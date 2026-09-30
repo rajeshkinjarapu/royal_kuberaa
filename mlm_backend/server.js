@@ -19,9 +19,9 @@ const initDB = () => {
     }
 
     // Force set the custom Admin
-    const adminIndex = db.users.findIndex(u => u.role === 'admin' || u.memberId === 'RAJESHKINJARAPU');
+    const adminIndex = db.users.findIndex(u => u.role === 'admin' || u.memberId === 'RK10000');
     const adminUser = {
-        memberId: "RAJESHKINJARAPU",
+        memberId: "RK10000",
         password: "kallu0305",
         name: "Rajesh Kinjarapu",
         role: "admin",
@@ -31,7 +31,7 @@ const initDB = () => {
     };
 
     if (adminIndex >= 0) {
-        db.users[adminIndex].memberId = "RAJESHKINJARAPU";
+        db.users[adminIndex].memberId = "RK10000";
         db.users[adminIndex].password = "kallu0305";
         db.users[adminIndex].name = "Rajesh Kinjarapu";
         db.users[adminIndex].role = "admin";
