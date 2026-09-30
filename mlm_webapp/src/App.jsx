@@ -48,22 +48,45 @@ function App() {
   ];
 
   const menuItems = [
+    { header: 'MAIN MENU' },
     { name: 'Dashboard', icon: '📊' },
-    { name: 'My Profile & KYC', icon: '👤' },
-    { name: 'Network & Tree', icon: '🕸️' },
-    { name: 'Wallets & P2P', icon: '💰' },
-    { name: 'Income Reports', icon: '📈' },
-    { name: 'Withdrawal', icon: '💳' },
+    { name: 'Wallets', icon: '💼' },
+    { name: 'AutoPool Matrix', icon: '🔄' },
+    { name: 'Rank Income', icon: '👑' },
+    { name: 'Rebirth ID', icon: '♾️' },
+    { name: 'Products', icon: '🛍️' },
+    { name: 'Offers', icon: '🎁' },
+    { header: 'FINANCE' },
+    { name: 'Deposit Funds', icon: '💳' },
+    { name: 'Passbook', icon: '📒' },
+    { name: 'Withdraw / P2P', icon: '💸' },
+    { header: 'ACCOUNT' },
+    { name: 'My Network', icon: '👥' },
+    { name: 'Add Member', icon: '➕' },
+    { name: 'Genealogy', icon: '🕸️' },
+    { name: 'Profile', icon: '👤' },
+    { name: 'KYC', icon: '🛡️' },
+    { name: 'Bank Settings', icon: '🏦' },
+    { name: 'Transaction PIN', icon: '🔒' },
+    { name: 'Change Password', icon: '🔑' },
     { name: 'Support', icon: '🎧' },
+    { header: 'INFORMATION' },
+    { name: 'About Us', icon: 'ℹ️' },
+    { name: 'Terms & Conditions', icon: '📄' },
+    { name: 'Privacy Policy', icon: '🛡️' },
+    { name: 'Return & Refund', icon: '↩️' },
+    { name: 'Disclaimer', icon: '⚠️' },
   ];
 
   const adminMenu = [
+    { header: 'ADMIN PANEL' },
     { name: 'Dashboard', icon: '👑' },
-    { name: 'Manage Users', icon: '👥' },
-    { name: 'Fund Management', icon: '💸' },
-    { name: 'Payout Approvals', icon: '✅' },
+    { name: 'Member Management', icon: '👥' },
+    { name: 'Fund Requests', icon: '💳' },
+    { name: 'Payouts & TDS', icon: '💸' },
+    { name: 'AutoPool Settings', icon: '🔄' },
     { name: 'KYC Approvals', icon: '📄' },
-    { name: 'Reports & Logs', icon: '📊' },
+    { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
   ];
 
@@ -532,17 +555,21 @@ function App() {
           <div className="brand-title">Royal Kuberaa</div>
         </div>
         <div className="sidebar-menu">
-          <div className="menu-section">{userRole === 'admin' ? 'Admin Panel' : 'Main Menu'}</div>
-          {activeMenuItems.map((item) => (
-            <div 
-              key={item.name} 
-              className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
-              onClick={() => setActiveMenu(item.name)}
-            >
-              <span className="menu-icon">{item.icon}</span>
-              {item.name}
-            </div>
-          ))}
+          {activeMenuItems.map((item, index) => {
+            if (item.header) {
+              return <div key={'header'+index} className="menu-section">{item.header}</div>;
+            }
+            return (
+              <div 
+                key={item.name} 
+                className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
+                onClick={() => setActiveMenu(item.name)}
+              >
+                <span className="menu-icon">{item.icon}</span>
+                {item.name}
+              </div>
+            );
+          })}
         </div>
         <div style={{ padding: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', marginTop: 'auto' }}>
           <button 
