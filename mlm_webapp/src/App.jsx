@@ -104,6 +104,34 @@ function App() {
     }
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const name = e.target.name.value;
+    const memberId = e.target.memberId.value;
+    const password = e.target.password.value;
+    
+    try {
+      const response = await fetch('http://66.116.252.191:5555/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, memberId, password })
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Registration Successful! Please login now.');
+        setAuthView('login');
+      } else {
+        alert(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      alert('Cannot connect to Live Server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="login-wrapper">
@@ -112,35 +140,70 @@ function App() {
             <div className="login-header">
               <div className="brand-logo-large">K</div>
               <h1 className="login-title">Royal Kuberaa</h1>
-              <p className="login-subtitle">Welcome back! Please login to your account.</p>
+              <p className="login-subtitle">
+                {authView === 'login' ? 'Welcome back! Please login to your account.' : 'Create a new account to join the network.'}
+              </p>
             </div>
-            <form className="login-form" onSubmit={handleLogin}>
-              <div className="form-group">
-                <label className="form-label">User ID (Type ADMIN for admin access)</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">👤</span>
-                  <input type="text" name="memberId" className="form-input" placeholder="Enter ID" required />
+            {authView === 'login' ? (
+              <form className="login-form" onSubmit={handleLogin}>
+                <div className="form-group">
+                  <label className="form-label">User ID (Type ADMIN for admin access)</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">👤</span>
+                    <input type="text" name="memberId" className="form-input" placeholder="Enter ID" required />
+                  </div>
                 </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="input-wrapper">
-                  <span className="input-icon">🔒</span>
-                  <input type="password" name="password" className="form-input" placeholder="Enter password (any text)" required />
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">🔒</span>
+                    <input type="password" name="password" className="form-input" placeholder="Enter password" required />
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '24px' }}>
-                 <label style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input type="checkbox" /> Remember me
-                 </label>
-                 <span style={{ color: '#0EA5E9', cursor: 'pointer', fontWeight: 'bold' }}>Forgot Password?</span>
-              </div>
-              <button type="submit" className="login-submit-btn" disabled={loading}>
-                {loading ? 'Authenticating...' : 'Secure Login'}
-              </button>
-            </form>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '24px' }}>
+                   <label style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input type="checkbox" /> Remember me
+                   </label>
+                   <span style={{ color: '#0EA5E9', cursor: 'pointer', fontWeight: 'bold' }}>Forgot Password?</span>
+                </div>
+                <button type="submit" className="login-submit-btn" disabled={loading}>
+                  {loading ? 'Authenticating...' : 'Secure Login'}
+                </button>
+              </form>
+            ) : (
+              <form className="login-form" onSubmit={handleRegister}>
+                <div className="form-group">
+                  <label className="form-label">Full Name</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">📝</span>
+                    <input type="text" name="name" className="form-input" placeholder="Enter full name" required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Desired Member ID</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">👤</span>
+                    <input type="text" name="memberId" className="form-input" placeholder="Choose an ID (e.g. RK1005)" required />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">🔒</span>
+                    <input type="password" name="password" className="form-input" placeholder="Create password" required />
+                  </div>
+                </div>
+                <button type="submit" className="login-submit-btn" disabled={loading}>
+                  {loading ? 'Creating Account...' : 'Register Now'}
+                </button>
+              </form>
+            )}
             <div className="login-footer" style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#64748B' }}>
-               Don't have an account? <span style={{ color: '#0EA5E9', fontWeight: 'bold', cursor: 'pointer' }}>Register here</span>
+               {authView === 'login' ? (
+                 <>Don't have an account? <span style={{ color: '#0EA5E9', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setAuthView('register')}>Register here</span></>
+               ) : (
+                 <>Already have an account? <span style={{ color: '#0EA5E9', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setAuthView('login')}>Login here</span></>
+               )}
             </div>
           </div>
         </div>
