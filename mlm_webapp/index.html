@@ -4,10 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mlm_webapp</title>
+    <meta name="theme-color" content="#0B1437" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135679.png" />
+    <title>Royal Kuberaa</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('PWA Service Worker registered');
+          }).catch(err => {
+            console.log('PWA Service Worker registration failed: ', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
