@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Royal Kuberaa</string>
+    <string name="title_activity_main">Royal Kuberaa</string>
+    <string name="package_name">com.royalkuberaa.mlm</string>
+    <string name="custom_url_scheme">com.royalkuberaa.mlm</string>
+</resources>
