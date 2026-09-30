@@ -67,23 +67,41 @@ function App() {
     e.preventDefault();
     setLoading(true);
     const memberId = e.target.memberId.value;
+    const password = e.target.password.value;
     
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://66.116.252.191:5555/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, password })
+      });
+      const result = await response.json();
+      
+      if (result.success) {
         if (memberId.toUpperCase().includes('ADMIN')) {
           setUserRole('admin');
-          setUserData({ name: "Super Admin", memberId: "ADMIN_001", rank: "OWNER" });
         } else {
           setUserRole('member');
-          setUserData({ name: "Rajesh Kumar", memberId: memberId, rank: "GOLD RANK" });
         }
-        setDashboardData({
-            totalEarnings: 18500, mainWallet: 15000, directReferral: 4500,
-            teamIncome: 2500, withdrawFund: 600, autopoolFund: 8000, allRanks: 2,
-            networkStats: { totalTeamSize: 124 }
-        });
+        setUserData(result.user);
         setIsLoggedIn(true);
-        setLoading(false);
-    }, 1000);
+      } else {
+        alert(result.message || 'Login failed');
+      }
+    } catch (error) {
+      alert('Cannot connect to Live Server. Using fallback mode.');
+      // Fallback for demo
+      if (memberId.toUpperCase().includes('ADMIN')) {
+        setUserRole('admin');
+        setUserData({ name: "Super Admin", memberId: "ADMIN_001", rank: "OWNER" });
+      } else {
+        setUserRole('member');
+        setUserData({ name: "Rajesh Kumar", memberId: memberId, rank: "GOLD RANK" });
+      }
+      setIsLoggedIn(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isLoggedIn) {
@@ -108,7 +126,7 @@ function App() {
                 <label className="form-label">Password</label>
                 <div className="input-wrapper">
                   <span className="input-icon">🔒</span>
-                  <input type="password" name="password" className="form-input" placeholder="Enter password" required />
+                  <input type="password" name="password" className="form-input" placeholder="Enter password (any text)" required />
                 </div>
               </div>
               <button type="submit" className="login-submit-btn" disabled={loading}>
