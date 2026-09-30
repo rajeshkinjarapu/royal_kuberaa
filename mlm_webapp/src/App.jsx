@@ -93,9 +93,9 @@ function App() {
     } catch (error) {
       alert('Cannot connect to Live Server. Using fallback mode.');
       // Fallback for demo
-      if (memberId.toUpperCase() === 'RK10000' || memberId.toUpperCase() === 'ADMIN') {
+      if (memberId.toUpperCase() === 'RK0305' || memberId.toUpperCase() === 'ADMIN') {
         setUserRole('admin');
-        setUserData({ name: "Rajesh Kinjarapu", memberId: "RK10000", rank: "OWNER" });
+        setUserData({ name: "Rajesh Kinjarapu", memberId: "RK0305", rank: "OWNER" });
       } else {
         setUserRole('member');
         setUserData({ name: "Member", memberId: memberId, rank: "GOLD RANK" });
