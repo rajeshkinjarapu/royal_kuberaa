@@ -112,7 +112,7 @@ function App() {
             <div className="login-header">
               <div className="brand-logo-large">K</div>
               <h1 className="login-title">Royal Kuberaa</h1>
-              <p className="login-subtitle">Professional SaaS Portal</p>
+              <p className="login-subtitle">Welcome back! Please login to your account.</p>
             </div>
             <form className="login-form" onSubmit={handleLogin}>
               <div className="form-group">
@@ -129,10 +129,19 @@ function App() {
                   <input type="password" name="password" className="form-input" placeholder="Enter password (any text)" required />
                 </div>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '24px' }}>
+                 <label style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input type="checkbox" /> Remember me
+                 </label>
+                 <span style={{ color: '#0EA5E9', cursor: 'pointer', fontWeight: 'bold' }}>Forgot Password?</span>
+              </div>
               <button type="submit" className="login-submit-btn" disabled={loading}>
                 {loading ? 'Authenticating...' : 'Secure Login'}
               </button>
             </form>
+            <div className="login-footer" style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#64748B' }}>
+               Don't have an account? <span style={{ color: '#0EA5E9', fontWeight: 'bold', cursor: 'pointer' }}>Register here</span>
+            </div>
           </div>
         </div>
       </div>
@@ -176,16 +185,19 @@ function App() {
   const renderDashboard = () => {
     const cards = userRole === 'admin' 
       ? [
-        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥' },
-        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰' },
-        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳' },
-        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈' },
+        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', color: 'linear-gradient(135deg, #0EA5E9, #2563EB)' },
+        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰', color: 'linear-gradient(135deg, #10B981, #059669)' },
+        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', color: 'linear-gradient(135deg, #F43F5E, #E11D48)' },
+        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', color: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' },
       ]
       : [
-        { id: 1, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀' },
-        { id: 2, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳' },
-        { id: 3, title: 'Direct Referral', amount: dashboardData?.directReferral || 0, icon: '👤' },
-        { id: 4, title: 'Team Income', amount: dashboardData?.teamIncome || 0, icon: '👥' },
+        { id: 1, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', color: 'linear-gradient(135deg, #0EA5E9, #3B82F6)' },
+        { id: 2, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', color: 'linear-gradient(135deg, #10B981, #059669)' },
+        { id: 3, title: 'Direct Referral', amount: dashboardData?.directReferral || 0, icon: '👤', color: 'linear-gradient(135deg, #F43F5E, #E11D48)' },
+        { id: 4, title: 'Team Income', amount: dashboardData?.teamIncome || 0, icon: '👥', color: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' },
+        { id: 5, title: 'Withdraw Fund', amount: dashboardData?.withdrawFund || 0, icon: '🔄', color: 'linear-gradient(135deg, #14B8A6, #0F766E)' },
+        { id: 6, title: 'Autopool Fund', amount: dashboardData?.autopoolFund || 0, icon: '♾️', color: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
+        { id: 7, title: 'All Ranks', amount: dashboardData?.allRanks || 0, icon: '🏆', color: 'linear-gradient(135deg, #F59E0B, #D97706)' },
       ];
 
     return (
@@ -203,11 +215,11 @@ function App() {
         </div>
         <div className="cards-grid">
           {cards.map(card => (
-            <div key={card.id} className="vibrant-card" style={{ background: '#0B1437' }}>
-              <div className="card-header"><div className="card-icon" style={{background:'rgba(255,255,255,0.1)'}}>{card.icon}</div></div>
+            <div key={card.id} className="vibrant-card" style={{ background: card.color, color: 'white' }}>
+              <div className="card-header"><div className="card-icon" style={{background:'rgba(255,255,255,0.2)', color: 'white'}}>{card.icon}</div></div>
               <div className="card-content">
-                <div className="card-title">{card.title.toUpperCase()}</div>
-                <div className="card-amount">{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+                <div className="card-title" style={{color: 'rgba(255,255,255,0.9)'}}>{card.title.toUpperCase()}</div>
+                <div className="card-amount" style={{color: 'white'}}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
