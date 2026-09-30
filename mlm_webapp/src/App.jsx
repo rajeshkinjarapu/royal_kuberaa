@@ -7,6 +7,8 @@ function App() {
   const [userRole, setUserRole] = useState('member'); 
   const [activeMenu, setActiveMenu] = useState('Dashboard');
   const [loading, setLoading] = useState(false);
+  const [sponsorName, setSponsorName] = useState('');
+  const [checkingSponsor, setCheckingSponsor] = useState(false);
 
   // States
   const [userData, setUserData] = useState(null);
@@ -104,23 +106,45 @@ function App() {
     }
   };
 
+  const handleSponsorCheck = async (e) => {
+    const id = e.target.value;
+    if (id.length > 3) {
+       setCheckingSponsor(true);
+       try {
+         const res = await fetch(`http://66.116.252.191:5555/api/sponsor/${id}`);
+         const result = await res.json();
+         if (result.success) {
+           setSponsorName(result.name);
+         } else {
+           setSponsorName('Invalid Sponsor ID');
+         }
+       } catch (err) {
+         setSponsorName('Network Error');
+       }
+       setCheckingSponsor(false);
+    } else {
+       setSponsorName('');
+    }
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     const name = e.target.name.value;
-    const memberId = e.target.memberId.value;
+    const mobile = e.target.mobile.value;
+    const sponsorId = e.target.sponsorId.value;
     const password = e.target.password.value;
     
     try {
       const response = await fetch('http://66.116.252.191:5555/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, memberId, password })
+        body: JSON.stringify({ name, mobile, sponsorId, password })
       });
       const result = await response.json();
       
       if (result.success) {
-        alert('Registration Successful! Please login now.');
+        alert(`Registration Successful!\nYour Member ID: ${result.user.memberId}\nPlease login now.`);
         setAuthView('login');
       } else {
         alert(result.message || 'Registration failed');
@@ -180,20 +204,32 @@ function App() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Desired Member ID</label>
+                  <label className="form-label">Mobile Number</label>
                   <div className="input-wrapper">
-                    <span className="input-icon">👤</span>
-                    <input type="text" name="memberId" className="form-input" placeholder="Choose an ID (e.g. RK1005)" required />
+                    <span className="input-icon">📱</span>
+                    <input type="tel" name="mobile" className="form-input" placeholder="Enter mobile number" required pattern="[0-9]{10}" maxLength="10" />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Password</label>
+                  <label className="form-label">Sponsor ID</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">🤝</span>
+                    <input type="text" name="sponsorId" className="form-input" placeholder="Enter Sponsor ID" required onBlur={handleSponsorCheck} />
+                  </div>
+                  {sponsorName && (
+                    <div style={{ marginTop: '8px', fontSize: '13px', fontWeight: 'bold', color: sponsorName === 'Invalid Sponsor ID' || sponsorName === 'Network Error' ? '#EF4444' : '#10B981' }}>
+                      {checkingSponsor ? 'Checking...' : (sponsorName !== 'Invalid Sponsor ID' && sponsorName !== 'Network Error' ? `✅ Sponsor: ${sponsorName}` : `❌ ${sponsorName}`)}
+                    </div>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password (6 Digits)</label>
                   <div className="input-wrapper">
                     <span className="input-icon">🔒</span>
-                    <input type="password" name="password" className="form-input" placeholder="Create password" required />
+                    <input type="password" name="password" className="form-input" placeholder="Enter 6 digit password" required pattern="[0-9]{6}" maxLength="6" inputMode="numeric" />
                   </div>
                 </div>
-                <button type="submit" className="login-submit-btn" disabled={loading}>
+                <button type="submit" className="login-submit-btn" disabled={loading || sponsorName === 'Invalid Sponsor ID'}>
                   {loading ? 'Creating Account...' : 'Register Now'}
                 </button>
               </form>

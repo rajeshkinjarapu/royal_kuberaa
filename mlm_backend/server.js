@@ -63,24 +63,45 @@ app.post('/api/login', (req, res) => {
     res.json({
         success: true,
         token,
-        user: { name: user.name, memberId: user.memberId, role: user.role, rank: user.rank, walletBalance: user.walletBalance }
+        user: { name: user.name, memberId: user.memberId, role: user.role, rank: user.rank, walletBalance: user.walletBalance, sponsorId: user.sponsorId }
     });
+});
+
+// --- Fetch Sponsor Name ---
+app.get('/api/sponsor/:id', (req, res) => {
+    const db = readDB();
+    const sponsor = db.users.find(u => u.memberId === req.params.id.toUpperCase());
+    if (sponsor) {
+        res.json({ success: true, name: sponsor.name });
+    } else {
+        res.status(404).json({ success: false, message: 'Sponsor not found' });
+    }
 });
 
 // --- Register Member Route (Saves to DB) ---
 app.post('/api/register', (req, res) => {
-    const { memberId, password, name } = req.body;
+    const { name, mobile, sponsorId, password } = req.body;
     const db = readDB();
 
-    // Check if user already exists
-    if (db.users.find(u => u.memberId === memberId.toUpperCase())) {
-        return res.status(400).json({ success: false, message: 'Member ID already exists! Choose another.' });
+    // Validate Sponsor
+    const sponsor = db.users.find(u => u.memberId === sponsorId.toUpperCase());
+    if (!sponsor && sponsorId.toUpperCase() !== 'ADMIN') {
+        return res.status(400).json({ success: false, message: 'Invalid Sponsor ID!' });
+    }
+
+    // Generate Unique Member ID (RK + 5 random digits)
+    const generateId = () => 'RK' + Math.floor(10000 + Math.random() * 90000);
+    let newMemberId = generateId();
+    while (db.users.find(u => u.memberId === newMemberId)) {
+        newMemberId = generateId();
     }
 
     const newUser = {
-        memberId: memberId.toUpperCase(),
+        memberId: newMemberId,
         password: password,
         name: name,
+        mobile: mobile,
+        sponsorId: sponsorId.toUpperCase(),
         role: "member",
         rank: "STARTER",
         walletBalance: 0,
