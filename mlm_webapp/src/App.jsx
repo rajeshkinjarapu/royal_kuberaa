@@ -9,6 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [sponsorName, setSponsorName] = useState('');
   const [checkingSponsor, setCheckingSponsor] = useState(false);
+  const [registeredMemberId, setRegisteredMemberId] = useState(null);
 
   // States
   const [userData, setUserData] = useState(null);
@@ -144,8 +145,7 @@ function App() {
       const result = await response.json();
       
       if (result.success) {
-        alert(`Registration Successful!\nYour Member ID: ${result.user.memberId}\nPlease login now.`);
-        setAuthView('login');
+        setRegisteredMemberId(result.user.memberId);
       } else {
         alert(result.message || 'Registration failed');
       }
@@ -157,6 +157,34 @@ function App() {
   };
 
   if (!isLoggedIn) {
+    if (registeredMemberId) {
+      return (
+        <div className="login-wrapper">
+          <div className="login-container">
+             <div className="login-card" style={{ textAlign: 'center', padding: '40px 30px' }}>
+                <div style={{ fontSize: '56px', marginBottom: '20px' }}>🎉</div>
+                <h2 style={{ color: '#0F172A', marginBottom: '12px', fontWeight: 'bold' }}>Registration Successful!</h2>
+                <p style={{ color: '#64748B', marginBottom: '24px', lineHeight: '1.5' }}>Welcome to Royal Kuberaa. Your account has been created successfully.</p>
+                
+                <div style={{ background: '#F0F9FF', border: '2px dashed #38BDF8', borderRadius: '12px', padding: '24px', marginBottom: '30px' }}>
+                  <p style={{ color: '#0284C7', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: 'bold' }}>Your Login ID</p>
+                  <h1 style={{ color: '#0EA5E9', fontSize: '36px', fontWeight: '900', margin: 0, letterSpacing: '3px' }}>{registeredMemberId}</h1>
+                  <p style={{ color: '#EF4444', fontSize: '13px', marginTop: '16px', fontWeight: 'bold' }}>⚠️ Please copy and save this ID safely!</p>
+                </div>
+
+                <button 
+                  onClick={() => { setRegisteredMemberId(null); setAuthView('login'); }}
+                  className="login-submit-btn" 
+                  style={{ width: '100%', padding: '14px', fontSize: '16px' }}
+                >
+                  Proceed to Login
+                </button>
+             </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="login-wrapper">
         <div className="login-container">
