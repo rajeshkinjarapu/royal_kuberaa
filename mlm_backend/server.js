@@ -54,8 +54,9 @@ app.post('/api/login', (req, res) => {
     const { memberId, password } = req.body;
     const db = readDB();
     
-    const user = db.users.find(u => u.memberId === memberId.toUpperCase());
-    if (!user) return res.status(401).json({ success: false, message: 'Invalid User ID! Account does not exist.' });
+    // Check if user exists by memberId OR mobile
+    const user = db.users.find(u => u.memberId === memberId.toUpperCase() || u.mobile === memberId);
+    if (!user) return res.status(401).json({ success: false, message: 'Invalid Login ID! Account does not exist.' });
     if (user.password !== password) return res.status(401).json({ success: false, message: 'Incorrect Password!' });
 
     const token = jwt.sign({ memberId: user.memberId, role: user.role }, 'royal_kuberaa_secret', { expiresIn: '1d' });

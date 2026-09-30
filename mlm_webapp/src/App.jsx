@@ -202,10 +202,10 @@ function App() {
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
                 <div className="form-group">
-                  <label className="form-label">User ID</label>
+                  <label className="form-label">User ID / Mobile No</label>
                   <div className="input-wrapper">
                     <span className="input-icon">👤</span>
-                    <input type="text" name="memberId" className="form-input" placeholder="Enter ID" required />
+                    <input type="text" name="memberId" className="form-input" placeholder="Enter ID or Mobile" required />
                   </div>
                 </div>
                 <div className="form-group">
