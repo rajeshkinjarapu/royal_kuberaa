@@ -10,6 +10,7 @@ function App() {
   const [sponsorName, setSponsorName] = useState('');
   const [checkingSponsor, setCheckingSponsor] = useState(false);
   const [registeredMemberId, setRegisteredMemberId] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // States
   const [userData, setUserData] = useState(null);
@@ -69,6 +70,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg('');
     const memberId = e.target.memberId.value;
     const password = e.target.password.value;
     
@@ -89,10 +91,10 @@ function App() {
         setUserData(result.user);
         setIsLoggedIn(true);
       } else {
-        alert(result.message || 'Login failed');
+        setErrorMsg(result.message || 'Login failed');
       }
     } catch (error) {
-      alert('Cannot connect to Live Server. Using fallback mode.');
+      setErrorMsg('Cannot connect to Live Server. Using fallback mode.');
       // Fallback for demo
       if (memberId.toUpperCase() === 'RK0305' || memberId.toUpperCase() === 'ADMIN') {
         setUserRole('admin');
@@ -131,6 +133,7 @@ function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg('');
     const name = e.target.name.value;
     const mobile = e.target.mobile.value;
     const sponsorId = e.target.sponsorId.value;
@@ -147,10 +150,10 @@ function App() {
       if (result.success) {
         setRegisteredMemberId(result.user.memberId);
       } else {
-        alert(result.message || 'Registration failed');
+        setErrorMsg(result.message || 'Registration failed');
       }
     } catch (error) {
-      alert('Cannot connect to Live Server.');
+      setErrorMsg('Cannot connect to Live Server.');
     } finally {
       setLoading(false);
     }
@@ -218,6 +221,11 @@ function App() {
                    </label>
                    <span style={{ color: '#0EA5E9', cursor: 'pointer', fontWeight: 'bold' }}>Forgot Password?</span>
                 </div>
+                {errorMsg && (
+                  <div style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '10px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', textAlign: 'center', fontWeight: 'bold' }}>
+                    ❌ {errorMsg}
+                  </div>
+                )}
                 <button type="submit" className="login-submit-btn" disabled={loading}>
                   {loading ? 'Authenticating...' : 'Secure Login'}
                 </button>
@@ -257,6 +265,11 @@ function App() {
                     <input type="password" name="password" className="form-input" placeholder="Enter 6 digit password" required pattern="[0-9]{6}" maxLength="6" inputMode="numeric" />
                   </div>
                 </div>
+                {errorMsg && (
+                  <div style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '10px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', textAlign: 'center', fontWeight: 'bold' }}>
+                    ❌ {errorMsg}
+                  </div>
+                )}
                 <button type="submit" className="login-submit-btn" disabled={loading || sponsorName === 'Invalid Sponsor ID'}>
                   {loading ? 'Creating Account...' : 'Register Now'}
                 </button>
