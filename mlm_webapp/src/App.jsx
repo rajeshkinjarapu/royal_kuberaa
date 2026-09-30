@@ -3,85 +3,88 @@ import './index.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [authView, setAuthView] = useState('login'); // 'login' or 'register'
-  const [userRole, setUserRole] = useState('member'); // 'admin' or 'member'
+  const [authView, setAuthView] = useState('login'); 
+  const [userRole, setUserRole] = useState('member'); 
   const [activeMenu, setActiveMenu] = useState('Dashboard');
-  
-  // Real Data States
-  const [userData, setUserData] = useState(null);
-  const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Dynamic Menus
+  // States
+  const [userData, setUserData] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+
+  // Fallback Dummy Data for UI Completeness
+  const dummyWallets = {
+    balance: 15000,
+    transactions: [
+      { id: "TXN1021", date: "2026-09-30", amount: 500, type: "Credit", remark: "Daily ROI" },
+      { id: "TXN1022", date: "2026-09-29", amount: 1200, type: "Credit", remark: "Direct Referral" },
+      { id: "TXN1023", date: "2026-09-28", amount: -200, type: "Debit", remark: "P2P Transfer" }
+    ]
+  };
+
+  const dummyNetwork = [
+    { id: "RK1001", name: "Ramesh Kumar", joinDate: "2026-09-15", status: "Active", package: "₹10,000", level: 1 },
+    { id: "RK1002", name: "Suresh Rao", joinDate: "2026-09-18", status: "Inactive", package: "₹0", level: 1 },
+    { id: "RK1003", name: "Mahesh Babu", joinDate: "2026-09-22", status: "Active", package: "₹25,000", level: 2 }
+  ];
+
+  const dummyUsers = [
+    { id: "RK1001", name: "Ramesh Kumar", email: "ramesh@test.com", wallet: 15000, status: "Active" },
+    { id: "RK1002", name: "Suresh Rao", email: "suresh@test.com", wallet: 200, status: "Blocked" },
+    { id: "RK1003", name: "Mahesh Babu", email: "mahesh@test.com", wallet: 35000, status: "Active" }
+  ];
+
+  const dummyPayouts = [
+    { id: "WD9901", user: "RK1001", amount: 5000, tds: 250, admin: 250, net: 4500, date: "2026-09-30", status: "Pending" },
+    { id: "WD9902", user: "RK1003", amount: 12000, tds: 600, admin: 600, net: 10800, date: "2026-09-30", status: "Pending" }
+  ];
+
+  const dummyKYC = [
+    { id: "RK1002", name: "Suresh Rao", doc: "PAN Card", date: "2026-09-30", status: "Pending Verification" }
+  ];
+
   const menuItems = [
     { name: 'Dashboard', icon: '📊' },
-    { name: 'Wallets', icon: '💰' },
-    { name: 'AutoPool Matrix', icon: '🔄' },
-    { name: 'Network', icon: '🕸️' },
-    { name: 'Withdraw / P2P', icon: '💸' },
-    { name: 'Profile', icon: '⚙️' },
+    { name: 'My Profile & KYC', icon: '👤' },
+    { name: 'Network & Tree', icon: '🕸️' },
+    { name: 'Wallets & P2P', icon: '💰' },
+    { name: 'Income Reports', icon: '📈' },
+    { name: 'Withdrawal', icon: '💳' },
+    { name: 'Support', icon: '🎧' },
   ];
 
   const adminMenu = [
     { name: 'Dashboard', icon: '👑' },
     { name: 'Manage Users', icon: '👥' },
+    { name: 'Fund Management', icon: '💸' },
     { name: 'Payout Approvals', icon: '✅' },
-    { name: 'Fund Management', icon: '💰' },
-    { name: 'Support Tickets', icon: '🎫' },
+    { name: 'KYC Approvals', icon: '📄' },
+    { name: 'Reports & Logs', icon: '📊' },
     { name: 'System Settings', icon: '⚙️' },
   ];
 
-  // API Call for Login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     const memberId = e.target.memberId.value;
-    const password = e.target.password.value;
     
-    try {
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memberId, password })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
+    setTimeout(() => {
         if (memberId.toUpperCase().includes('ADMIN')) {
           setUserRole('admin');
+          setUserData({ name: "Super Admin", memberId: "ADMIN_001", rank: "OWNER" });
         } else {
           setUserRole('member');
+          setUserData({ name: "Rajesh Kumar", memberId: memberId, rank: "GOLD RANK" });
         }
-        setUserData(result.user);
+        setDashboardData({
+            totalEarnings: 18500, mainWallet: 15000, directReferral: 4500,
+            teamIncome: 2500, withdrawFund: 600, autopoolFund: 8000, allRanks: 2,
+            networkStats: { totalTeamSize: 124 }
+        });
         setIsLoggedIn(true);
-      } else {
-        alert(result.message || 'Login failed');
-      }
-    } catch (error) {
-      alert('Cannot connect to server. Ensure backend is running on port 5000.');
-    } finally {
-      setLoading(false);
-    }
+        setLoading(false);
+    }, 1000);
   };
-
-  // Fetch Dashboard Data after Login
-  useEffect(() => {
-    if (isLoggedIn) {
-      const fetchDashboard = async () => {
-        try {
-          const response = await fetch('http://localhost:5000/api/dashboard');
-          const result = await response.json();
-          if (result.success) {
-            setDashboardData(result.data);
-          }
-        } catch (error) {
-          console.error('Error fetching dashboard:', error);
-        }
-      };
-      fetchDashboard();
-    }
-  }, [isLoggedIn]);
 
   if (!isLoggedIn) {
     return (
@@ -91,89 +94,27 @@ function App() {
             <div className="login-header">
               <div className="brand-logo-large">K</div>
               <h1 className="login-title">Royal Kuberaa</h1>
-              <p className="login-subtitle">
-                {authView === 'login' ? 'Welcome back! Please login to your account.' : 'Create a new account to join the network.'}
-              </p>
+              <p className="login-subtitle">Professional SaaS Portal</p>
             </div>
-            
-            {authView === 'login' ? (
-              <form className="login-form" onSubmit={handleLogin}>
-                <div className="form-group">
-                  <label className="form-label">User ID</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">👤</span>
-                    <input type="text" name="memberId" className="form-input" placeholder="Enter your User ID" required />
-                  </div>
+            <form className="login-form" onSubmit={handleLogin}>
+              <div className="form-group">
+                <label className="form-label">User ID (Type ADMIN for admin access)</label>
+                <div className="input-wrapper">
+                  <span className="input-icon">👤</span>
+                  <input type="text" name="memberId" className="form-input" placeholder="Enter ID" required />
                 </div>
-                
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🔒</span>
-                    <input type="password" name="password" className="form-input" placeholder="Enter your password" required />
-                  </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <div className="input-wrapper">
+                  <span className="input-icon">🔒</span>
+                  <input type="password" name="password" className="form-input" placeholder="Enter password" required />
                 </div>
-                
-                <div className="form-options">
-                  <label className="remember-checkbox">
-                    <input type="checkbox" />
-                    <span>Remember me</span>
-                  </label>
-                  <a href="#" className="forgot-link">Forgot Password?</a>
-                </div>
-                
-                <button type="submit" className="login-submit-btn" disabled={loading}>
-                  {loading ? 'Authenticating...' : 'Secure Login'}
-                </button>
-              </form>
-            ) : (
-              <form className="login-form" onSubmit={(e) => { e.preventDefault(); setAuthView('login'); }}>
-                {/* Registration Form (Same as before) */}
-                <div className="form-group">
-                  <label className="form-label">Sponsor ID</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🤝</span>
-                    <input type="text" className="form-input" placeholder="Enter Referral ID" required />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">👤</span>
-                    <input type="text" className="form-input" placeholder="Enter your name" required />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Email Address</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">✉️</span>
-                    <input type="email" className="form-input" placeholder="Enter your email" required />
-                  </div>
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🔒</span>
-                    <input type="password" className="form-input" placeholder="Create a password" required />
-                  </div>
-                </div>
-                
-                <button type="submit" className="login-submit-btn" style={{ background: 'linear-gradient(135deg, #10B981, #047857)', boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)' }}>
-                  Create Account
-                </button>
-              </form>
-            )}
-            
-            <div className="login-footer">
-              {authView === 'login' ? (
-                <>Don't have an account? <span className="toggle-auth" onClick={() => setAuthView('register')}>Register here</span></>
-              ) : (
-                <>Already have an account? <span className="toggle-auth" onClick={() => setAuthView('login')}>Login here</span></>
-              )}
-            </div>
+              </div>
+              <button type="submit" className="login-submit-btn" disabled={loading}>
+                {loading ? 'Authenticating...' : 'Secure Login'}
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -182,29 +123,234 @@ function App() {
 
   const activeMenuItems = userRole === 'admin' ? adminMenu : menuItems;
 
-  // Prepare Dynamic Cards Based on API Data
-  const getCards = () => {
-    if (!dashboardData) return [];
+  const PageHeader = ({ title, subtitle }) => (
+    <div style={{ marginBottom: '24px' }}>
+      <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', marginBottom: '4px' }}>{title}</h2>
+      <p style={{ color: '#64748B', fontSize: '14px' }}>{subtitle}</p>
+    </div>
+  );
 
-    if (userRole === 'admin') {
-      return [
-        { id: 1, title: 'Total Members', amount: dashboardData.networkStats?.totalTeamSize || 0, icon: '👥', bg: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', shadow: 'rgba(139, 92, 246, 0.4)' },
-        { id: 2, title: 'Total Revenue', amount: dashboardData.totalEarnings * 100 || 0, icon: '💰', bg: 'linear-gradient(135deg, #10B981, #047857)', shadow: 'rgba(16, 185, 129, 0.4)' },
-        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', bg: 'linear-gradient(135deg, #F59E0B, #D97706)', shadow: 'rgba(245, 158, 11, 0.4)' },
-        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: 'linear-gradient(135deg, #F43F5E, #E11D48)', shadow: 'rgba(244, 63, 94, 0.4)' },
-        { id: 5, title: 'Active Tickets', amount: 12, icon: '🎫', bg: 'linear-gradient(135deg, #0EA5E9, #2563EB)', shadow: 'rgba(14, 165, 233, 0.4)' },
-        { id: 6, title: 'Total Autopool', amount: dashboardData.autopoolFund || 0, icon: '♾️', bg: 'linear-gradient(135deg, #14B8A6, #0F766E)', shadow: 'rgba(20, 184, 166, 0.4)' },
+  const CardWrapper = ({ children }) => (
+    <div style={{ background: 'white', padding: '30px', borderRadius: '24px', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)' }}>
+      {children}
+    </div>
+  );
+
+  const Table = ({ headers, children }) => (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
+        <thead>
+          <tr style={{ background: '#F1F5F9', color: '#64748B' }}>
+            {headers.map((h, i) => (
+              <th key={i} style={{ padding: '15px', borderRadius: i===0?'8px 0 0 8px':(i===headers.length-1?'0 8px 8px 0':'') }}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+
+  // --- VIEWS ---
+
+  const renderDashboard = () => {
+    const cards = userRole === 'admin' 
+      ? [
+        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥' },
+        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰' },
+        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳' },
+        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈' },
+      ]
+      : [
+        { id: 1, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀' },
+        { id: 2, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳' },
+        { id: 3, title: 'Direct Referral', amount: dashboardData?.directReferral || 0, icon: '👤' },
+        { id: 4, title: 'Team Income', amount: dashboardData?.teamIncome || 0, icon: '👥' },
       ];
-    } else {
-      return [
-        { id: 1, title: 'Total Earnings', amount: dashboardData.totalEarnings || 0, icon: '🚀', bg: 'linear-gradient(135deg, #0EA5E9, #2563EB)', shadow: 'rgba(14, 165, 233, 0.4)' },
-        { id: 2, title: 'Main Wallet', amount: dashboardData.mainWallet || 0, icon: '💳', bg: 'linear-gradient(135deg, #10B981, #047857)', shadow: 'rgba(16, 185, 129, 0.4)' },
-        { id: 3, title: 'Direct Referral', amount: dashboardData.directReferral || 0, icon: '👤', bg: 'linear-gradient(135deg, #F43F5E, #E11D48)', shadow: 'rgba(244, 63, 94, 0.4)' },
-        { id: 4, title: 'Team Income', amount: dashboardData.teamIncome || 0, icon: '👥', bg: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', shadow: 'rgba(139, 92, 246, 0.4)' },
-        { id: 5, title: 'Withdraw Fund', amount: dashboardData.withdrawFund || 0, icon: '🔄', bg: 'linear-gradient(135deg, #14B8A6, #0F766E)', shadow: 'rgba(20, 184, 166, 0.4)' },
-        { id: 6, title: 'Autopool Fund', amount: dashboardData.autopoolFund || 0, icon: '♾️', bg: 'linear-gradient(135deg, #6366F1, #4F46E5)', shadow: 'rgba(99, 102, 241, 0.4)' },
-        { id: 7, title: 'All Ranks', amount: dashboardData.allRanks || 0, icon: '🏆', bg: 'linear-gradient(135deg, #F59E0B, #D97706)', shadow: 'rgba(245, 158, 11, 0.4)' },
-      ];
+
+    return (
+      <>
+        <div className="user-banner">
+          <div className="user-avatar">{userRole === 'admin' ? '👑' : userData?.name?.charAt(0)}</div>
+          <div className="user-info-text">
+            <span className="welcome-text">{userRole === 'admin' ? 'ADMINISTRATOR' : 'Welcome Back'}</span>
+            <h2 className="user-name">{userData?.name}</h2>
+            <div className="badges">
+              <span className="badge badge-gold">{userData?.rank}</span>
+              <span className="badge badge-id">ID: {userData?.memberId}</span>
+            </div>
+          </div>
+        </div>
+        <div className="cards-grid">
+          {cards.map(card => (
+            <div key={card.id} className="vibrant-card" style={{ background: '#0B1437' }}>
+              <div className="card-header"><div className="card-icon" style={{background:'rgba(255,255,255,0.1)'}}>{card.icon}</div></div>
+              <div className="card-content">
+                <div className="card-title">{card.title.toUpperCase()}</div>
+                <div className="card-amount">{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  };
+
+  // Member Views
+  const renderProfile = () => (
+    <CardWrapper>
+      <PageHeader title="My Profile & KYC" subtitle="Manage your personal details and verify identity" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <div>
+          <h3 style={{ marginBottom: '16px' }}>Personal Details</h3>
+          <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px' }}>
+            <p><strong>Name:</strong> {userData?.name}</p>
+            <p><strong>Member ID:</strong> {userData?.memberId}</p>
+            <p><strong>Email:</strong> user@royalkuberaa.com</p>
+            <p><strong>Phone:</strong> +91 9876543210</p>
+          </div>
+        </div>
+        <div>
+          <h3 style={{ marginBottom: '16px' }}>KYC Status</h3>
+          <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+             <p style={{ color: '#10B981', fontWeight: 'bold' }}>✅ KYC Verified</p>
+             <p style={{ fontSize: '13px', marginTop: '8px', color: '#64748B' }}>Your PAN and Bank Account details have been approved by the administration.</p>
+          </div>
+        </div>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderNetwork = () => (
+    <CardWrapper>
+      <PageHeader title="Network & Tree" subtitle="View your downline and direct referrals" />
+      <Table headers={['Member ID', 'Name', 'Level', 'Join Date', 'Status']}>
+        {dummyNetwork.map(user => (
+          <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+            <td style={{ padding: '15px', fontWeight: 'bold', color: '#0EA5E9' }}>{user.id}</td>
+            <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
+            <td style={{ padding: '15px' }}>Level {user.level}</td>
+            <td style={{ padding: '15px', color: '#64748B' }}>{user.joinDate}</td>
+            <td style={{ padding: '15px' }}>
+              <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>
+                {user.status}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderWallets = () => (
+    <CardWrapper>
+      <PageHeader title="Wallets & P2P" subtitle="Manage your funds and transfer to other members" />
+      <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+         <div style={{ flex: 1, padding: '24px', background: '#0B1437', color: 'white', borderRadius: '16px' }}>
+            <h3 style={{ opacity: 0.8, fontSize: '14px' }}>Available Balance</h3>
+            <h1 style={{ fontSize: '36px', margin: '10px 0' }}>₹ {dummyWallets.balance.toLocaleString()}</h1>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+               <button style={{ flex: 1, padding: '10px', background: '#38bdf8', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Transfer (P2P)</button>
+               <button style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Deposit</button>
+            </div>
+         </div>
+      </div>
+      <h3 style={{ marginBottom: '15px' }}>Recent Transactions</h3>
+      <Table headers={['TXN ID', 'Date', 'Remark', 'Amount']}>
+        {dummyWallets.transactions.map(txn => (
+          <tr key={txn.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+            <td style={{ padding: '15px', fontWeight: '600' }}>{txn.id}</td>
+            <td style={{ padding: '15px', color: '#64748B' }}>{txn.date}</td>
+            <td style={{ padding: '15px' }}>{txn.remark}</td>
+            <td style={{ padding: '15px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: 'bold' }}>
+              {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount)}
+            </td>
+          </tr>
+        ))}
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderWithdrawal = () => (
+    <CardWrapper>
+      <PageHeader title="Withdrawal Request" subtitle="Withdraw your available funds to your bank account" />
+      <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', maxWidth: '500px' }}>
+         <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dummyWallets.balance.toLocaleString()}</strong></p>
+         <input type="number" placeholder="Enter Amount (Min ₹500)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+         <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
+         <button style={{ width: '100%', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>Submit Withdrawal</button>
+      </div>
+    </CardWrapper>
+  );
+
+  // Admin Views
+  const renderManageUsers = () => (
+    <CardWrapper>
+      <PageHeader title="Manage Users" subtitle="View and edit network members" />
+      <Table headers={['ID', 'Name / Email', 'Wallet', 'Status', 'Action']}>
+        {dummyUsers.map(user => (
+          <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+            <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.id}</td>
+            <td style={{ padding: '15px' }}>
+              <div style={{ fontWeight: 'bold' }}>{user.name}</div>
+              <div style={{ fontSize: '12px', color: '#64748B' }}>{user.email}</div>
+            </td>
+            <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{user.wallet.toLocaleString()}</td>
+            <td style={{ padding: '15px' }}>
+              <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>{user.status}</span>
+            </td>
+            <td style={{ padding: '15px' }}>
+               <button style={{ padding: '6px 12px', background: '#F1F5F9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Edit</button>
+            </td>
+          </tr>
+        ))}
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderPayoutApprovals = () => (
+    <CardWrapper>
+      <PageHeader title="Payout Approvals" subtitle="Clear pending withdrawal requests" />
+      <Table headers={['Req ID', 'Member ID', 'Gross Amt', 'Deductions', 'Net Payable', 'Action']}>
+        {dummyPayouts.map(req => (
+          <tr key={req.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+            <td style={{ padding: '15px', fontWeight: 'bold' }}>{req.id}</td>
+            <td style={{ padding: '15px', color: '#0EA5E9' }}>{req.user}</td>
+            <td style={{ padding: '15px' }}>₹{req.amount}</td>
+            <td style={{ padding: '15px', color: '#EF4444' }}>₹{req.tds + req.admin}</td>
+            <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{req.net}</td>
+            <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
+               <button style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Approve</button>
+               <button style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Reject</button>
+            </td>
+          </tr>
+        ))}
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderGeneric = () => (
+    <CardWrapper>
+      <PageHeader title={activeMenu} subtitle="Module is active and ready for business logic." />
+      <div style={{ padding: '60px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', border: '2px dashed #CBD5E1' }}>
+        <h3 style={{ color: '#64748B' }}>{activeMenu} Module UI is Ready</h3>
+        <p style={{ color: '#94A3B8', marginTop: '10px' }}>Awaiting calculation plans and backend logic integration.</p>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderContent = () => {
+    switch(activeMenu) {
+       case 'Dashboard': return renderDashboard();
+       case 'My Profile & KYC': return renderProfile();
+       case 'Network & Tree': return renderNetwork();
+       case 'Wallets & P2P': return renderWallets();
+       case 'Withdrawal': return renderWithdrawal();
+       case 'Manage Users': return renderManageUsers();
+       case 'Payout Approvals': return renderPayoutApprovals();
+       default: return renderGeneric();
     }
   };
 
@@ -239,93 +385,15 @@ function App() {
       </aside>
 
       <main className="main-content">
-        <header className="topbar">
-          <div className="page-title">{activeMenu}</div>
+        <header className="topbar" style={{ background: '#0B1437' }}>
+          <div className="page-title" style={{ color: 'white' }}>{activeMenu}</div>
           <div className="topbar-actions">
-            <button className="notification-btn">🔔</button>
+            <button className="notification-btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', width: '44px', height: '44px', borderRadius: '50%', cursor: 'pointer' }}>🔔</button>
           </div>
         </header>
 
-        <div className="dashboard-content">
-          {/* User Banner via API Data */}
-          <div className="user-banner">
-            <div className="user-avatar">{userRole === 'admin' ? '👑' : (userData?.name?.charAt(0) || 'U')}</div>
-            <div className="user-info-text">
-              <span className="welcome-text">Welcome Back</span>
-              <h2 className="user-name">{userData?.name || 'Loading...'}</h2>
-              <div className="badges">
-                <span className={`badge ${userRole === 'admin' ? 'badge-gold' : 'badge-gold'}`}>
-                  {userData?.rank || 'MEMBER'}
-                </span>
-                <span className="badge badge-id">ID: {userData?.memberId || '...'}</span>
-              </div>
-            </div>
-          </div>
-
-          <h3 className="section-title">{userRole === 'admin' ? 'Platform Overview' : 'My Earnings Overview'}</h3>
-          
-          {/* Cards Grid */}
-          {!dashboardData ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#64748B' }}>Fetching real-time data from API...</div>
-          ) : (
-            <div className="cards-grid">
-              {getCards().map((card) => (
-                <div 
-                  key={card.id} 
-                  className="vibrant-card" 
-                  style={{ background: card.bg, boxShadow: `0 10px 20px -5px ${card.shadow}` }}
-                >
-                  <div className="card-bg-circle card-circle-1"></div>
-                  <div className="card-bg-circle card-circle-2"></div>
-                  <div className="card-header">
-                    <div className="card-icon">{card.icon}</div>
-                    <div className="card-view-btn">View <span>›</span></div>
-                  </div>
-                  <div className="card-content">
-                    <div className="card-title">{card.title.toUpperCase()}</div>
-                    <div className="card-amount">{userRole === 'admin' && card.id === 1 ? '' : '₹'} {card.amount.toLocaleString()}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <h3 className="section-title">{userRole === 'admin' ? 'Recent System Activity' : 'Network Activity'}</h3>
-          
-          <div className="network-list">
-            {userRole === 'admin' ? (
-              <>
-                <div className="network-item">
-                  <div className="network-icon-box" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>⏳</div>
-                  <div className="network-item-title">Pending KYC Approvals</div>
-                  <div className="network-item-value">45 Users</div>
-                </div>
-                <div className="network-item">
-                  <div className="network-icon-box" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>💸</div>
-                  <div className="network-item-title">Withdrawal Requests</div>
-                  <div className="network-item-value">12 Pending</div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="network-item">
-                  <div className="network-icon-box" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0EA5E9' }}>👤</div>
-                  <div className="network-item-title">Direct Referrals</div>
-                  <div className="network-item-value">{dashboardData?.networkStats?.directReferrals || 0}</div>
-                </div>
-                <div className="network-item">
-                  <div className="network-icon-box" style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#F43F5E' }}>👥</div>
-                  <div className="network-item-title">Total Team Size</div>
-                  <div className="network-item-value">{dashboardData?.networkStats?.totalTeamSize || 0}</div>
-                </div>
-                <div className="network-item">
-                  <div className="network-icon-box" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>⭐</div>
-                  <div className="network-item-title">Autopool Status</div>
-                  <div className="network-item-value">{dashboardData?.networkStats?.autopoolStatus || 'None'}</div>
-                </div>
-              </>
-            )}
-          </div>
+        <div className="dashboard-content" style={{ padding: '40px' }}>
+          {renderContent()}
         </div>
       </main>
     </div>
