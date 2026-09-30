@@ -1,32 +1,72 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Fake Database (Strict Authentication)
+const USERS_DB = [
+    {
+        _id: "1",
+        memberId: "ADMIN",
+        password: "Admin@123", // strict password
+        name: "Super Admin",
+        role: "admin",
+        rank: "OWNER",
+        walletBalance: 0
+    },
+    {
+        _id: "2",
+        memberId: "RK1001",
+        password: "User@123", // strict password
+        name: "Rajesh Kumar",
+        role: "member",
+        rank: "GOLD RANK",
+        walletBalance: 15000
+    }
+];
 
 // Basic Route
 app.get('/', (req, res) => {
     res.json({ message: "Welcome to Royal Kuberaa API" });
 });
 
-// Auth Route
+// --- Auth Routes ---
 app.post('/api/login', (req, res) => {
     const { memberId, password } = req.body;
-    if (memberId && password) {
-        res.json({
-            success: true,
-            token: "sample-jwt-token-12345",
-            user: { name: "Rajesh Kumar", memberId: memberId, rank: "GOLD RANK" }
-        });
-    } else {
-        res.status(401).json({ success: false, message: "Invalid credentials" });
+    
+    // Check if user exists in our DB
+    const user = USERS_DB.find(u => u.memberId === memberId.toUpperCase());
+    
+    if (!user) {
+        return res.status(401).json({ success: false, message: 'Invalid User ID! Account does not exist.' });
     }
+
+    // Check Password strictly
+    if (user.password !== password) {
+        return res.status(401).json({ success: false, message: 'Incorrect Password!' });
+    }
+
+    // Generate Token
+    const token = jwt.sign({ id: user._id, role: user.role }, 'royal_kuberaa_secret', { expiresIn: '1d' });
+
+    res.json({
+        success: true,
+        token,
+        user: {
+            name: user.name,
+            memberId: user.memberId,
+            role: user.role,
+            rank: user.rank,
+            walletBalance: user.walletBalance
+        }
+    });
 });
 
-// Dashboard Data Route
+// Dashboard Data Route (Dummy for now)
 app.get('/api/dashboard', (req, res) => {
     res.json({
         success: true,
@@ -38,7 +78,7 @@ app.get('/api/dashboard', (req, res) => {
     });
 });
 
-// Wallets Route
+// Wallets Route (Dummy for now)
 app.get('/api/wallets', (req, res) => {
     res.json({
         success: true,
@@ -53,7 +93,7 @@ app.get('/api/wallets', (req, res) => {
     });
 });
 
-// Network Route
+// Network Route (Dummy for now)
 app.get('/api/network', (req, res) => {
     res.json({
         success: true,
@@ -65,7 +105,7 @@ app.get('/api/network', (req, res) => {
     });
 });
 
-// Admin Routes
+// Admin Routes (Dummy for now)
 app.get('/api/admin/users', (req, res) => {
     res.json({
         success: true,
