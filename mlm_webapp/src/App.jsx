@@ -171,7 +171,7 @@ function App() {
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
                 <div className="form-group">
-                  <label className="form-label">User ID (Type ADMIN for admin access)</label>
+                  <label className="form-label">User ID</label>
                   <div className="input-wrapper">
                     <span className="input-icon">👤</span>
                     <input type="text" name="memberId" className="form-input" placeholder="Enter ID" required />
