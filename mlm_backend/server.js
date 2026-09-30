@@ -13,22 +13,33 @@ app.use(express.json());
 const DB_FILE = path.join(__dirname, 'database.json');
 
 const initDB = () => {
-    if (!fs.existsSync(DB_FILE)) {
-        const initialData = {
-            users: [
-                {
-                    memberId: "ADMIN",
-                    password: "Admin@123",
-                    name: "Super Admin",
-                    role: "admin",
-                    rank: "OWNER",
-                    walletBalance: 0,
-                    joinDate: new Date().toISOString()
-                }
-            ]
-        };
-        fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
+    let db = { users: [] };
+    if (fs.existsSync(DB_FILE)) {
+        db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     }
+
+    // Force set the custom Admin
+    const adminIndex = db.users.findIndex(u => u.role === 'admin' || u.memberId === 'RAJESHKINJARAPU');
+    const adminUser = {
+        memberId: "RAJESHKINJARAPU",
+        password: "kallu0305",
+        name: "Rajesh Kinjarapu",
+        role: "admin",
+        rank: "OWNER",
+        walletBalance: 0,
+        joinDate: new Date().toISOString()
+    };
+
+    if (adminIndex >= 0) {
+        db.users[adminIndex].memberId = "RAJESHKINJARAPU";
+        db.users[adminIndex].password = "kallu0305";
+        db.users[adminIndex].name = "Rajesh Kinjarapu";
+        db.users[adminIndex].role = "admin";
+    } else {
+        db.users.push(adminUser);
+    }
+
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 };
 initDB();
 

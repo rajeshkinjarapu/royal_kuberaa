@@ -78,7 +78,7 @@ function App() {
       const result = await response.json();
       
       if (result.success) {
-        if (memberId.toUpperCase().includes('ADMIN')) {
+        if (result.user.role === 'admin') {
           setUserRole('admin');
         } else {
           setUserRole('member');
@@ -91,12 +91,12 @@ function App() {
     } catch (error) {
       alert('Cannot connect to Live Server. Using fallback mode.');
       // Fallback for demo
-      if (memberId.toUpperCase().includes('ADMIN')) {
+      if (memberId.toUpperCase() === 'RAJESHKINJARAPU' || memberId.toUpperCase() === 'ADMIN') {
         setUserRole('admin');
-        setUserData({ name: "Super Admin", memberId: "ADMIN_001", rank: "OWNER" });
+        setUserData({ name: "Rajesh Kinjarapu", memberId: "RAJESHKINJARAPU", rank: "OWNER" });
       } else {
         setUserRole('member');
-        setUserData({ name: "Rajesh Kumar", memberId: memberId, rank: "GOLD RANK" });
+        setUserData({ name: "Member", memberId: memberId, rank: "GOLD RANK" });
       }
       setIsLoggedIn(true);
     } finally {
