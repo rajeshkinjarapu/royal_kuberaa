@@ -520,8 +520,8 @@ function App() {
                 <div className="card-icon" style={{ background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>{card.icon}</div>
               </div>
               <div className="card-content">
-                <div className="card-title" style={{ color: card.color, fontWeight: '700', fontSize: '13px' }}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{ color: card.color, fontSize: '28px', fontWeight: '900' }}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+                <div className="card-title" style={{ color: card.color, fontWeight: '600', fontSize: '13px', opacity: 0.8, marginBottom: '4px' }}>{card.title.toUpperCase()}</div>
+                <div className="card-amount" style={{ color: card.color, fontSize: '24px', fontWeight: '800' }}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
