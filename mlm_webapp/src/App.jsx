@@ -1981,38 +1981,42 @@ function App() {
     );
   };
 
+  const DynamicView = ({ renderFn }) => {
+    return renderFn();
+  };
+
   const renderContent = () => {
+    let renderFn;
     switch(activeMenu) {
-       case 'Dashboard': return renderDashboard();
+       case 'Dashboard': renderFn = renderDashboard; break;
        case 'Profile':
-       case 'KYC': return renderProfile();
-       case 'My Network': return renderNetwork();
-       case 'Binary Genealogy': return renderBinaryTree();
+       case 'KYC': renderFn = renderProfile; break;
+       case 'My Network': renderFn = renderNetwork; break;
+       case 'Binary Genealogy': renderFn = renderBinaryTree; break;
        case 'Wallets': 
-       case 'Passbook': return renderWallets();
-       case 'Withdraw / P2P': return renderWithdrawal();
+       case 'Passbook': renderFn = renderWallets; break;
+       case 'Withdraw / P2P': renderFn = renderWithdrawal; break;
        case 'Manage Users':
-       case 'Member Management': return renderManageUsers();
+       case 'Member Management': renderFn = renderManageUsers; break;
        case 'Payout Approvals':
-       case 'Payouts & TDS': return renderPayoutApprovals();
-       case 'Notifications': return renderNotifications();
-       case 'Non-Working Cashback': return renderRoyaltyAndCashback();
-       case 'Add Member': return renderAddMember();
-       case 'Fund Requests': return renderFundRequests();
+       case 'Payouts & TDS': renderFn = renderPayoutApprovals; break;
+       case 'Notifications': renderFn = renderNotifications; break;
+       case 'Non-Working Cashback': renderFn = renderRoyaltyAndCashback; break;
+       case 'Add Member': renderFn = renderAddMember; break;
+       case 'Fund Requests': renderFn = renderFundRequests; break;
        case 'AutoPool Settings':
-       case 'Pool Distributions': return renderAutoPoolSettings();
-       case 'KYC Approvals': return renderKYCApprovals();
-       case 'Support Tickets': return renderSupportTickets();
-       case 'System Settings': return renderSystemSettings();
-       case 'Royalty Pools': return renderRoyaltyAndCashback();
-       case 'Rebirth ID': return renderRebirths();
+       case 'Pool Distributions': renderFn = renderAutoPoolSettings; break;
+       case 'KYC Approvals': renderFn = renderKYCApprovals; break;
+       case 'Support Tickets': renderFn = renderSupportTickets; break;
+       case 'System Settings': renderFn = renderSystemSettings; break;
+       case 'Royalty Pools': renderFn = renderRoyaltyAndCashback; break;
+       case 'Rebirth ID': renderFn = renderRebirths; break;
        case 'Offers': 
-       case 'Awards & Rewards': return renderRewards();
-       case 'Deposit Funds': return renderDepositFunds();
-       case 'Transaction PIN': return renderTpinSettings();
+       case 'Awards & Rewards': renderFn = renderRewards; break;
+       case 'Deposit Funds': renderFn = renderDepositFunds; break;
+       case 'Transaction PIN': renderFn = renderTpinSettings; break;
        case 'Products':
        case 'Bank Settings':
-       case 'Transaction PIN':
        case 'Change Password':
        case 'Support':
        case 'About Us':
@@ -2020,9 +2024,10 @@ function App() {
        case 'Privacy Policy':
        case 'Return & Refund':
        case 'Disclaimer':
-           return renderComingSoon(activeMenu);
-       default: return renderGeneric();
+           renderFn = () => renderComingSoon(activeMenu); break;
+       default: renderFn = renderGeneric; break;
     }
+    return <DynamicView key={activeMenu} renderFn={renderFn} />;
   };
 
   return (
