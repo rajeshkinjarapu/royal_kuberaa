@@ -110,6 +110,26 @@ function App() {
     }
   }, [isLoggedIn, userRole, userData]);
 
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      const token = localStorage.getItem('token');
+      if (isLoggedIn && token && activeMenu === 'Dashboard') {
+        try {
+          const res = await fetch('/api/dashboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const result = await res.json();
+          if (result.success) {
+            setDashboardData(result.data);
+          }
+        } catch (err) {
+          console.error('Failed to fetch dashboard', err);
+        }
+      }
+    };
+    fetchDashboard();
+  }, [isLoggedIn, activeMenu]);
+
   // Fallback Dummy Data for UI Completeness
   const dummyWallets = {
     balance: 15000,
@@ -215,6 +235,7 @@ function App() {
           setUserRole('member');
         }
         setUserData(result.user);
+        localStorage.setItem('token', result.token);
         setIsLoggedIn(true);
       } else {
         setErrorMsg(result.message || 'Login failed');
@@ -585,110 +606,306 @@ function App() {
     </CardWrapper>
   );
 
-  const renderWallets = () => (
-    <CardWrapper>
-      <div className="wallet-cards-grid">
-         <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)' }}>
-            <h3 className="wallet-card-title">Main Wallet</h3>
-            <h1 className="wallet-card-amount">₹ {dummyWallets.balance.toLocaleString()}</h1>
-            <div className="wallet-card-icon">💳</div>
-            <div className="wallet-card-action">
-               <button className="wallet-btn wallet-btn-primary">Transfer (P2P)</button>
-            </div>
-         </div>
-         <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)' }}>
-            <h3 className="wallet-card-title">Earnings Wallet</h3>
-            <h1 className="wallet-card-amount">₹ {(dummyWallets.balance * 0.4).toLocaleString()}</h1>
-            <div className="wallet-card-icon">💰</div>
-            <div className="wallet-card-action">
-               <button className="wallet-btn wallet-btn-secondary">Withdraw</button>
-            </div>
-         </div>
-         <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
-            <h3 className="wallet-card-title">Autopool Fund</h3>
-            <h1 className="wallet-card-amount">₹ {(dummyWallets.balance * 0.15).toLocaleString()}</h1>
-            <div className="wallet-card-icon">♾️</div>
-            <div className="wallet-card-action">
-               <button className="wallet-btn wallet-btn-secondary">View Details</button>
-            </div>
-         </div>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ margin: 0, fontSize: '18px', color: '#0F172A', fontWeight: '800' }}>Recent Transactions</h3>
-        <button style={{ background: '#F1F5F9', border: 'none', padding: '8px 16px', borderRadius: '8px', color: '#475569', fontWeight: '700', cursor: 'pointer' }}>View All</button>
-      </div>
-      <Table headers={['TXN ID', 'Date', 'Remark', 'Amount']}>
-        {dummyWallets.transactions.map(txn => (
-          <tr key={txn.id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.background='#F8FAFC'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-            <td style={{ padding: '16px', fontWeight: '700', color: '#0F172A' }}>{txn.id}</td>
-            <td style={{ padding: '16px', color: '#64748B', fontSize: '14px', fontWeight: '600' }}>{txn.date}</td>
-            <td style={{ padding: '16px', color: '#334155', fontWeight: '500' }}>{txn.remark}</td>
-            <td style={{ padding: '16px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: '800', fontSize: '16px' }}>
-              {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount).toLocaleString()}
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </CardWrapper>
-  );
+  const renderWallets = () => {
+    const [transactions, setTransactions] = useState([]);
+    useEffect(() => {
+       const fetchTxns = async () => {
+          try {
+             const token = localStorage.getItem('token');
+             const res = await fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` }});
+             const result = await res.json();
+             if(result.success) setTransactions(result.data);
+          } catch(err) { console.error(err); }
+       };
+       if(activeMenu === 'Wallets' || activeMenu === 'Passbook' || activeMenu === 'Wallets & P2P') {
+          fetchTxns();
+       }
+    }, [activeMenu]);
 
-  const renderWithdrawal = () => (
-    <CardWrapper>
-      <PageHeader title="Withdrawal Request" subtitle="Withdraw your available funds to your bank account" />
-      <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', maxWidth: '500px' }}>
-         <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dummyWallets.balance.toLocaleString()}</strong></p>
-         <input type="number" placeholder="Enter Amount (Min ₹500)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
-         <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
-         <button style={{ width: '100%', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>Submit Withdrawal</button>
-      </div>
-    </CardWrapper>
-  );
+    return (
+      <CardWrapper>
+        <div className="wallet-cards-grid">
+           <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)' }}>
+              <h3 className="wallet-card-title">Main Wallet</h3>
+              <h1 className="wallet-card-amount">₹ {(dashboardData?.mainWallet || 0).toLocaleString()}</h1>
+              <div className="wallet-card-icon">💳</div>
+              <div className="wallet-card-action">
+                 <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('Withdraw / P2P')}>Transfer (P2P)</button>
+              </div>
+           </div>
+           <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)' }}>
+              <h3 className="wallet-card-title">Earnings Wallet</h3>
+              <h1 className="wallet-card-amount">₹ {(dashboardData?.totalEarnings || 0).toLocaleString()}</h1>
+              <div className="wallet-card-icon">💰</div>
+              <div className="wallet-card-action">
+                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Withdraw / P2P')}>Withdraw</button>
+              </div>
+           </div>
+           <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
+              <h3 className="wallet-card-title">Autopool Fund</h3>
+              <h1 className="wallet-card-amount">₹ {(dashboardData?.autopoolFund || 0).toLocaleString()}</h1>
+              <div className="wallet-card-icon">♾️</div>
+              <div className="wallet-card-action">
+                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('AutoPool Matrix')}>View Details</button>
+              </div>
+           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0, fontSize: '18px', color: '#0F172A', fontWeight: '800' }}>Recent Transactions</h3>
+        </div>
+        <Table headers={['Date', 'Remark', 'Category', 'Amount']}>
+          {transactions.length === 0 && <tr><td colSpan="4" style={{ padding: '16px', textAlign: 'center' }}>No transactions found.</td></tr>}
+          {transactions.map(txn => (
+            <tr key={txn._id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.background='#F8FAFC'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+              <td style={{ padding: '16px', color: '#64748B', fontSize: '14px', fontWeight: '600' }}>{new Date(txn.createdAt).toLocaleDateString()}</td>
+              <td style={{ padding: '16px', color: '#334155', fontWeight: '500' }}>{txn.remark}</td>
+              <td style={{ padding: '16px', color: '#64748B', fontWeight: '500', fontSize: '13px' }}>{txn.category}</td>
+              <td style={{ padding: '16px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: '800', fontSize: '16px' }}>
+                {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount).toLocaleString()}
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </CardWrapper>
+    );
+  };
 
-  // Admin Views
-  const renderManageUsers = () => (
-    <CardWrapper>
-      <PageHeader title="Manage Users" subtitle="View and edit network members" />
-      <Table headers={['ID', 'Name / Email', 'Wallet', 'Status', 'Action']}>
-        {dummyUsers.map(user => (
-          <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-            <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.id}</td>
-            <td style={{ padding: '15px' }}>
-              <div style={{ fontWeight: 'bold' }}>{user.name}</div>
-              <div style={{ fontSize: '12px', color: '#64748B' }}>{user.email}</div>
-            </td>
-            <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{user.wallet.toLocaleString()}</td>
-            <td style={{ padding: '15px' }}>
-              <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>{user.status}</span>
-            </td>
-            <td style={{ padding: '15px' }}>
-               <button style={{ padding: '6px 12px', background: '#F1F5F9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Edit</button>
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </CardWrapper>
-  );
+  const renderWithdrawal = () => {
+    const [p2pReceiver, setP2pReceiver] = useState('');
+    const [p2pAmount, setP2pAmount] = useState('');
+    const [p2pMessage, setP2pMessage] = useState({ text: '', type: '' });
+    const [loadingP2p, setLoadingP2p] = useState(false);
 
-  const renderPayoutApprovals = () => (
-    <CardWrapper>
-      <PageHeader title="Payout Approvals" subtitle="Clear pending withdrawal requests" />
-      <Table headers={['Req ID', 'Member ID', 'Gross Amt', 'Deductions', 'Net Payable', 'Action']}>
-        {dummyPayouts.map(req => (
-          <tr key={req.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-            <td style={{ padding: '15px', fontWeight: 'bold' }}>{req.id}</td>
-            <td style={{ padding: '15px', color: '#0EA5E9' }}>{req.user}</td>
-            <td style={{ padding: '15px' }}>₹{req.amount}</td>
-            <td style={{ padding: '15px', color: '#EF4444' }}>₹{req.tds + req.admin}</td>
-            <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{req.net}</td>
-            <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
-               <button style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Approve</button>
-               <button style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Reject</button>
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </CardWrapper>
-  );
+    const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [withdrawMessage, setWithdrawMessage] = useState({ text: '', type: '' });
+    const [loadingWithdraw, setLoadingWithdraw] = useState(false);
+
+    const handleWithdrawSubmit = async (e) => {
+       e.preventDefault();
+       setLoadingWithdraw(true);
+       setWithdrawMessage({ text: '', type: '' });
+       try {
+         const token = localStorage.getItem('token');
+         const res = await fetch('/api/withdraw', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+           body: JSON.stringify({ amount: withdrawAmount })
+         });
+         const result = await res.json();
+         if (result.success) {
+           setWithdrawMessage({ text: result.message, type: 'success' });
+           setWithdrawAmount('');
+           if(setDashboardData) {
+              setDashboardData(prev => ({ ...prev, mainWallet: result.newBalance, totalEarnings: result.newBalance }));
+           }
+         } else {
+           setWithdrawMessage({ text: result.message, type: 'error' });
+         }
+       } catch (err) {
+         setWithdrawMessage({ text: 'Server connection error.', type: 'error' });
+       }
+       setLoadingWithdraw(false);
+    };
+
+    const handleP2pSubmit = async (e) => {
+       e.preventDefault();
+       setLoadingP2p(true);
+       setP2pMessage({ text: '', type: '' });
+       try {
+         const token = localStorage.getItem('token');
+         const res = await fetch('/api/p2p-transfer', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+           body: JSON.stringify({ receiverId: p2pReceiver, amount: p2pAmount })
+         });
+         const result = await res.json();
+         if (result.success) {
+           setP2pMessage({ text: result.message, type: 'success' });
+           setP2pReceiver('');
+           setP2pAmount('');
+           if(setDashboardData) {
+              setDashboardData(prev => ({ ...prev, mainWallet: result.newBalance, totalEarnings: result.newBalance }));
+           }
+         } else {
+           setP2pMessage({ text: result.message, type: 'error' });
+         }
+       } catch (err) {
+         setP2pMessage({ text: 'Server connection error.', type: 'error' });
+       }
+       setLoadingP2p(false);
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Withdraw / P2P Transfer" subtitle="Withdraw your available funds or transfer to another member" />
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+           {/* Withdrawal Form */}
+           <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px' }}>
+              <h3 style={{ marginBottom: '16px' }}>Bank Withdrawal</h3>
+              <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong></p>
+              
+              <form onSubmit={handleWithdrawSubmit}>
+                 <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min ₹500)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+                 <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
+                 {withdrawMessage.text && (
+                    <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: withdrawMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
+                       {withdrawMessage.text}
+                    </div>
+                 )}
+                 <button type="submit" disabled={loadingWithdraw} style={{ width: '100%', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', cursor: loadingWithdraw ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', opacity: loadingWithdraw ? 0.7 : 1 }}>
+                   {loadingWithdraw ? 'Processing...' : 'Submit Withdrawal'}
+                 </button>
+              </form>
+           </div>
+
+           {/* P2P Transfer Form */}
+           <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', background: '#F8FAFC' }}>
+              <h3 style={{ marginBottom: '16px' }}>P2P Transfer</h3>
+              <p style={{ color: '#64748B', marginBottom: '16px' }}>Transfer funds to another member instantly. No deductions.</p>
+              
+              <form onSubmit={handleP2pSubmit}>
+                 <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Receiver Member ID</label>
+                    <input type="text" value={p2pReceiver} onChange={(e) => setP2pReceiver(e.target.value)} required placeholder="e.g. RK12345" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+                 </div>
+                 <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transfer Amount</label>
+                    <input type="number" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} required placeholder="Amount in ₹" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+                 </div>
+                 {p2pMessage.text && (
+                    <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: p2pMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: p2pMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
+                       {p2pMessage.text}
+                    </div>
+                 )}
+                 <button type="submit" disabled={loadingP2p} style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: loadingP2p ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', opacity: loadingP2p ? 0.7 : 1 }}>
+                    {loadingP2p ? 'Processing...' : 'Transfer Funds Now'}
+                 </button>
+              </form>
+           </div>
+        </div>
+      </CardWrapper>
+    );
+  };
+
+  const renderManageUsers = () => {
+    const [usersList, setUsersList] = useState([]);
+    
+    useEffect(() => {
+       const fetchUsers = async () => {
+          try {
+             const token = localStorage.getItem('token');
+             const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` }});
+             const result = await res.json();
+             if(result.success) setUsersList(result.data);
+          } catch(err) { console.error(err); }
+       };
+       fetchUsers();
+    }, []);
+
+    const handleToggleBlock = async (memberId) => {
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/admin/users/${memberId}/toggle-block`, {
+             method: 'POST',
+             headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const result = await res.json();
+          if(result.success) {
+             setUsersList(prev => prev.map(u => u.id === memberId ? { ...u, status: result.status } : u));
+          } else {
+             alert(result.message);
+          }
+       } catch(err) { console.error(err); }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Manage Users" subtitle="View and edit network members" />
+        <Table headers={['ID', 'Name / Email', 'Wallet', 'Status', 'Action']}>
+          {usersList.length === 0 && <tr><td colSpan="5" style={{ padding: '16px', textAlign: 'center' }}>No users found.</td></tr>}
+          {usersList.map(user => (
+            <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+              <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.id}</td>
+              <td style={{ padding: '15px' }}>
+                <div style={{ fontWeight: 'bold' }}>{user.name}</div>
+                <div style={{ fontSize: '12px', color: '#64748B' }}>User</div>
+              </td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{user.wallet.toLocaleString()}</td>
+              <td style={{ padding: '15px' }}>
+                <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>{user.status}</span>
+              </td>
+              <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
+                 <button onClick={() => handleToggleBlock(user.id)} style={{ padding: '6px 12px', background: user.status === 'Active' ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    {user.status === 'Active' ? 'Block' : 'Unblock'}
+                 </button>
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </CardWrapper>
+    );
+  };
+
+  const renderPayoutApprovals = () => {
+    const [withdrawals, setWithdrawals] = useState([]);
+    
+    useEffect(() => {
+       const fetchWithdrawals = async () => {
+          try {
+             const token = localStorage.getItem('token');
+             const res = await fetch('/api/admin/withdrawals', { headers: { 'Authorization': `Bearer ${token}` }});
+             const result = await res.json();
+             if(result.success) setWithdrawals(result.data);
+          } catch(err) { console.error(err); }
+       };
+       fetchWithdrawals();
+    }, []);
+
+    const handleAction = async (id, action) => {
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/admin/withdrawals/${id}`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+             body: JSON.stringify({ action })
+          });
+          const result = await res.json();
+          if(result.success) {
+             setWithdrawals(prev => prev.map(w => w._id === id ? { ...w, status: action === 'approve' ? 'Approved' : 'Rejected' } : w));
+          } else {
+             alert(result.message);
+          }
+       } catch(err) { console.error(err); }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Payout Approvals" subtitle="Clear pending withdrawal requests" />
+        <Table headers={['Req ID', 'Member ID', 'Gross Amt', 'Deductions', 'Net Payable', 'Status', 'Action']}>
+          {withdrawals.length === 0 && <tr><td colSpan="7" style={{ padding: '16px', textAlign: 'center' }}>No requests found.</td></tr>}
+          {withdrawals.map(req => (
+            <tr key={req._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+              <td style={{ padding: '15px', fontWeight: 'bold' }}>{req._id.slice(-6).toUpperCase()}</td>
+              <td style={{ padding: '15px', color: '#0EA5E9' }}>{req.memberId}</td>
+              <td style={{ padding: '15px' }}>₹{req.grossAmount}</td>
+              <td style={{ padding: '15px', color: '#EF4444' }}>₹{req.tdsAmount + req.adminChargeAmount}</td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{req.netAmount}</td>
+              <td style={{ padding: '15px', color: req.status === 'Pending' ? '#F59E0B' : (req.status === 'Approved' ? '#10B981' : '#EF4444') }}>{req.status}</td>
+              <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
+                 {req.status === 'Pending' && (
+                   <>
+                     <button onClick={() => handleAction(req._id, 'approve')} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Approve</button>
+                     <button onClick={() => handleAction(req._id, 'reject')} style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Reject</button>
+                   </>
+                 )}
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </CardWrapper>
+    );
+  };
 
   const renderGeneric = () => (
     <CardWrapper>
@@ -727,17 +944,100 @@ function App() {
     </div>
   );
 
+  const renderComingSoon = (moduleName) => (
+    <CardWrapper>
+      <PageHeader title={moduleName} subtitle="Coming Soon" />
+      <div style={{ padding: '60px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', border: '2px dashed #CBD5E1' }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚀</div>
+        <h3 style={{ color: '#0F172A', marginBottom: '8px' }}>{moduleName}</h3>
+        <p style={{ color: '#64748B' }}>This feature is currently under development. Stay tuned!</p>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderAutoPool = () => (
+    <CardWrapper>
+      <PageHeader title="AutoPool Matrix" subtitle="View your progress in the global auto-fill system" />
+      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '24px' }}>
+         {['STARTER', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'CROWN'].map((pool, idx) => (
+            <div key={pool} style={{ flex: '1 1 200px', padding: '20px', background: idx === 0 ? 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)' : '#F1F5F9', color: idx === 0 ? 'white' : '#64748B', borderRadius: '12px', textAlign: 'center', boxShadow: idx === 0 ? '0 10px 25px -5px rgba(37,99,235,0.4)' : 'none' }}>
+               <h3 style={{ marginBottom: '8px' }}>{pool} POOL</h3>
+               <p style={{ fontSize: '12px' }}>{idx === 0 ? 'Active' : 'Locked'}</p>
+               <div style={{ marginTop: '16px', background: idx === 0 ? 'rgba(255,255,255,0.2)' : '#E2E8F0', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                 {idx === 0 && <div style={{ width: '45%', height: '100%', background: 'white' }}></div>}
+               </div>
+               {idx === 0 && <p style={{ fontSize: '11px', marginTop: '8px' }}>Level 2 in progress...</p>}
+            </div>
+         ))}
+      </div>
+    </CardWrapper>
+  );
+
+  const renderAddMember = () => (
+    <CardWrapper>
+      <PageHeader title="Add New Member" subtitle="Register a new member in your downline" />
+      <form style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Sponsor ID</label>
+          <input type="text" className="form-input" value={userData?.memberId} readOnly style={{ background: '#F1F5F9' }} />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Full Name</label>
+          <input type="text" className="form-input" placeholder="Enter member name" />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Mobile Number</label>
+          <input type="tel" className="form-input" placeholder="10-digit mobile number" />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Select Position</label>
+          <select className="form-input">
+            <option>Left</option>
+            <option>Right</option>
+          </select>
+        </div>
+        <button type="button" className="login-submit-btn">Register Member</button>
+      </form>
+    </CardWrapper>
+  );
+
   const renderContent = () => {
     switch(activeMenu) {
        case 'Dashboard': return renderDashboard();
-       case 'My Profile & KYC': return renderProfile();
-       case 'Network & Tree': return renderNetwork();
+       case 'Profile':
+       case 'KYC': return renderProfile();
+       case 'My Network':
+       case 'Genealogy': return renderNetwork();
        case 'Wallets': 
-       case 'Wallets & P2P': return renderWallets();
-       case 'Withdrawal': return renderWithdrawal();
-       case 'Manage Users': return renderManageUsers();
-       case 'Payout Approvals': return renderPayoutApprovals();
+       case 'Passbook': return renderWallets();
+       case 'Withdraw / P2P': return renderWithdrawal();
+       case 'Manage Users':
+       case 'Member Management': return renderManageUsers();
+       case 'Payout Approvals':
+       case 'Payouts & TDS': return renderPayoutApprovals();
        case 'Notifications': return renderNotifications();
+       case 'AutoPool Matrix': return renderAutoPool();
+       case 'Add Member': return renderAddMember();
+       case 'Rank Income':
+       case 'Rebirth ID':
+       case 'Products':
+       case 'Offers':
+       case 'Deposit Funds':
+       case 'Bank Settings':
+       case 'Transaction PIN':
+       case 'Change Password':
+       case 'Support':
+       case 'Fund Requests':
+       case 'AutoPool Settings':
+       case 'KYC Approvals':
+       case 'Support Tickets':
+       case 'System Settings':
+       case 'About Us':
+       case 'Terms & Conditions':
+       case 'Privacy Policy':
+       case 'Return & Refund':
+       case 'Disclaimer':
+           return renderComingSoon(activeMenu);
        default: return renderGeneric();
     }
   };
