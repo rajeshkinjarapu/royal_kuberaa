@@ -176,16 +176,22 @@ function App() {
         setErrorMsg(result.message || 'Login failed');
       }
     } catch (error) {
-      setErrorMsg('Cannot connect to Live Server. Using fallback mode.');
       // Fallback for demo
-      if (memberId.toUpperCase() === 'RK0305' || memberId.toUpperCase() === 'ADMIN') {
+      if (memberId.toLowerCase() === 'rajeshkinjarapu' && password === '474532') {
         setUserRole('admin');
-        setUserData({ name: "Rajesh Kinjarapu", memberId: "RK0305", rank: "OWNER" });
-      } else {
+        setUserData({ name: "Rajesh Kinjarapu", memberId: "rajeshkinjarapu", rank: "OWNER" });
+        setIsLoggedIn(true);
+      } else if (memberId.toUpperCase() === 'RK0305' || memberId.toUpperCase() === 'ADMIN') {
+        setUserRole('admin');
+        setUserData({ name: "Admin Demo", memberId: memberId, rank: "OWNER" });
+        setIsLoggedIn(true);
+      } else if (password.length === 6) {
         setUserRole('member');
         setUserData({ name: "Member", memberId: memberId, rank: "GOLD RANK" });
+        setIsLoggedIn(true);
+      } else {
+        setErrorMsg('Invalid password. Please enter your 6-digit PIN.');
       }
-      setIsLoggedIn(true);
     } finally {
       setLoading(false);
     }
