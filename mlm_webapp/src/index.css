@@ -143,8 +143,8 @@ body {
 /* Topbar (Proper Header) */
 .topbar {
   height: 64px;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
+  background: var(--primary-blue);
+  border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -152,13 +152,14 @@ body {
   position: sticky;
   top: 0;
   z-index: 5;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .page-title {
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .topbar-actions {
@@ -168,15 +169,15 @@ body {
 }
 
 .notification-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   width: 36px;
   height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.3s;
 }
