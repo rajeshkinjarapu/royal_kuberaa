@@ -103,16 +103,16 @@ app.post('/api/login', async (req, res) => {
 // --- Register / Activate Route ---
 app.post('/api/register', async (req, res) => {
     try {
-        const { memberId, name, mobile, password, sponsorId } = req.body;
+        const { name, mobile, password, sponsorId } = req.body;
         
         // Validation
-        if (!memberId || !name || !mobile || !password) {
+        if (!name || !mobile || !password) {
             return res.status(400).json({ success: false, message: 'All fields are required.' });
         }
 
-        const existingUser = await User.findOne({ $or: [{ memberId: memberId.toUpperCase() }, { mobile }] });
+        const existingUser = await User.findOne({ mobile });
         if (existingUser) {
-            return res.status(400).json({ success: false, message: 'Member ID or Mobile already exists.' });
+            return res.status(400).json({ success: false, message: 'Mobile number is already registered.' });
         }
 
         let sponsor = null;
@@ -125,8 +125,15 @@ app.post('/api/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
+        // Generate Unique Member ID
+        const generateId = () => 'RK' + Math.floor(10000 + Math.random() * 90000);
+        let newMemberId = generateId();
+        while (await User.findOne({ memberId: newMemberId })) {
+            newMemberId = generateId();
+        }
+        
         const newUser = new User({
-            memberId: memberId.toUpperCase(),
+            memberId: newMemberId,
             name,
             mobile,
             password: hashedPassword,
