@@ -561,6 +561,31 @@ function App() {
             </div>
           </div>
         </div>
+        {!userData?.isActive && userRole === 'member' && (
+          <div style={{ background: '#FEF2F2', padding: '24px', borderRadius: '16px', border: '1px solid #FCA5A5', marginBottom: '24px', textAlign: 'center', boxShadow: '0 4px 10px rgba(239, 68, 68, 0.1)' }}>
+            <h3 style={{ margin: '0 0 10px 0', color: '#EF4444', fontSize: '20px' }}>⚠️ Account Not Activated</h3>
+            <p style={{ color: '#7F1D1D', marginBottom: '16px', fontSize: '14px' }}>Your account is currently inactive. You need ₹1000 in your Main Wallet to activate your account and start earning commissions.</p>
+            <button 
+               onClick={async () => {
+                  try {
+                     const token = localStorage.getItem('token');
+                     const res = await fetch('/api/user/activate', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }});
+                     const result = await res.json();
+                     alert(result.message);
+                     if (result.success) {
+                         const ud = {...userData, isActive: true};
+                         setUserData(ud);
+                         window.location.reload();
+                     }
+                  } catch(e) { alert('Activation failed'); }
+               }}
+               style={{ padding: '12px 24px', background: '#EF4444', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none', transition: 'all 0.2s' }}
+            >
+               Activate ID Now (₹1000)
+            </button>
+            <p style={{ fontSize: '13px', color: '#991B1B', marginTop: '12px', fontWeight: '600' }}>Current Main Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</p>
+          </div>
+        )}
         <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
           {cards.map(card => (
             <div key={card.id} className="vibrant-card metric-card" style={{ background: card.bg, borderRadius: '16px', padding: '24px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
@@ -1981,6 +2006,96 @@ function App() {
     );
   };
 
+  const renderChangePassword = () => {
+    const [currentPwd, setCurrentPwd] = useState(['', '', '', '', '', '']);
+    const [newPwd, setNewPwd] = useState(['', '', '', '', '', '']);
+    const [msg, setMsg] = useState({ text: '', type: '' });
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const currentPassword = currentPwd.join('');
+        const newPassword = newPwd.join('');
+        if (currentPassword.length !== 6 || newPassword.length !== 6) {
+            return setMsg({ text: 'Please enter 6-digit passwords', type: 'error' });
+        }
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            const result = await res.json();
+            setMsg({ text: result.message, type: result.success ? 'success' : 'error' });
+            if (result.success) {
+                setCurrentPwd(['','','','','','']);
+                setNewPwd(['','','','','','']);
+            }
+        } catch (err) { setMsg({ text: 'Network Error', type: 'error' }); }
+    };
+
+    return (
+        <CardWrapper>
+            <PageHeader title="Change Password" subtitle="Update your 6-digit login PIN for security" />
+            
+            <form onSubmit={handleSubmit} style={{ maxWidth: '400px', background: '#F8FAFC', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 'bold' }}>Current Password</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {currentPwd.map((digit, index) => (
+                            <input key={index} type="password" inputMode="numeric" maxLength="1" className="form-input" value={digit}
+                                onChange={(e) => {
+                                    if (!/^[0-9]*$/.test(e.target.value)) return;
+                                    const newP = [...currentPwd];
+                                    newP[index] = e.target.value;
+                                    setCurrentPwd(newP);
+                                    if(e.target.value && e.target.nextSibling) e.target.nextSibling.focus();
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Backspace' && !digit && e.target.previousSibling) e.target.previousSibling.focus();
+                                }}
+                                style={{ flex: 1, minWidth: 0, height: '48px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold', padding: 0 }}
+                            />
+                        ))}
+                    </div>
+                </div>
+                
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 'bold' }}>New Password</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {newPwd.map((digit, index) => (
+                            <input key={index} type="password" inputMode="numeric" maxLength="1" className="form-input" value={digit}
+                                onChange={(e) => {
+                                    if (!/^[0-9]*$/.test(e.target.value)) return;
+                                    const newP = [...newPwd];
+                                    newP[index] = e.target.value;
+                                    setNewPwd(newP);
+                                    if(e.target.value && e.target.nextSibling) e.target.nextSibling.focus();
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Backspace' && !digit && e.target.previousSibling) e.target.previousSibling.focus();
+                                }}
+                                style={{ flex: 1, minWidth: 0, height: '48px', textAlign: 'center', fontSize: '24px', fontWeight: 'bold', padding: 0 }}
+                            />
+                        ))}
+                    </div>
+                </div>
+                
+                {msg.text && (
+                    <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', background: msg.type==='success'?'#D1FAE5':'#FEE2E2', color: msg.type==='success'?'#059669':'#E11D48' }}>
+                        {msg.text}
+                    </div>
+                )}
+                
+                <button type="submit" style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    Update Password
+                </button>
+            </form>
+        </CardWrapper>
+    );
+  };
+
   const DynamicView = ({ renderFn }) => {
     return renderFn();
   };
@@ -2018,8 +2133,8 @@ function App() {
        case 'Transaction PIN': renderFn = renderTpinSettings; break;
        case 'Support':
        case 'Support Tickets': renderFn = renderSupportTickets; break;
+       case 'Change Password': renderFn = renderChangePassword; break;
        case 'Products':
-       case 'Change Password':
        case 'About Us':
        case 'Terms & Conditions':
        case 'Privacy Policy':

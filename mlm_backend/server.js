@@ -156,15 +156,13 @@ app.post('/api/register', async (req, res) => {
             password: hashedPassword,
             sponsorId: sponsor ? sponsor.memberId : null,
             placement: placement, // 'Left' or 'Right'
-            role: 'member'
+            role: 'member',
+            isActive: false // Must be activated later
         });
 
         await newUser.save();
 
-        // Trigger the MLM core logic for 1000 Rs distribution
-        await mlmLogic.activateUser(newUser, sponsor, placement);
-
-        res.status(201).json({ success: true, message: 'Registration successful! Rs 1000 distributed correctly.', user: newUser });
+        res.status(201).json({ success: true, message: 'Registration successful! Please login and activate your ID.', user: newUser });
     } catch (error) {
         console.error("Register Error:", error);
         res.status(500).json({ success: false, message: "Server error during registration" });
@@ -337,6 +335,21 @@ app.post('/api/p2p-transfer', authMiddleware, async (req, res) => {
         session.endSession();
         console.error("P2P Transfer Error:", error);
         res.status(500).json({ success: false, message: "Server error during P2P transfer" });
+    }
+});
+
+// Fetch Transactions (Passbook)
+app.get('/api/transactions', authMiddleware, async (req, res) => {
+    try {
+        const Transaction = require('./models/Transaction');
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        const txns = await Transaction.find({ memberId: user.memberId }).sort({ createdAt: -1 }).limit(100);
+        res.json({ success: true, data: txns });
+    } catch (error) {
+        console.error("Transactions Fetch Error:", error);
+        res.status(500).json({ success: false, message: "Server error fetching transactions" });
     }
 });
 
@@ -591,6 +604,68 @@ app.get('/api/user/profile', authMiddleware, async (req, res) => {
         res.json({ success: true, user, hasTpin: !!user.tpin });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error fetching profile" });
+    }
+});
+
+// Activate ID
+app.post('/api/user/activate', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        if (user.isActive) {
+            return res.status(400).json({ success: false, message: 'ID is already activated' });
+        }
+        
+        if (user.mainWallet < 1000) {
+            return res.status(400).json({ success: false, message: 'Insufficient balance to activate ID. You need ₹1000.' });
+        }
+        
+        user.mainWallet -= 1000;
+        user.isActive = true;
+        await user.save();
+        
+        const Transaction = require('./models/Transaction');
+        await Transaction.create({
+            userId: user._id,
+            memberId: user.memberId,
+            type: 'Debit',
+            amount: 1000,
+            description: 'ID Activation Fee'
+        });
+        
+        let sponsor = null;
+        if (user.sponsorId) {
+            sponsor = await User.findOne({ memberId: user.sponsorId });
+        }
+        
+        // Trigger MLM Distribution
+        await mlmLogic.activateUser(user, sponsor, user.placement);
+        
+        res.json({ success: true, message: 'ID Activated Successfully!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error during activation' });
+    }
+});
+
+// Change Password
+app.post('/api/user/change-password', authMiddleware, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Incorrect current password' });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.json({ success: true, message: 'Password changed successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
