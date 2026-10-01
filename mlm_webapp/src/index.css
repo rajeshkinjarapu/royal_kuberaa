@@ -539,6 +539,19 @@ body {
   100% { transform: translateY(-15px); }
 }
 
+.login-logo {
+  display: none;
+}
+
+.login-brand-name {
+  color: #6c28d9;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 .login-content {
   flex: 1;
   padding: 60px 40px;
@@ -549,7 +562,7 @@ body {
 }
 
 .login-header {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
   text-align: left;
 }
 
@@ -579,23 +592,25 @@ body {
 
 .form-input {
   width: 100%;
-  padding: 12px 0;
-  border: none;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   font-size: 15px;
   color: #1e293b;
-  background: transparent;
+  background: #eff6ff;
   transition: all 0.3s ease;
   font-family: inherit;
 }
 
 .form-input::placeholder {
-  color: #cbd5e1;
+  color: #94a3b8;
 }
 
 .form-input:focus {
   outline: none;
-  border-bottom-color: #6c28d9;
+  background: #ffffff;
+  border-color: #6c28d9;
+  box-shadow: 0 0 0 3px rgba(108, 40, 217, 0.15);
 }
 
 .form-options {
@@ -694,15 +709,58 @@ body {
 
 @media (max-width: 480px) {
   .login-wrapper {
-    padding: 16px;
+    padding: 0;
+    align-items: flex-start;
+    background: #ffffff;
+  }
+  
+  .login-container {
+    height: 100vh;
+    box-shadow: none;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .login-illustration {
+    display: none; /* Hide illustration on mobile to save space */
+  }
+
+  .login-logo {
+    display: block;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(108, 40, 217, 0.15);
   }
   
   .login-content {
-    padding: 32px 24px;
+    padding: 24px 20px;
+    height: 100vh;
+    justify-content: flex-start;
   }
   
+  .login-header {
+    margin-bottom: 24px;
+  }
+
   .login-title {
     font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .login-form {
+    gap: 16px;
+  }
+
+  .login-submit-btn {
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .login-footer {
+    margin-top: 20px;
   }
 }
 

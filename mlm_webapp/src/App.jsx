@@ -263,8 +263,9 @@ function App() {
             <img src="https://img.freepik.com/free-vector/secure-login-concept-illustration_114360-4685.jpg" alt="Secure Login" />
           </div>
           <div className="login-content">
-            <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px', boxShadow: '0 10px 25px rgba(108, 40, 217, 0.2)' }} />
+            <div className="login-header">
+              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" />
+              <h3 className="login-brand-name">Royal Kuberaa</h3>
               <h1 className="login-title">{authView === 'login' ? 'Hello,' : 'Welcome,'}</h1>
               <h1 className="login-title">{authView === 'login' ? 'Welcome back' : 'Create Account'}</h1>
             </div>
