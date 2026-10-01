@@ -515,13 +515,13 @@ function App() {
         </div>
         <div className="cards-grid">
           {cards.map(card => (
-            <div key={card.id} className="vibrant-card metric-card">
+            <div key={card.id} className="vibrant-card" style={{ background: card.color }}>
               <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <div className="card-icon" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>{card.icon}</div>
+                <div className="card-icon" style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', color: 'white' }}>{card.icon}</div>
               </div>
               <div className="card-content">
-                <div className="card-title">{card.title.toUpperCase()}</div>
-                <div className="card-amount">{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+                <div className="card-title" style={{ color: 'rgba(255,255,255,0.9)' }}>{card.title.toUpperCase()}</div>
+                <div className="card-amount" style={{ color: 'white' }}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}

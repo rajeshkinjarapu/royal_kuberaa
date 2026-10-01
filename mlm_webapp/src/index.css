@@ -205,18 +205,18 @@ body {
 
 /* User Header Banner (Premium 2026 Gold Style) */
 .user-banner {
-  background: linear-gradient(135deg, #FFFBEB 0%, #FDE68A 50%, #F59E0B 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
   border-radius: 24px;
   padding: 36px 40px;
   display: flex;
   align-items: center;
   gap: 32px;
-  box-shadow: 0 20px 40px -15px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 20px 40px -15px rgba(30, 27, 75, 0.4);
   margin-bottom: 40px;
   position: relative;
   overflow: hidden;
-  color: #78350F;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-banner::after {
@@ -269,7 +269,7 @@ body {
 .welcome-text {
   font-size: 13px;
   font-weight: 700;
-  color: #92400E;
+  color: #94a3b8;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -280,7 +280,7 @@ body {
   font-weight: 900;
   margin: 0 0 12px;
   letter-spacing: -1px;
-  color: #451A03;
+  color: #ffffff;
 }
 
 .badges {
