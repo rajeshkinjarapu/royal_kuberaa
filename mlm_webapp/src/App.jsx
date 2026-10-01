@@ -478,8 +478,8 @@ function App() {
         <div className="cards-grid">
           {cards.map(card => (
             <div key={card.id} className="vibrant-card metric-card">
-              <div className="card-header">
-                <div className="card-icon" style={{ background: card.color }}>{card.icon}</div>
+              <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <div className="card-icon" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>{card.icon}</div>
               </div>
               <div className="card-content">
                 <div className="card-title">{card.title.toUpperCase()}</div>
@@ -722,7 +722,7 @@ function App() {
           </div>
         </header>
 
-        <div className="dashboard-content" style={{ padding: '40px' }}>
+        <div className="dashboard-content">
           {renderContent()}
         </div>
       </main>
