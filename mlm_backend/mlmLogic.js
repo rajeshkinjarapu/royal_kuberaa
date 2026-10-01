@@ -30,11 +30,13 @@ async function addIncome(user, amount, type, desc) {
 
     await Transaction.create({
         memberId: user.memberId,
-        type: 'CREDIT',
+        type: 'Credit',
+        category: type,
+        remark: desc,
         amount: mainAmount,
         status: 'COMPLETED',
         date: new Date()
-    }); // Logging main income (simplified)
+    }); // Logging main income
 
     await user.save();
     await checkAndTriggerRebirth(user);
@@ -184,7 +186,61 @@ async function updateRankStatus(sponsor) {
     // Complex logic for Platinum, Ruby, Crown would check downline stats
 }
 
+const MAX_CAPS = {
+    GOLD: 60000,
+    PLATINUM: 100000,
+    RUBY: 200000,
+    CROWN_DIAMOND: 400000
+};
+
+// Daily Pool Distribution (Cron Job)
+async function processDailyPools() {
+    for (const pool of ['GOLD', 'PLATINUM', 'RUBY', 'CROWN_DIAMOND']) {
+        const globalPool = await GlobalPool.findOne({ poolName: pool });
+        if (!globalPool || globalPool.totalFund <= 0) continue;
+
+        const queue = globalPool.activeQueue.slice(0, 10); // FIFO Top 10
+        if (queue.length === 0) continue;
+
+        const amountPerUser = globalPool.totalFund / queue.length;
+        
+        const membersToRemove = [];
+
+        for (const item of queue) {
+            const user = await User.findOne({ memberId: item.memberId });
+            if (user) {
+                // Ensure they don't exceed their cap
+                const earningField = pool.toLowerCase() + 'Earnings'; // e.g. 'goldEarnings'
+                let amountToGive = amountPerUser;
+
+                if (user[earningField] + amountToGive >= MAX_CAPS[pool]) {
+                    amountToGive = MAX_CAPS[pool] - user[earningField];
+                    membersToRemove.push(item.memberId);
+                }
+
+                if (amountToGive > 0) {
+                    user[earningField] += amountToGive;
+                    await user.save();
+                    await addIncome(user, amountToGive, 'ROYALTY', `${pool} Royalty Bonus`);
+                }
+            }
+        }
+
+        // Remove maxed-out users from the queue
+        if (membersToRemove.length > 0) {
+            globalPool.activeQueue = globalPool.activeQueue.filter(
+                q => !membersToRemove.includes(q.memberId)
+            );
+        }
+
+        // Reset the pool fund after distribution
+        globalPool.totalFund = 0;
+        await globalPool.save();
+    }
+}
+
 module.exports = {
     activateUser,
-    addIncome
+    addIncome,
+    processDailyPools
 };

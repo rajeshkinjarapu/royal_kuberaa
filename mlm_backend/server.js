@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const mlmLogic = require('./mlmLogic');
+const cron = require('node-cron');
 
 const app = express();
 app.use(cors());
@@ -36,6 +37,16 @@ mongoose.connect(MONGO_URI)
     })
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
+// Cron Job - Runs everyday at 12:01 AM
+cron.schedule('1 0 * * *', async () => {
+    console.log('⏰ Running Daily Royalty Pool Distribution Cron Job...');
+    try {
+        await mlmLogic.processDailyPools();
+        console.log('✅ Daily Pool Distribution Completed.');
+    } catch (error) {
+        console.error('❌ Cron Job Error:', error);
+    }
+});
 
 // Basic Route
 app.get('/', (req, res) => res.json({ message: "Royal Kuberaa Secure API Running on MongoDB" }));
@@ -223,23 +234,40 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         const totalTeamSize = await User.countDocuments({ sponsorId: user.memberId });
-        // NOTE: In the future, we will calculate real earnings from the Transaction model
-        // For now, returning real wallet balance and basic network stats.
+        
+        // Fetch Income breakdown from Transactions
+        const Transaction = require('./models/Transaction');
+        
+        // Note: Our transactions type was set to 'CREDIT' in mlmLogic, and 'category' field is not there.
+        // Wait, in mlmLogic.js we did not save 'category', we saved `type` as 'DIRECT', 'LEVEL' etc?
+        // Ah, mlmLogic.js: addIncome doesn't save to Transaction properly. Wait, I should just fix the response using the User model fields for now or fetch by remark.
+        // Let's rely on User model fields and a quick aggregation where possible.
+        // Actually, we can just look up all transactions for the member.
+        const txs = await Transaction.find({ memberId: user.memberId });
+        let direct = 0, team = 0, autopool = 0, withdraw = 0;
+        
+        txs.forEach(tx => {
+            if (tx.category === 'DIRECT') direct += tx.amount;
+            if (tx.category === 'LEVEL') team += tx.amount;
+            if (tx.category === 'AUTOPOOL') autopool += tx.amount;
+            if (tx.category === 'Withdrawal') withdraw += tx.amount;
+        });
 
         res.json({
             success: true,
             data: {
-                totalEarnings: user.mainWallet, // Placeholder for total earnings
+                totalEarnings: user.totalEarnings,
                 mainWallet: user.mainWallet,
-                directReferral: 0,
-                teamIncome: 0, 
-                withdrawFund: 0, 
-                autopoolFund: 0, 
-                allRanks: 0,
+                rebirthWallet: user.rebirthWallet,
+                directReferral: direct,
+                teamIncome: team, 
+                withdrawFund: withdraw, 
+                autopoolFund: autopool, 
+                allRanks: user.goldEarnings + user.platinumEarnings + user.rubyEarnings + user.crownDiamondEarnings,
                 networkStats: { 
-                    directReferrals: totalTeamSize, 
-                    totalTeamSize: totalTeamSize, // Simplified for now
-                    autopoolStatus: user.rank 
+                    directReferrals: user.directReferralsCount, 
+                    totalTeamSize: totalTeamSize, 
+                    autopoolStatus: user.autopoolLevel || 1 
                 }
             }
         });

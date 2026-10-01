@@ -528,6 +528,7 @@ function App() {
         { id: 5, title: 'Withdraw Fund', amount: dashboardData?.withdrawFund || 0, icon: '🔄', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e' },
         { id: 6, title: 'Autopool Fund', amount: dashboardData?.autopoolFund || 0, icon: '♾️', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8' },
         { id: 7, title: 'All Ranks', amount: dashboardData?.allRanks || 0, icon: '🏆', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309' },
+        { id: 8, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
       ];
 
     return (
