@@ -578,26 +578,45 @@ function App() {
 
   const renderWallets = () => (
     <CardWrapper>
-      <PageHeader title="Wallets & P2P" subtitle="Manage your funds and transfer to other members" />
-      <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
-         <div style={{ flex: 1, padding: '24px', background: '#0B1437', color: 'white', borderRadius: '16px' }}>
-            <h3 style={{ opacity: 0.8, fontSize: '14px' }}>Available Balance</h3>
-            <h1 style={{ fontSize: '36px', margin: '10px 0' }}>₹ {dummyWallets.balance.toLocaleString()}</h1>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-               <button style={{ flex: 1, padding: '10px', background: '#38bdf8', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Transfer (P2P)</button>
-               <button style={{ flex: 1, padding: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Deposit</button>
+      <PageHeader title="My Wallets" subtitle="Manage your funds, view balances, and transfer to other members" />
+      <div className="cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', marginBottom: '32px' }}>
+         <div style={{ padding: '24px', background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)', position: 'relative', overflow: 'hidden' }}>
+            <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Main Wallet</h3>
+            <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {dummyWallets.balance.toLocaleString()}</h1>
+            <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '100px', opacity: 0.1 }}>💳</div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+               <button style={{ flex: 1, padding: '12px', background: 'white', color: '#2563EB', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '800' }}>Transfer (P2P)</button>
+            </div>
+         </div>
+         <div style={{ padding: '24px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)', position: 'relative', overflow: 'hidden' }}>
+            <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Earnings Wallet</h3>
+            <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {(dummyWallets.balance * 0.4).toLocaleString()}</h1>
+            <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '100px', opacity: 0.1 }}>💰</div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+               <button style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>Withdraw</button>
+            </div>
+         </div>
+         <div style={{ padding: '24px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)', position: 'relative', overflow: 'hidden' }}>
+            <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Autopool Fund</h3>
+            <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {(dummyWallets.balance * 0.15).toLocaleString()}</h1>
+            <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '100px', opacity: 0.1 }}>♾️</div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+               <button style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>View Details</button>
             </div>
          </div>
       </div>
-      <h3 style={{ marginBottom: '15px' }}>Recent Transactions</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h3 style={{ margin: 0, fontSize: '18px', color: '#0F172A', fontWeight: '800' }}>Recent Transactions</h3>
+        <button style={{ background: '#F1F5F9', border: 'none', padding: '8px 16px', borderRadius: '8px', color: '#475569', fontWeight: '700', cursor: 'pointer' }}>View All</button>
+      </div>
       <Table headers={['TXN ID', 'Date', 'Remark', 'Amount']}>
         {dummyWallets.transactions.map(txn => (
-          <tr key={txn.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-            <td style={{ padding: '15px', fontWeight: '600' }}>{txn.id}</td>
-            <td style={{ padding: '15px', color: '#64748B' }}>{txn.date}</td>
-            <td style={{ padding: '15px' }}>{txn.remark}</td>
-            <td style={{ padding: '15px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: 'bold' }}>
-              {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount)}
+          <tr key={txn.id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s', cursor: 'default' }} onMouseEnter={e => e.currentTarget.style.background='#F8FAFC'} onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+            <td style={{ padding: '16px', fontWeight: '700', color: '#0F172A' }}>{txn.id}</td>
+            <td style={{ padding: '16px', color: '#64748B', fontSize: '14px', fontWeight: '600' }}>{txn.date}</td>
+            <td style={{ padding: '16px', color: '#334155', fontWeight: '500' }}>{txn.remark}</td>
+            <td style={{ padding: '16px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: '800', fontSize: '16px' }}>
+              {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount).toLocaleString()}
             </td>
           </tr>
         ))}
@@ -705,6 +724,7 @@ function App() {
        case 'Dashboard': return renderDashboard();
        case 'My Profile & KYC': return renderProfile();
        case 'Network & Tree': return renderNetwork();
+       case 'Wallets': 
        case 'Wallets & P2P': return renderWallets();
        case 'Withdrawal': return renderWithdrawal();
        case 'Manage Users': return renderManageUsers();
