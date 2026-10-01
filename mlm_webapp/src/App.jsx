@@ -329,13 +329,13 @@ function App() {
             </div>
             {/* App Store Buttons Placeholder */}
             {authView === 'login' && (
-               <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-                 <div style={{ background: '#111827', color: 'white', padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
-                    🍏 App Store
-                 </div>
-                 <div style={{ background: '#111827', color: 'white', padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
-                    ▶️ Google Play
-                 </div>
+               <div style={{ display: 'flex', gap: '16px', marginTop: '32px', justifyContent: 'flex-start' }}>
+                 <a href="#" style={{ display: 'inline-block', transition: 'transform 0.2s', ':hover': { transform: 'scale(1.05)' } }}>
+                   <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" style={{ height: '40px', cursor: 'pointer' }} />
+                 </a>
+                 <a href="#" style={{ display: 'inline-block', transition: 'transform 0.2s' }}>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" style={{ height: '40px', cursor: 'pointer' }} />
+                 </a>
                </div>
             )}
           </div>
