@@ -2,137 +2,180 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const User = require('./models/User');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// JSON File Database Setup (Requires NO installation, works 100% on VPS)
-const DB_FILE = path.join(__dirname, 'database.json');
+// MongoDB Connection
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/royalkuberaa';
+const JWT_SECRET = process.env.JWT_SECRET || 'royal_kuberaa_super_secret_key';
 
-const initDB = () => {
-    let db = { users: [] };
-    if (fs.existsSync(DB_FILE)) {
-        db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-    }
+mongoose.connect(MONGO_URI)
+    .then(async () => {
+        console.log('✅ Connected to MongoDB Database');
+        
+        // Initialize Default Admin if not exists
+        const adminExists = await User.findOne({ role: 'admin' });
+        if (!adminExists) {
+            const hashedAdminPassword = await bcrypt.hash('kallu0305', 10);
+            await User.create({
+                memberId: 'RK0305',
+                password: hashedAdminPassword,
+                name: 'Rajesh Kinjarapu',
+                mobile: '9999999999',
+                role: 'admin',
+                rank: 'OWNER'
+            });
+            console.log('✅ Default Admin User Created (RK0305)');
+        }
+    })
+    .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
-    // Force set the custom Admin
-    const adminIndex = db.users.findIndex(u => u.role === 'admin' || u.memberId === 'RK0305');
-    const adminUser = {
-        memberId: "RK0305",
-        password: "kallu0305",
-        name: "Rajesh Kinjarapu",
-        role: "admin",
-        rank: "OWNER",
-        walletBalance: 0,
-        joinDate: new Date().toISOString()
-    };
-
-    if (adminIndex >= 0) {
-        db.users[adminIndex].memberId = "RK0305";
-        db.users[adminIndex].password = "kallu0305";
-        db.users[adminIndex].name = "Rajesh Kinjarapu";
-        db.users[adminIndex].role = "admin";
-    } else {
-        db.users.push(adminUser);
-    }
-
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
-};
-initDB();
-
-const readDB = () => JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-const writeDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 
 // Basic Route
-app.get('/', (req, res) => res.json({ message: "Royal Kuberaa API Running" }));
+app.get('/', (req, res) => res.json({ message: "Royal Kuberaa Secure API Running" }));
 
 // --- Auth Routes ---
-app.post('/api/login', (req, res) => {
-    const { memberId, password } = req.body;
-    const db = readDB();
-    
-    // Check if user exists by memberId OR mobile
-    const user = db.users.find(u => u.memberId === memberId.toUpperCase() || u.mobile === memberId);
-    if (!user) return res.status(401).json({ success: false, message: 'Invalid Login ID! Account does not exist.' });
-    if (user.password !== password) return res.status(401).json({ success: false, message: 'Incorrect Password!' });
+app.post('/api/login', async (req, res) => {
+    try {
+        const { memberId, password } = req.body;
+        
+        // Find user by memberId or mobile
+        const user = await User.findOne({ 
+            $or: [{ memberId: memberId.toUpperCase() }, { mobile: memberId }] 
+        });
 
-    const token = jwt.sign({ memberId: user.memberId, role: user.role }, 'royal_kuberaa_secret', { expiresIn: '1d' });
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Invalid Login ID! Account does not exist.' });
+        }
 
-    res.json({
-        success: true,
-        token,
-        user: { name: user.name, memberId: user.memberId, role: user.role, rank: user.rank, walletBalance: user.walletBalance, sponsorId: user.sponsorId }
-    });
+        // Verify Password using bcrypt
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Incorrect Password!' });
+        }
+
+        // Generate JWT Token
+        const token = jwt.sign(
+            { id: user._id, memberId: user.memberId, role: user.role }, 
+            JWT_SECRET, 
+            { expiresIn: '1d' }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: { 
+                name: user.name, 
+                memberId: user.memberId, 
+                role: user.role, 
+                rank: user.rank, 
+                walletBalance: user.walletBalance, 
+                sponsorId: user.sponsorId 
+            }
+        });
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ success: false, message: "Server error during login" });
+    }
 });
 
 // --- Fetch Sponsor Name ---
-app.get('/api/sponsor/:id', (req, res) => {
-    const db = readDB();
-    const sponsor = db.users.find(u => u.memberId === req.params.id.toUpperCase());
-    if (sponsor) {
-        res.json({ success: true, name: sponsor.name });
-    } else {
-        res.status(404).json({ success: false, message: 'Sponsor not found' });
+app.get('/api/sponsor/:id', async (req, res) => {
+    try {
+        const sponsor = await User.findOne({ memberId: req.params.id.toUpperCase() });
+        if (sponsor) {
+            res.json({ success: true, name: sponsor.name });
+        } else {
+            res.status(404).json({ success: false, message: 'Sponsor not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error" });
     }
 });
 
-// --- Register Member Route (Saves to DB) ---
-app.post('/api/register', (req, res) => {
-    const { name, mobile, sponsorId, password } = req.body;
-    const db = readDB();
+// --- Register Member Route (Secure) ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const { name, mobile, sponsorId, password } = req.body;
 
-    // Validate Sponsor
-    const sponsor = db.users.find(u => u.memberId === sponsorId.toUpperCase());
-    if (!sponsor && sponsorId.toUpperCase() !== 'ADMIN') {
-        return res.status(400).json({ success: false, message: 'Invalid Sponsor ID!' });
+        // Check if mobile already exists
+        const existingMobile = await User.findOne({ mobile });
+        if (existingMobile) {
+            return res.status(400).json({ success: false, message: 'Mobile number already registered!' });
+        }
+
+        // Validate Sponsor
+        if (sponsorId.toUpperCase() !== 'ADMIN') {
+            const sponsor = await User.findOne({ memberId: sponsorId.toUpperCase() });
+            if (!sponsor) {
+                return res.status(400).json({ success: false, message: 'Invalid Sponsor ID!' });
+            }
+        }
+
+        // Generate Unique Member ID (RK + 5 random digits)
+        let newMemberId;
+        let isUnique = false;
+        while (!isUnique) {
+            newMemberId = 'RK' + Math.floor(10000 + Math.random() * 90000);
+            const exists = await User.findOne({ memberId: newMemberId });
+            if (!exists) isUnique = true;
+        }
+
+        // Hash Password before saving
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            memberId: newMemberId,
+            password: hashedPassword,
+            name,
+            mobile,
+            sponsorId: sponsorId.toUpperCase(),
+            role: "member",
+            rank: "STARTER",
+            walletBalance: 0
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Member Registered Successfully!', 
+            user: { memberId: newUser.memberId, name: newUser.name } 
+        });
+    } catch (error) {
+        console.error("Registration Error:", error);
+        res.status(500).json({ success: false, message: "Server error during registration" });
     }
-
-    // Generate Unique Member ID (RK + 5 random digits)
-    const generateId = () => 'RK' + Math.floor(10000 + Math.random() * 90000);
-    let newMemberId = generateId();
-    while (db.users.find(u => u.memberId === newMemberId)) {
-        newMemberId = generateId();
-    }
-
-    const newUser = {
-        memberId: newMemberId,
-        password: password,
-        name: name,
-        mobile: mobile,
-        sponsorId: sponsorId.toUpperCase(),
-        role: "member",
-        rank: "STARTER",
-        walletBalance: 0,
-        joinDate: new Date().toISOString()
-    };
-
-    db.users.push(newUser);
-    writeDB(db);
-
-    res.json({ success: true, message: 'Member Registered Successfully!', user: newUser });
 });
 
-// Dashboard Data Route
-app.get('/api/dashboard', (req, res) => {
-    const db = readDB();
+// Dashboard Data Route (Mocked for now, will connect to real logic later)
+app.get('/api/dashboard', async (req, res) => {
+    const userCount = await User.countDocuments();
     res.json({
         success: true,
         data: {
-            totalEarnings: 18500, mainWallet: 12500, directReferral: 4500,
-            teamIncome: 2500, withdrawFund: 600, autopoolFund: 8000, allRanks: 0,
-            networkStats: { directReferrals: 3, totalTeamSize: db.users.length, autopoolStatus: "Level 1" }
+            totalEarnings: 0, mainWallet: 0, directReferral: 0,
+            teamIncome: 0, withdrawFund: 0, autopoolFund: 0, allRanks: 0,
+            networkStats: { directReferrals: 0, totalTeamSize: userCount, autopoolStatus: "Level 1" }
         }
     });
 });
 
 // Admin Users List Route
-app.get('/api/admin/users', (req, res) => {
-    const db = readDB();
-    res.json({ success: true, data: db.users.map(u => ({ id: u.memberId, name: u.name, wallet: u.walletBalance, status: "Active" })) });
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const users = await User.find({}).select('-password');
+        res.json({ 
+            success: true, 
+            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.walletBalance, status: u.isActive ? "Active" : "Blocked" })) 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error" });
+    }
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Backend Server is running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Secure Backend Server is running on port ${PORT}`));
