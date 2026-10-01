@@ -711,6 +711,10 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid Transaction PIN (T-PIN)." });
         }
 
+        if (user.kycStatus !== 'Approved') {
+            return res.status(400).json({ success: false, message: "KYC must be Approved to make a withdrawal. Please update Bank Settings." });
+        }
+
         const SystemSetting = require('./models/SystemSetting');
         let settings = await SystemSetting.findOne();
         const minWithdrawal = settings ? settings.minimumWithdrawal : 500; // Updated to 500 based on rules
