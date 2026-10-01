@@ -363,7 +363,7 @@ function App() {
           <div className="login-content">
             <div className="login-header">
               <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" />
-              <h1 className="login-brand-name">Royal Kuberaa</h1>
+              {authView === 'login' && <h1 className="login-brand-name">Royal Kuberaa</h1>}
               {authView === 'register' && <h2 className="login-title" style={{ marginTop: '16px' }}>Create Account</h2>}
             </div>
             {authView === 'login' ? (
