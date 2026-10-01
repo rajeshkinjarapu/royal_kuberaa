@@ -483,21 +483,21 @@ function App() {
   // --- VIEWS ---
 
   const renderDashboard = () => {
-    const cards = userRole === 'admin' 
+      const cards = userRole === 'admin' 
       ? [
-        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', color: 'linear-gradient(135deg, #0EA5E9, #2563EB)' },
-        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰', color: 'linear-gradient(135deg, #10B981, #059669)' },
-        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', color: 'linear-gradient(135deg, #F43F5E, #E11D48)' },
-        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', color: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' },
+        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
+        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
+        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
+        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
       ]
       : [
-        { id: 1, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', color: 'linear-gradient(135deg, #0EA5E9, #3B82F6)' },
-        { id: 2, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', color: 'linear-gradient(135deg, #10B981, #059669)' },
-        { id: 3, title: 'Direct Referral', amount: dashboardData?.directReferral || 0, icon: '👤', color: 'linear-gradient(135deg, #F43F5E, #E11D48)' },
-        { id: 4, title: 'Team Income', amount: dashboardData?.teamIncome || 0, icon: '👥', color: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' },
-        { id: 5, title: 'Withdraw Fund', amount: dashboardData?.withdrawFund || 0, icon: '🔄', color: 'linear-gradient(135deg, #14B8A6, #0F766E)' },
-        { id: 6, title: 'Autopool Fund', amount: dashboardData?.autopoolFund || 0, icon: '♾️', color: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
-        { id: 7, title: 'All Ranks', amount: dashboardData?.allRanks || 0, icon: '🏆', color: 'linear-gradient(135deg, #F59E0B, #D97706)' },
+        { id: 1, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
+        { id: 2, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
+        { id: 3, title: 'Direct Referral', amount: dashboardData?.directReferral || 0, icon: '👤', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
+        { id: 4, title: 'Team Income', amount: dashboardData?.teamIncome || 0, icon: '👥', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
+        { id: 5, title: 'Withdraw Fund', amount: dashboardData?.withdrawFund || 0, icon: '🔄', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e' },
+        { id: 6, title: 'Autopool Fund', amount: dashboardData?.autopoolFund || 0, icon: '♾️', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8' },
+        { id: 7, title: 'All Ranks', amount: dashboardData?.allRanks || 0, icon: '🏆', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309' },
       ];
 
     return (
@@ -515,13 +515,13 @@ function App() {
         </div>
         <div className="cards-grid">
           {cards.map(card => (
-            <div key={card.id} className="vibrant-card metric-card">
+            <div key={card.id} className="vibrant-card metric-card" style={{ background: card.bg }}>
               <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <div className="card-icon" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', color: 'initial' }}>{card.icon}</div>
+                <div className="card-icon" style={{ background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>{card.icon}</div>
               </div>
               <div className="card-content">
-                <div className="card-title">{card.title.toUpperCase()}</div>
-                <div className="card-amount">{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+                <div className="card-title" style={{ color: card.color, fontWeight: '700', fontSize: '13px' }}>{card.title.toUpperCase()}</div>
+                <div className="card-amount" style={{ color: card.color, fontSize: '28px', fontWeight: '900' }}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
