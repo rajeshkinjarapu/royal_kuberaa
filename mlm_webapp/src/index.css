@@ -130,7 +130,7 @@ body {
 
 /* Topbar (Proper Header) */
 .topbar {
-  height: 80px;
+  height: 64px;
   background: #0B1437; /* Same as Sidebar */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
@@ -144,7 +144,7 @@ body {
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.5px;
   color: white;
@@ -159,8 +159,8 @@ body {
 .notification-btn {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -407,6 +407,49 @@ body {
   letter-spacing: -1px;
 }
 
+.metric-card {
+  background: #ffffff !important;
+  color: var(--text-dark) !important;
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metric-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+}
+
+.metric-card .card-header {
+  margin-bottom: 0;
+}
+
+.metric-card .card-icon {
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  color: white;
+}
+
+.metric-card .card-title {
+  color: var(--text-gray) !important;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.metric-card .card-amount {
+  color: var(--text-dark) !important;
+  font-size: 24px;
+}
+
 /* Network Activity List */
 .network-list {
   background: #FFFFFF;
@@ -499,12 +542,44 @@ body {
     padding: 0 20px 20px;
   }
   .user-banner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
+    flex-direction: row;
+    align-items: center;
+    padding: 20px 16px;
+    gap: 16px;
+    border-radius: 16px;
+  }
+  .user-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    box-shadow: 0 0 0 4px #F1F5F9;
+  }
+  .user-name {
+    font-size: 20px;
+  }
+  .welcome-text {
+    font-size: 11px;
   }
   .cards-grid {
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  .metric-card {
+    padding: 16px;
+  }
+  .metric-card .card-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  .metric-card .card-amount {
+    font-size: 18px;
+  }
+  .metric-card .card-title {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

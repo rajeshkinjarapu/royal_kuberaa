@@ -471,11 +471,13 @@ function App() {
         </div>
         <div className="cards-grid">
           {cards.map(card => (
-            <div key={card.id} className="vibrant-card" style={{ background: card.color, color: 'white' }}>
-              <div className="card-header"><div className="card-icon" style={{background:'rgba(255,255,255,0.2)', color: 'white'}}>{card.icon}</div></div>
+            <div key={card.id} className="vibrant-card metric-card">
+              <div className="card-header">
+                <div className="card-icon" style={{ background: card.color }}>{card.icon}</div>
+              </div>
               <div className="card-content">
-                <div className="card-title" style={{color: 'rgba(255,255,255,0.9)'}}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{color: 'white'}}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+                <div className="card-title">{card.title.toUpperCase()}</div>
+                <div className="card-amount">{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
@@ -627,6 +629,31 @@ function App() {
     </CardWrapper>
   );
 
+  const renderNotifications = () => (
+    <CardWrapper>
+      <PageHeader title="Notifications" subtitle="Recent updates and alerts" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {[
+          { id: 1, title: 'Payout Processed', desc: 'Your withdrawal request of ₹4,500 has been processed successfully.', time: '2 mins ago', icon: '💸', color: '#10B981' },
+          { id: 2, title: 'New Direct Referral', desc: 'Ramesh (RK98234) joined your direct downline.', time: '1 hour ago', icon: '👤', color: '#0EA5E9' },
+          { id: 3, title: 'Daily ROI Credited', desc: '₹500 has been credited to your Main Wallet.', time: '5 hours ago', icon: '💰', color: '#F59E0B' },
+          { id: 4, title: 'Rank Upgraded', desc: 'Congratulations! You have reached Silver rank.', time: '1 day ago', icon: '🏆', color: '#8B5CF6' },
+        ].map(n => (
+          <div key={n.id} style={{ display: 'flex', gap: '16px', padding: '16px', background: '#F8FAFC', borderRadius: '16px', alignItems: 'center' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: `${n.color}20`, color: n.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
+              {n.icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 4px 0', color: '#0F172A', fontSize: '15px' }}>{n.title}</h4>
+              <p style={{ margin: 0, color: '#64748B', fontSize: '13px' }}>{n.desc}</p>
+            </div>
+            <div style={{ color: '#94A3B8', fontSize: '12px', fontWeight: '600' }}>{n.time}</div>
+          </div>
+        ))}
+      </div>
+    </CardWrapper>
+  );
+
   const renderContent = () => {
     switch(activeMenu) {
        case 'Dashboard': return renderDashboard();
@@ -636,6 +663,7 @@ function App() {
        case 'Withdrawal': return renderWithdrawal();
        case 'Manage Users': return renderManageUsers();
        case 'Payout Approvals': return renderPayoutApprovals();
+       case 'Notifications': return renderNotifications();
        default: return renderGeneric();
     }
   };
@@ -682,7 +710,7 @@ function App() {
             <div className="page-title" style={{ color: 'white' }}>{activeMenu}</div>
           </div>
           <div className="topbar-actions">
-            <button className="notification-btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', width: '44px', height: '44px', borderRadius: '50%', cursor: 'pointer' }}>🔔</button>
+            <button className="notification-btn" onClick={() => { setActiveMenu('Notifications'); setSidebarOpen(false); }} style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', width: '44px', height: '44px', borderRadius: '50%', cursor: 'pointer' }}>🔔</button>
           </div>
         </header>
 
