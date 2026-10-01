@@ -79,7 +79,7 @@ app.post('/api/login', async (req, res) => {
                 memberId: user.memberId, 
                 role: user.role, 
                 rank: user.rank, 
-                walletBalance: user.walletBalance, 
+                mainWallet: user.mainWallet, 
                 sponsorId: user.sponsorId 
             }
         });
@@ -188,7 +188,7 @@ app.post('/api/register', async (req, res) => {
             sponsorId: sponsorId.toUpperCase(),
             role: "member",
             rank: "STARTER",
-            walletBalance: 0
+            mainWallet: 0
         });
 
         res.json({ 
@@ -229,8 +229,8 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         res.json({
             success: true,
             data: {
-                totalEarnings: user.walletBalance, // Placeholder for total earnings
-                mainWallet: user.walletBalance,
+                totalEarnings: user.mainWallet, // Placeholder for total earnings
+                mainWallet: user.mainWallet,
                 directReferral: 0,
                 teamIncome: 0, 
                 withdrawFund: 0, 
@@ -254,7 +254,7 @@ app.get('/api/admin/users', async (req, res) => {
         const users = await User.find({}).select('-password');
         res.json({ 
             success: true, 
-            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.walletBalance, status: u.isActive ? "Active" : "Blocked" })) 
+            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
@@ -281,7 +281,7 @@ app.post('/api/p2p-transfer', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: 'You cannot transfer funds to yourself.' });
         }
 
-        if (sender.walletBalance < transferAmount) {
+        if (sender.mainWallet < transferAmount) {
             return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
         }
 
@@ -291,11 +291,15 @@ app.post('/api/p2p-transfer', authMiddleware, async (req, res) => {
         }
 
         // Deduct from Sender
-        sender.walletBalance -= transferAmount;
+        sender.mainWallet -= transferAmount;
         await sender.save({ session });
 
+        // Apply 5% charge for P2P transfer
+        const transferCharge = transferAmount * 0.05;
+        const netAmount = transferAmount - transferCharge;
+
         // Add to Receiver
-        receiver.walletBalance += transferAmount;
+        receiver.mainWallet += netAmount;
         await receiver.save({ session });
 
         // Record Transactions
@@ -320,7 +324,7 @@ app.post('/api/p2p-transfer', authMiddleware, async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        res.json({ success: true, message: 'P2P Transfer Successful!', newBalance: sender.walletBalance });
+        res.json({ success: true, message: 'P2P Transfer Successful!', newBalance: sender.mainWallet });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
@@ -336,25 +340,25 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
         const withdrawAmount = Number(amount);
         const Withdrawal = require('./models/Withdrawal');
 
-        if (!withdrawAmount || withdrawAmount < 500) {
-            return res.status(400).json({ success: false, message: 'Minimum withdrawal amount is ₹500.' });
+        if (!withdrawAmount || withdrawAmount < 200) {
+            return res.status(400).json({ success: false, message: 'Minimum withdrawal amount is ₹200.' });
         }
 
         const user = await User.findById(req.user.id);
-        if (user.walletBalance < withdrawAmount) {
-            return res.status(400).json({ success: false, message: 'Insufficient wallet balance.' });
+        if (user.mainWallet < withdrawAmount) {
+            return res.status(400).json({ success: false, message: 'Insufficient main wallet balance.' });
         }
 
-        // Calculate Deductions
+        // Calculate Deductions (10% total charges)
         const tdsAmount = withdrawAmount * 0.05;
         const adminChargeAmount = withdrawAmount * 0.05;
         const netAmount = withdrawAmount - tdsAmount - adminChargeAmount;
 
         // Deduct from User Wallet
-        user.walletBalance -= withdrawAmount;
+        user.mainWallet -= withdrawAmount;
         await user.save();
 
-        // Record Withdrawal Request
+        // Record Withdrawal Request (Automatic Approval)
         await Withdrawal.create({
             userId: user._id,
             memberId: user.memberId,
@@ -362,7 +366,7 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
             tdsAmount,
             adminChargeAmount,
             netAmount,
-            status: 'Pending'
+            status: 'Approved'
         });
 
         // Also record a transaction debit for withdrawal request
@@ -376,7 +380,7 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
             remark: `Withdrawal request initiated (Net: ₹${netAmount})`
         });
 
-        res.json({ success: true, message: 'Withdrawal Request Submitted Successfully!', newBalance: user.walletBalance });
+        res.json({ success: true, message: 'Withdrawal Request Submitted Successfully!', newBalance: user.mainWallet });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error during withdrawal" });
     }
@@ -401,7 +405,7 @@ app.get('/api/admin/users', authMiddleware, async (req, res) => {
         const users = await User.find({}).select('-password').sort({ createdAt: -1 });
         res.json({ 
             success: true, 
-            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.walletBalance, status: u.isActive ? "Active" : "Blocked" })) 
+            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
@@ -460,7 +464,7 @@ app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
             // Refund the user
             const user = await User.findById(request.userId);
             if (user) {
-                user.walletBalance += request.grossAmount;
+                user.mainWallet += request.grossAmount;
                 await user.save();
 
                 const Transaction = require('./models/Transaction');
