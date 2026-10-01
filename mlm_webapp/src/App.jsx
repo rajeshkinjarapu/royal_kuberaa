@@ -263,8 +263,8 @@ function App() {
             <img src="https://img.freepik.com/free-vector/secure-login-concept-illustration_114360-4685.jpg" alt="Secure Login" />
           </div>
           <div className="login-content">
-            <div className="login-header">
-              <h3 style={{ color: '#6c28d9', fontSize: '16px', fontWeight: '800', marginBottom: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>Royal Kuberaa</h3>
+            <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px', boxShadow: '0 10px 25px rgba(108, 40, 217, 0.2)' }} />
               <h1 className="login-title">{authView === 'login' ? 'Hello,' : 'Welcome,'}</h1>
               <h1 className="login-title">{authView === 'login' ? 'Welcome back' : 'Create Account'}</h1>
             </div>
@@ -583,9 +583,9 @@ function App() {
   return (
     <div className="app-container">
       <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="brand-icon">K</div>
-          <div className="brand-title">Royal Kuberaa</div>
+        <div className="sidebar-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0 16px 0', gap: '12px' }}>
+          <img src="/royal-kuberaa-logo.jpg" alt="Logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }} />
+          <div className="brand-title" style={{ fontSize: '22px' }}>Royal Kuberaa</div>
         </div>
         <div className="sidebar-menu">
           {activeMenuItems.map((item, index) => {
