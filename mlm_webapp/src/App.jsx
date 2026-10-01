@@ -363,9 +363,8 @@ function App() {
           <div className="login-content">
             <div className="login-header">
               <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" />
-              <h3 className="login-brand-name">Royal Kuberaa</h3>
-              <h1 className="login-title">{authView === 'login' ? 'Hello,' : 'Welcome,'}</h1>
-              <h1 className="login-title">{authView === 'login' ? 'Welcome back' : 'Create Account'}</h1>
+              <h1 className="login-brand-name">Royal Kuberaa</h1>
+              {authView === 'register' && <h2 className="login-title" style={{ marginTop: '16px' }}>Create Account</h2>}
             </div>
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
