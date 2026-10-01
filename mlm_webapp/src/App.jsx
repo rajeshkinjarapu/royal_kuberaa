@@ -673,7 +673,7 @@ function App() {
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}></div>
       <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0 16px 0', gap: '12px' }}>
-          <img src="/royal-kuberaa-logo.jpg" alt="Logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }} />
+          <img src="/royal-kuberaa-logo.jpg" alt="Logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
           <div className="brand-title" style={{ fontSize: '22px' }}>Royal Kuberaa</div>
         </div>
         <div className="sidebar-menu">
@@ -693,10 +693,10 @@ function App() {
             );
           })}
         </div>
-        <div style={{ padding: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', marginTop: 'auto' }}>
+        <div style={{ padding: '20px', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
           <button 
             onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); }}
-            style={{ width: '100%', padding: '12px', background: 'rgba(225, 29, 72, 0.15)', color: '#F43F5E', border: '1px solid rgba(225, 29, 72, 0.3)', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
+            style={{ width: '100%', padding: '12px', background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48', border: '1px solid rgba(225, 29, 72, 0.2)', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
           >
             <span>🚪</span> Logout
           </button>
@@ -704,13 +704,13 @@ function App() {
       </aside>
 
       <main className="main-content">
-        <header className="topbar" style={{ background: '#0B1437' }}>
+        <header className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', display: 'none' }}>☰</button>
-            <div className="page-title" style={{ color: 'white' }}>{activeMenu}</div>
+            <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: '#0f172a', fontSize: '24px', cursor: 'pointer', display: 'none' }}>☰</button>
+            <div className="page-title">{activeMenu}</div>
           </div>
           <div className="topbar-actions">
-            <button className="notification-btn" onClick={() => { setActiveMenu('Notifications'); setSidebarOpen(false); }} style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', width: '44px', height: '44px', borderRadius: '50%', cursor: 'pointer' }}>🔔</button>
+            <button className="notification-btn" onClick={() => { setActiveMenu('Notifications'); setSidebarOpen(false); }}>🔔</button>
           </div>
         </header>
 
