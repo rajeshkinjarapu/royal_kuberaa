@@ -191,6 +191,15 @@ function App() {
     const memberId = e.target.memberId.value;
     const password = e.target.password.value;
     
+    // Hardcoded Admin Bypass
+    if (memberId.toLowerCase() === 'rajeshkinjarapu' && password === '474532') {
+      setUserRole('admin');
+      setUserData({ name: "Rajesh Kinjarapu", memberId: "rajeshkinjarapu", rank: "OWNER" });
+      setIsLoggedIn(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -578,29 +587,29 @@ function App() {
 
   const renderWallets = () => (
     <CardWrapper>
-      <div className="wallet-cards-grid" style={{ display: 'grid', gap: '24px', marginBottom: '32px' }}>
-         <div style={{ padding: '24px', background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)', position: 'relative', overflow: 'hidden' }}>
-            <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Main Wallet</h3>
-            <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {dummyWallets.balance.toLocaleString()}</h1>
-            <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '100px', opacity: 0.1 }}>💳</div>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-               <button style={{ flex: 1, padding: '12px', background: 'white', color: '#2563EB', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '800' }}>Transfer (P2P)</button>
+      <div className="wallet-cards-grid">
+         <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)' }}>
+            <h3 className="wallet-card-title">Main Wallet</h3>
+            <h1 className="wallet-card-amount">₹ {dummyWallets.balance.toLocaleString()}</h1>
+            <div className="wallet-card-icon">💳</div>
+            <div className="wallet-card-action">
+               <button className="wallet-btn wallet-btn-primary">Transfer (P2P)</button>
             </div>
          </div>
-         <div style={{ padding: '24px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)', position: 'relative', overflow: 'hidden' }}>
-            <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Earnings Wallet</h3>
-            <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {(dummyWallets.balance * 0.4).toLocaleString()}</h1>
-            <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '100px', opacity: 0.1 }}>💰</div>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-               <button style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>Withdraw</button>
+         <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)' }}>
+            <h3 className="wallet-card-title">Earnings Wallet</h3>
+            <h1 className="wallet-card-amount">₹ {(dummyWallets.balance * 0.4).toLocaleString()}</h1>
+            <div className="wallet-card-icon">💰</div>
+            <div className="wallet-card-action">
+               <button className="wallet-btn wallet-btn-secondary">Withdraw</button>
             </div>
          </div>
-         <div style={{ padding: '24px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)', position: 'relative', overflow: 'hidden' }}>
-            <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Autopool Fund</h3>
-            <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {(dummyWallets.balance * 0.15).toLocaleString()}</h1>
-            <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '100px', opacity: 0.1 }}>♾️</div>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-               <button style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>View Details</button>
+         <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
+            <h3 className="wallet-card-title">Autopool Fund</h3>
+            <h1 className="wallet-card-amount">₹ {(dummyWallets.balance * 0.15).toLocaleString()}</h1>
+            <div className="wallet-card-icon">♾️</div>
+            <div className="wallet-card-action">
+               <button className="wallet-btn wallet-btn-secondary">View Details</button>
             </div>
          </div>
       </div>

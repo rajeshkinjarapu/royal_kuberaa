@@ -337,6 +337,59 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Wallet Card Base */
+.wallet-card {
+  padding: 24px;
+  color: white;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.wallet-card-title {
+  opacity: 0.9;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.wallet-card-amount {
+  font-size: 36px;
+  font-weight: 900;
+  margin: 0;
+}
+.wallet-card-icon {
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  font-size: 100px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+.wallet-card-action {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.wallet-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 14px;
+  text-align: center;
+}
+.wallet-btn-primary {
+  background: white;
+  color: #2563EB;
+}
+.wallet-btn-secondary {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.4);
 }
 
 /* Premium Vibrant Card (Glassmorphism + Gradients) */
@@ -602,6 +655,27 @@ body {
   .wallet-cards-grid {
     grid-template-columns: 1fr !important;
     gap: 16px;
+  }
+  .wallet-card {
+    padding: 20px;
+  }
+  .wallet-card-title {
+    font-size: 13px;
+  }
+  .wallet-card-amount {
+    font-size: 30px;
+  }
+  .wallet-card-icon {
+    font-size: 80px;
+    right: -15px;
+    top: -15px;
+  }
+  .wallet-card-action {
+    margin-top: 20px;
+  }
+  .wallet-btn {
+    padding: 10px;
+    font-size: 13px;
   }
   .metric-card {
     padding: 12px;
