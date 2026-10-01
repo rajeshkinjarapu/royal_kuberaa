@@ -187,25 +187,28 @@ function App() {
       return (
         <div className="login-wrapper">
           <div className="login-container">
-             <div className="login-card" style={{ textAlign: 'center', padding: '40px 30px' }}>
-                <div style={{ fontSize: '56px', marginBottom: '20px' }}>🎉</div>
-                <h2 style={{ color: '#0F172A', marginBottom: '12px', fontWeight: 'bold' }}>Registration Successful!</h2>
-                <p style={{ color: '#64748B', marginBottom: '24px', lineHeight: '1.5' }}>Welcome to Royal Kuberaa. Your account has been created successfully.</p>
-                
-                <div style={{ background: '#F0F9FF', border: '2px dashed #38BDF8', borderRadius: '12px', padding: '24px', marginBottom: '30px' }}>
-                  <p style={{ color: '#0284C7', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: 'bold' }}>Your Login ID</p>
-                  <h1 style={{ color: '#0EA5E9', fontSize: '36px', fontWeight: '900', margin: 0, letterSpacing: '3px' }}>{registeredMemberId}</h1>
-                  <p style={{ color: '#EF4444', fontSize: '13px', marginTop: '16px', fontWeight: 'bold' }}>⚠️ Please copy and save this ID safely!</p>
-                </div>
+            <div className="login-illustration">
+              <img src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg" alt="Login" />
+            </div>
+            <div className="login-content" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '56px', marginBottom: '16px', animation: 'floatUp 1s ease-out' }}>🎉</div>
+              <h2 className="login-title">Registration Successful!</h2>
+              <p className="login-subtitle" style={{ marginBottom: '24px' }}>Welcome to Royal Kuberaa. Your account has been created.</p>
+              
+              <div style={{ background: '#f8faff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '32px' }}>
+                <p style={{ color: '#6c28d9', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: '700' }}>Your Login ID</p>
+                <h1 style={{ color: '#1e1b4b', fontSize: '32px', fontWeight: '900', margin: 0, letterSpacing: '2px' }}>{registeredMemberId}</h1>
+                <p style={{ color: '#f43f5e', fontSize: '13px', marginTop: '12px', fontWeight: '600' }}>⚠️ Please copy and save this ID safely!</p>
+              </div>
 
-                <button 
-                  onClick={() => { setRegisteredMemberId(null); setAuthView('login'); }}
-                  className="login-submit-btn" 
-                  style={{ width: '100%', padding: '14px', fontSize: '16px' }}
-                >
-                  Proceed to Login
-                </button>
-             </div>
+              <button 
+                onClick={() => { setRegisteredMemberId(null); setAuthView('login'); }}
+                className="login-submit-btn" 
+                style={{ width: '100%' }}
+              >
+                Proceed to Login
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -214,83 +217,59 @@ function App() {
     return (
       <div className="login-wrapper">
         <div className="login-container">
-          <div className="login-card">
+          <div className="login-illustration">
+            <img src="https://img.freepik.com/free-vector/secure-login-concept-illustration_114360-4685.jpg" alt="Secure Login" />
+          </div>
+          <div className="login-content">
             <div className="login-header">
-              <div className="brand-logo-large">K</div>
-              <h1 className="login-title">Royal Kuberaa</h1>
-              <p className="login-subtitle">
-                {authView === 'login' ? 'Welcome back! Please login to your account.' : 'Create a new account to join the network.'}
-              </p>
+              <h1 className="login-title">{authView === 'login' ? 'Hello,' : 'Welcome,'}</h1>
+              <h1 className="login-title">{authView === 'login' ? 'Welcome back' : 'Create Account'}</h1>
             </div>
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
                 <div className="form-group">
-                  <label className="form-label">User ID / Mobile No</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">👤</span>
-                    <input type="text" name="memberId" className="form-input" placeholder="Enter ID or Mobile" required />
-                  </div>
+                  <input type="text" name="memberId" className="form-input" placeholder="User ID or Mobile No" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🔒</span>
-                    <input type="password" name="password" className="form-input" placeholder="Enter password" required />
-                  </div>
+                  <input type="password" name="password" className="form-input" placeholder="Password" required />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '24px' }}>
-                   <label style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input type="checkbox" /> Remember me
+                <div className="form-options">
+                   <label className="remember-me">
+                      <input type="checkbox" style={{ accentColor: '#5b21b6' }} /> Remember me
                    </label>
-                   <span style={{ color: '#0EA5E9', cursor: 'pointer', fontWeight: 'bold' }}>Forgot Password?</span>
+                   <span className="forgot-password">Forgot password?</span>
                 </div>
                 {errorMsg && (
-                  <div style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '10px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', textAlign: 'center', fontWeight: 'bold' }}>
-                    ❌ {errorMsg}
+                  <div style={{ color: '#e11d48', fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
+                    {errorMsg}
                   </div>
                 )}
                 <button type="submit" className="login-submit-btn" disabled={loading}>
-                  {loading ? 'Authenticating...' : 'Secure Login'}
+                  {loading ? 'Authenticating...' : 'Login'}
                 </button>
               </form>
             ) : (
               <form className="login-form" onSubmit={handleRegister}>
                 <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">📝</span>
-                    <input type="text" name="name" className="form-input" placeholder="Enter full name" required />
-                  </div>
+                  <input type="text" name="name" className="form-input" placeholder="Full Name" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Mobile Number</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">📱</span>
-                    <input type="tel" name="mobile" className="form-input" placeholder="Enter mobile number" required pattern="[0-9]{10}" maxLength="10" />
-                  </div>
+                  <input type="tel" name="mobile" className="form-input" placeholder="Mobile Number" required pattern="[0-9]{10}" maxLength="10" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Sponsor ID</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🤝</span>
-                    <input type="text" name="sponsorId" className="form-input" placeholder="Enter Sponsor ID" required onBlur={handleSponsorCheck} />
-                  </div>
+                  <input type="text" name="sponsorId" className="form-input" placeholder="Sponsor ID" required onBlur={handleSponsorCheck} />
                   {sponsorName && (
-                    <div style={{ marginTop: '8px', fontSize: '13px', fontWeight: 'bold', color: sponsorName === 'Invalid Sponsor ID' || sponsorName === 'Network Error' ? '#EF4444' : '#10B981' }}>
-                      {checkingSponsor ? 'Checking...' : (sponsorName !== 'Invalid Sponsor ID' && sponsorName !== 'Network Error' ? `✅ Sponsor: ${sponsorName}` : `❌ ${sponsorName}`)}
+                    <div style={{ marginTop: '6px', fontSize: '13px', fontWeight: '600', color: sponsorName === 'Invalid Sponsor ID' || sponsorName === 'Network Error' ? '#e11d48' : '#10b981' }}>
+                      {checkingSponsor ? 'Checking...' : (sponsorName !== 'Invalid Sponsor ID' && sponsorName !== 'Network Error' ? `✓ Sponsor: ${sponsorName}` : `✕ ${sponsorName}`)}
                     </div>
                   )}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Password (6 Digits)</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🔒</span>
-                    <input type="password" name="password" className="form-input" placeholder="Enter 6 digit password" required pattern="[0-9]{6}" maxLength="6" inputMode="numeric" />
-                  </div>
+                  <input type="password" name="password" className="form-input" placeholder="Password (6 Digits)" required pattern="[0-9]{6}" maxLength="6" inputMode="numeric" />
                 </div>
                 {errorMsg && (
-                  <div style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '10px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', textAlign: 'center', fontWeight: 'bold' }}>
-                    ❌ {errorMsg}
+                  <div style={{ color: '#e11d48', fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
+                    {errorMsg}
                   </div>
                 )}
                 <button type="submit" className="login-submit-btn" disabled={loading || sponsorName === 'Invalid Sponsor ID'}>
@@ -298,13 +277,24 @@ function App() {
                 </button>
               </form>
             )}
-            <div className="login-footer" style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px', color: '#64748B' }}>
+            <div className="login-footer">
                {authView === 'login' ? (
-                 <>Don't have an account? <span style={{ color: '#0EA5E9', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setAuthView('register')}>Register here</span></>
+                 <>Don't have an account? <span onClick={() => setAuthView('register')}>Click here</span></>
                ) : (
-                 <>Already have an account? <span style={{ color: '#0EA5E9', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => setAuthView('login')}>Login here</span></>
+                 <>Already have an account? <span onClick={() => setAuthView('login')}>Click here</span></>
                )}
             </div>
+            {/* App Store Buttons Placeholder */}
+            {authView === 'login' && (
+               <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+                 <div style={{ background: '#111827', color: 'white', padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                    🍏 App Store
+                 </div>
+                 <div style={{ background: '#111827', color: 'white', padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                    ▶️ Google Play
+                 </div>
+               </div>
+            )}
           </div>
         </div>
       </div>
