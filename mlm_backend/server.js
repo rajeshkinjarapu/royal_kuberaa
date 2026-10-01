@@ -1115,5 +1115,62 @@ app.post('/api/admin/settings', authMiddleware, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "Error saving settings" }); }
 });
 
+// --- Fund Requests API ---
+app.post('/api/fund-request', authMiddleware, async (req, res) => {
+    try {
+        const { amount, utrNumber } = req.body;
+        if (!amount || amount < 100) return res.status(400).json({ success: false, message: "Minimum deposit is ₹100" });
+        if (!utrNumber) return res.status(400).json({ success: false, message: "UTR Number is required" });
+        
+        const FundRequest = require('./models/FundRequest');
+        await FundRequest.create({
+            userId: req.user.id,
+            memberId: req.user.memberId,
+            amount: Number(amount),
+            utrNumber,
+            status: 'Pending'
+        });
+        res.json({ success: true, message: "Fund request submitted successfully! Pending admin approval." });
+    } catch (err) { res.status(500).json({ success: false, message: "Error submitting request" }); }
+});
+
+app.get('/api/admin/fund-requests', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const FundRequest = require('./models/FundRequest');
+        const requests = await FundRequest.find({ status: 'Pending' }).sort({ requestDate: -1 });
+        res.json({ success: true, data: requests });
+    } catch (err) { res.status(500).json({ success: false, message: "Error fetching fund requests" }); }
+});
+
+app.post('/api/admin/fund-requests/:id', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { action } = req.body;
+        const FundRequest = require('./models/FundRequest');
+        const User = require('./models/User');
+        
+        const request = await FundRequest.findById(req.params.id);
+        if(!request) return res.status(404).json({ success: false, message: "Request not found" });
+        if(request.status !== 'Pending') return res.status(400).json({ success: false, message: "Request already processed" });
+        
+        if (action === 'approve') {
+            request.status = 'Approved';
+            request.processDate = new Date();
+            await request.save();
+            
+            await User.findByIdAndUpdate(request.userId, {
+                $inc: { mainWallet: request.amount }
+            });
+            return res.json({ success: true, message: `₹${request.amount} approved and added to ${request.memberId}'s wallet.` });
+        } else {
+            request.status = 'Rejected';
+            request.processDate = new Date();
+            await request.save();
+            return res.json({ success: true, message: "Fund request rejected." });
+        }
+    } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error processing request" }); }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Secure Backend Server is running on port ${PORT}`));
