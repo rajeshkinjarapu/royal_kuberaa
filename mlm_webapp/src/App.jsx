@@ -60,7 +60,19 @@ const PinInput = ({ name }) => {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
+    const loginTime = localStorage.getItem('loginTime');
+    const isLogged = localStorage.getItem('isLoggedIn') === 'true';
+    if (isLogged && loginTime) {
+      const now = Date.now();
+      const diff = now - parseInt(loginTime, 10);
+      const hours24 = 24 * 60 * 60 * 1000;
+      if (diff > hours24) {
+        localStorage.clear();
+        return false;
+      }
+      return true;
+    }
+    return false;
   });
   const [authView, setAuthView] = useState('login'); 
   const [userRole, setUserRole] = useState(() => {
@@ -85,6 +97,12 @@ function App() {
   useEffect(() => {
     localStorage.setItem('isLoggedIn', isLoggedIn);
     localStorage.setItem('userRole', userRole);
+    if (isLoggedIn && !localStorage.getItem('loginTime')) {
+      localStorage.setItem('loginTime', Date.now().toString());
+    }
+    if (!isLoggedIn) {
+      localStorage.removeItem('loginTime');
+    }
     if (userData) {
       localStorage.setItem('userData', JSON.stringify(userData));
     } else {
