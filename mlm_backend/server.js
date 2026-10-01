@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
+const mlmLogic = require('./mlmLogic');
 
 const app = express();
 app.use(cors());
@@ -85,6 +86,52 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error("Login Error:", error);
         res.status(500).json({ success: false, message: "Server error during login" });
+    }
+});
+
+// --- Register / Activate Route ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const { memberId, name, mobile, password, sponsorId } = req.body;
+        
+        // Validation
+        if (!memberId || !name || !mobile || !password) {
+            return res.status(400).json({ success: false, message: 'All fields are required.' });
+        }
+
+        const existingUser = await User.findOne({ $or: [{ memberId: memberId.toUpperCase() }, { mobile }] });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'Member ID or Mobile already exists.' });
+        }
+
+        let sponsor = null;
+        if (sponsorId) {
+            sponsor = await User.findOne({ memberId: sponsorId.toUpperCase() });
+            if (!sponsor) {
+                return res.status(400).json({ success: false, message: 'Invalid Sponsor ID.' });
+            }
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const newUser = new User({
+            memberId: memberId.toUpperCase(),
+            name,
+            mobile,
+            password: hashedPassword,
+            sponsorId: sponsor ? sponsor.memberId : null,
+            role: 'member'
+        });
+
+        await newUser.save();
+
+        // Trigger the MLM core logic for 1000 Rs distribution
+        await mlmLogic.activateUser(newUser, sponsor);
+
+        res.status(201).json({ success: true, message: 'Registration successful! Rs 1000 distributed correctly.', user: newUser });
+    } catch (error) {
+        console.error("Register Error:", error);
+        res.status(500).json({ success: false, message: "Server error during registration" });
     }
 });
 

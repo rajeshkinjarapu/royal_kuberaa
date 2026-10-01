@@ -515,7 +515,7 @@ function App() {
   const renderDashboard = () => {
       const cards = userRole === 'admin' 
       ? [
-        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
+        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: 'A', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
         { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
         { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
         { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
@@ -532,26 +532,28 @@ function App() {
 
     return (
       <>
-        <div className="user-banner">
-          <div className="user-avatar">{userRole === 'admin' ? '👑' : userData?.name?.charAt(0)}</div>
+        <div className="user-banner" style={{ background: userRole === 'admin' ? 'linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%)' : 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', border: '1px solid #bae6fd' }}>
+          <div className="user-avatar" style={{ width: '60px', height: '60px', background: '#0284C7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: '#fff', flexShrink: 0, boxShadow: '0 4px 10px rgba(2,132,199,0.3)' }}>
+             {userRole === 'admin' ? '👑' : userData?.name?.charAt(0)}
+          </div>
           <div className="user-info-text">
-            <span className="welcome-text">{userRole === 'admin' ? 'ADMINISTRATOR' : 'Welcome Back'}</span>
-            <h2 className="user-name">{userData?.name}</h2>
-            <div className="badges">
-              <span className="badge badge-gold">{userData?.rank}</span>
-              <span className="badge badge-id">ID: {userData?.memberId}</span>
+            <span className="welcome-text" style={{ fontSize: '11px', fontWeight: '700', color: '#0284C7', letterSpacing: '0.5px' }}>{userRole === 'admin' ? 'ADMINISTRATOR' : 'WELCOME'}</span>
+            <h2 className="user-name" style={{ margin: '2px 0 6px 0', fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>{userData?.name}</h2>
+            <div className="badges" style={{ display: 'flex', gap: '8px' }}>
+              <span className="badge badge-gold" style={{ background: '#FEF3C7', color: '#D97706', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', border: '1px solid #FDE68A' }}>{userData?.rank}</span>
+              <span className="badge badge-id" style={{ background: '#E0F2FE', color: '#0284C7', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', border: '1px solid #BAE6FD' }}>ID: {userData?.memberId}</span>
             </div>
           </div>
         </div>
-        <div className="cards-grid">
+        <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
           {cards.map(card => (
-            <div key={card.id} className="vibrant-card metric-card" style={{ background: card.bg }}>
-              <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <div className="card-icon" style={{ background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>{card.icon}</div>
+            <div key={card.id} className="vibrant-card metric-card" style={{ background: card.bg, borderRadius: '16px', padding: '24px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                 <div className="card-icon" style={{ width: '40px', height: '40px', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '20px' }}>{card.icon}</div>
               </div>
               <div className="card-content">
-                <div className="card-title" style={{ color: card.color, fontWeight: '600', fontSize: '13px', opacity: 0.8, marginBottom: '4px' }}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{ color: card.color, fontSize: '24px', fontWeight: '800' }}>{userRole==='admin'&&card.id===1?'':'₹'} {card.amount.toLocaleString()}</div>
+                <div className="card-title" style={{ color: '#64748B', fontWeight: '700', fontSize: '12px', letterSpacing: '0.5px', marginBottom: '8px' }}>{card.title.toUpperCase()}</div>
+                <div className="card-amount" style={{ color: '#0F172A', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'':'₹ '} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
@@ -944,6 +946,73 @@ function App() {
     </div>
   );
 
+  const renderFundRequests = () => (
+    <CardWrapper>
+      <PageHeader title="Fund Requests" subtitle="Approve or reject member deposit requests" />
+      <Table headers={['Req ID', 'Member', 'Amount', 'Date', 'Status', 'Action']}>
+        <tr><td colSpan="6" style={{ padding: '16px', textAlign: 'center' }}>No pending fund requests.</td></tr>
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderAutoPoolSettings = () => (
+    <CardWrapper>
+      <PageHeader title="AutoPool Settings" subtitle="Configure pool entry amounts and levels" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {['Starter', 'Silver', 'Gold', 'Platinum'].map(pool => (
+          <div key={pool} style={{ padding: '20px', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
+             <h4 style={{ marginBottom: '12px' }}>{pool} Pool</h4>
+             <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>Entry Fee (₹)</label>
+             <input type="number" defaultValue="500" style={{ width: '100%', padding: '10px', border: '1px solid #CBD5E1', borderRadius: '6px', marginBottom: '12px' }} />
+             <button style={{ width: '100%', padding: '10px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '6px' }}>Save</button>
+          </div>
+        ))}
+      </div>
+    </CardWrapper>
+  );
+
+  const renderKYCApprovals = () => (
+    <CardWrapper>
+      <PageHeader title="KYC Approvals" subtitle="Verify PAN and Bank details" />
+      <Table headers={['Member ID', 'Name', 'Document Type', 'Status', 'Action']}>
+        <tr><td colSpan="5" style={{ padding: '16px', textAlign: 'center' }}>No pending KYC documents.</td></tr>
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderSupportTickets = () => (
+    <CardWrapper>
+      <PageHeader title="Support Tickets" subtitle="Respond to member queries" />
+      <Table headers={['Ticket ID', 'Member', 'Subject', 'Status', 'Action']}>
+        <tr><td colSpan="5" style={{ padding: '16px', textAlign: 'center' }}>No open support tickets.</td></tr>
+      </Table>
+    </CardWrapper>
+  );
+
+  const renderSystemSettings = () => (
+    <CardWrapper>
+      <PageHeader title="System Settings" subtitle="Manage global application settings" />
+      <div style={{ maxWidth: '600px' }}>
+         <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Website Name</label>
+            <input type="text" defaultValue="Royal Kuberaa" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+         </div>
+         <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Maintenance Mode</label>
+            <select style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
+               <option>Disabled (Site Live)</option>
+               <option>Enabled (Under Maintenance)</option>
+            </select>
+         </div>
+         <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Admin TDS Deduction (%)</label>
+            <input type="number" defaultValue="5" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+         </div>
+         <button style={{ padding: '12px 24px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>Save Settings</button>
+      </div>
+    </CardWrapper>
+  );
+
   const renderComingSoon = (moduleName) => (
     <CardWrapper>
       <PageHeader title={moduleName} subtitle="Coming Soon" />
@@ -973,30 +1042,64 @@ function App() {
     </CardWrapper>
   );
 
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+    const mobile = e.target.mobile.value;
+    const password = e.target.password.value;
+    const btn = e.target.submitBtn;
+    
+    btn.disabled = true;
+    btn.innerText = 'Registering...';
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: `RK${Math.floor(Math.random() * 90000) + 10000}`, // Generating random ID
+          name,
+          mobile,
+          password,
+          sponsorId: userData?.memberId
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Member Registered Successfully! ID: ' + data.user.memberId);
+        e.target.reset();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    } catch (err) {
+      alert('Network Error');
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'Register Member';
+    }
+  };
+
   const renderAddMember = () => (
     <CardWrapper>
       <PageHeader title="Add New Member" subtitle="Register a new member in your downline" />
-      <form style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <form onSubmit={handleAddMember} style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Sponsor ID</label>
           <input type="text" className="form-input" value={userData?.memberId} readOnly style={{ background: '#F1F5F9' }} />
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Full Name</label>
-          <input type="text" className="form-input" placeholder="Enter member name" />
+          <input type="text" name="name" className="form-input" placeholder="Enter member name" required />
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Mobile Number</label>
-          <input type="tel" className="form-input" placeholder="10-digit mobile number" />
+          <input type="tel" name="mobile" className="form-input" placeholder="10-digit mobile number" required />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Select Position</label>
-          <select className="form-input">
-            <option>Left</option>
-            <option>Right</option>
-          </select>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Password</label>
+          <input type="password" name="password" className="form-input" placeholder="Set password" required />
         </div>
-        <button type="button" className="login-submit-btn">Register Member</button>
+        <button type="submit" name="submitBtn" className="login-submit-btn">Register Member</button>
       </form>
     </CardWrapper>
   );
@@ -1018,6 +1121,11 @@ function App() {
        case 'Notifications': return renderNotifications();
        case 'AutoPool Matrix': return renderAutoPool();
        case 'Add Member': return renderAddMember();
+       case 'Fund Requests': return renderFundRequests();
+       case 'AutoPool Settings': return renderAutoPoolSettings();
+       case 'KYC Approvals': return renderKYCApprovals();
+       case 'Support Tickets': return renderSupportTickets();
+       case 'System Settings': return renderSystemSettings();
        case 'Rank Income':
        case 'Rebirth ID':
        case 'Products':
@@ -1027,11 +1135,6 @@ function App() {
        case 'Transaction PIN':
        case 'Change Password':
        case 'Support':
-       case 'Fund Requests':
-       case 'AutoPool Settings':
-       case 'KYC Approvals':
-       case 'Support Tickets':
-       case 'System Settings':
        case 'About Us':
        case 'Terms & Conditions':
        case 'Privacy Policy':

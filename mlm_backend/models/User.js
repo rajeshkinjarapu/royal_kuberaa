@@ -15,13 +15,12 @@ const UserSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        required: true,
-        unique: true,
+        required: false, // Not required for rebirth IDs
         trim: true
     },
     password: {
         type: String,
-        required: true
+        required: false // Not required for rebirth IDs
     },
     sponsorId: {
         type: String,
@@ -33,14 +32,37 @@ const UserSchema = new mongoose.Schema({
         enum: ['admin', 'member'],
         default: 'member'
     },
-    rank: {
-        type: String,
-        default: 'STARTER'
-    },
-    walletBalance: {
-        type: Number,
-        default: 0
-    },
+    
+    // Wallet System
+    mainWallet: { type: Number, default: 0 },
+    rebirthWallet: { type: Number, default: 0 },
+    totalEarnings: { type: Number, default: 0 },
+
+    // Rebirth ID Logic
+    isRebirth: { type: Boolean, default: false },
+    mainUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    rebirthCount: { type: Number, default: 0 }, // Tracks how many rebirth IDs this main user generated
+
+    // Directs & Network
+    directReferralsCount: { type: Number, default: 0 },
+    directs: [{ type: String }], // Array of memberIds sponsored directly
+
+    // Ranks Eligibility
+    isGold: { type: Boolean, default: false },
+    isPlatinum: { type: Boolean, default: false },
+    isRuby: { type: Boolean, default: false },
+    isCrownDiamond: { type: Boolean, default: false },
+
+    // Royalty Capping Trackers
+    goldEarnings: { type: Number, default: 0 },
+    platinumEarnings: { type: Number, default: 0 },
+    rubyEarnings: { type: Number, default: 0 },
+    crownDiamondEarnings: { type: Number, default: 0 },
+
+    // Autopool Status
+    autopoolLevel: { type: Number, default: 1 }, // 1 to 5
+    autopoolBalance: { type: Number, default: 0 },
+
     isActive: {
         type: Boolean,
         default: true
