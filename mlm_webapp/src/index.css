@@ -24,7 +24,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #F4F7FE; /* Premium soft background */
+  background-color: #FFFFFF; /* Pure white background */
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
 }
