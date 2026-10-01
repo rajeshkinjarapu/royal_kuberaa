@@ -578,8 +578,7 @@ function App() {
 
   const renderWallets = () => (
     <CardWrapper>
-      <PageHeader title="My Wallets" subtitle="Manage your funds, view balances, and transfer to other members" />
-      <div className="cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', marginBottom: '32px' }}>
+      <div className="wallet-cards-grid" style={{ display: 'grid', gap: '24px', marginBottom: '32px' }}>
          <div style={{ padding: '24px', background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', color: 'white', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)', position: 'relative', overflow: 'hidden' }}>
             <h3 style={{ opacity: 0.9, fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Main Wallet</h3>
             <h1 style={{ fontSize: '36px', fontWeight: '900', margin: '0' }}>₹ {dummyWallets.balance.toLocaleString()}</h1>

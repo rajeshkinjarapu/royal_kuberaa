@@ -333,6 +333,12 @@ body {
   margin-bottom: 48px;
 }
 
+.wallet-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
 /* Premium Vibrant Card (Glassmorphism + Gradients) */
 .vibrant-card {
   border-radius: 24px;
@@ -592,6 +598,10 @@ body {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px;
     margin-bottom: 20px;
+  }
+  .wallet-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
   }
   .metric-card {
     padding: 12px;
