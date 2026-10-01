@@ -1427,7 +1427,7 @@ function App() {
              if(result.success) setTickets(result.data);
           } catch(err) { console.error(err); }
        };
-       if (activeMenu === 'Support Tickets') fetchTickets();
+       if (activeMenu === 'Support Tickets' || activeMenu === 'Support') fetchTickets();
     }, [activeMenu, userRole]);
 
     const handleCreateTicket = async (e) => {
@@ -1990,6 +1990,7 @@ function App() {
     switch(activeMenu) {
        case 'Dashboard': renderFn = renderDashboard; break;
        case 'Profile':
+       case 'Bank Settings':
        case 'KYC': renderFn = renderProfile; break;
        case 'My Network': renderFn = renderNetwork; break;
        case 'Binary Genealogy': renderFn = renderBinaryTree; break;
@@ -2015,10 +2016,10 @@ function App() {
        case 'Awards & Rewards': renderFn = renderRewards; break;
        case 'Deposit Funds': renderFn = renderDepositFunds; break;
        case 'Transaction PIN': renderFn = renderTpinSettings; break;
-       case 'Products':
-       case 'Bank Settings':
-       case 'Change Password':
        case 'Support':
+       case 'Support Tickets': renderFn = renderSupportTickets; break;
+       case 'Products':
+       case 'Change Password':
        case 'About Us':
        case 'Terms & Conditions':
        case 'Privacy Policy':
