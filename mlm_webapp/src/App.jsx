@@ -2,6 +2,62 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
+const PinInput = ({ name }) => {
+  const [pin, setPin] = useState(['', '', '', '', '', '']);
+  const inputRefs = useRef([]);
+
+  const handleChange = (index, value) => {
+    if (!/^[0-9]*$/.test(value)) return;
+    const newPin = [...pin];
+    newPin[index] = value;
+    setPin(newPin);
+    if (value !== '' && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !pin[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData('text').slice(0, 6).replace(/[^0-9]/g, '');
+    if (paste) {
+      const newPin = [...pin];
+      paste.split('').forEach((char, i) => {
+        newPin[i] = char;
+      });
+      setPin(newPin);
+      const nextIndex = Math.min(paste.length, 5);
+      inputRefs.current[nextIndex]?.focus();
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', width: '100%' }}>
+      <input type="hidden" name={name} value={pin.join('')} />
+      {pin.map((digit, index) => (
+        <input
+          key={index}
+          ref={(el) => (inputRefs.current[index] = el)}
+          type="password"
+          inputMode="numeric"
+          maxLength={1}
+          value={digit}
+          onChange={(e) => handleChange(index, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(index, e)}
+          onPaste={index === 0 ? handlePaste : undefined}
+          className="form-input"
+          style={{ flex: 1, minWidth: '0', height: '48px', textAlign: 'center', fontSize: '24px', padding: '0', fontWeight: '800' }}
+        />
+      ))}
+    </div>
+  );
+};
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authView, setAuthView] = useState('login'); 
@@ -275,7 +331,8 @@ function App() {
                   <input type="text" name="memberId" className="form-input" placeholder="User ID or Mobile No" required />
                 </div>
                 <div className="form-group">
-                  <input type="password" name="password" className="form-input" placeholder="Password" required />
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password (6 Digits)</label>
+                  <PinInput name="password" />
                 </div>
                 <div className="form-options">
                    <label className="remember-me">
@@ -309,7 +366,8 @@ function App() {
                   )}
                 </div>
                 <div className="form-group">
-                  <input type="password" name="password" className="form-input" placeholder="Password (6 Digits)" required pattern="[0-9]{6}" maxLength="6" inputMode="numeric" />
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password (6 Digits)</label>
+                  <PinInput name="password" />
                 </div>
                 {errorMsg && (
                   <div style={{ color: '#e11d48', fontSize: '14px', fontWeight: '600', marginTop: '8px' }}>
