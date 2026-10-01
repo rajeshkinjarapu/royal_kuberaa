@@ -709,45 +709,58 @@ body {
 
 @media (max-width: 480px) {
   .login-wrapper {
-    padding: 0;
-    align-items: flex-start;
-    background: #ffffff;
+    padding: 16px;
+    align-items: center;
+    background: linear-gradient(135deg, #6c28d9 0%, #4c1d95 100%);
   }
   
   .login-container {
-    height: 100vh;
-    box-shadow: none;
-    border-radius: 0;
+    height: auto;
+    max-height: calc(100vh - 32px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-radius: 24px;
     max-width: 100%;
+    overflow-y: auto;
+    background: #ffffff;
   }
 
   .login-illustration {
-    display: none; /* Hide illustration on mobile to save space */
+    display: none;
   }
 
   .login-logo {
     display: block;
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 12px;
-    box-shadow: 0 4px 12px rgba(108, 40, 217, 0.15);
+    box-shadow: 0 4px 12px rgba(108, 40, 217, 0.2);
+    border: 3px solid #ffffff;
   }
   
   .login-content {
-    padding: 24px 20px;
-    height: 100vh;
+    padding: 32px 24px;
+    height: auto;
     justify-content: flex-start;
   }
   
   .login-header {
     margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .login-title {
-    font-size: 28px;
-    line-height: 1.2;
+    font-size: 26px;
+    line-height: 1.25;
+  }
+
+  .login-brand-name {
+    font-size: 16px;
+    margin-bottom: 8px;
   }
 
   .login-form {
@@ -760,7 +773,8 @@ body {
   }
 
   .login-footer {
-    margin-top: 20px;
+    margin-top: 24px;
+    text-align: center;
   }
 }
 
