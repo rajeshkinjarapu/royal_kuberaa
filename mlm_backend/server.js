@@ -713,13 +713,12 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
 
         const SystemSetting = require('./models/SystemSetting');
         let settings = await SystemSetting.findOne();
-        const minWithdrawal = settings ? settings.minimumWithdrawal : 200;
+        const minWithdrawal = settings ? settings.minimumWithdrawal : 500; // Updated to 500 based on rules
 
         if (!requestedAmount || requestedAmount < minWithdrawal) {
             return res.status(400).json({ success: false, message: `Minimum withdrawal amount is ₹${minWithdrawal}.` });
         }
 
-        const user = await User.findById(req.user.id);
         if (user.mainWallet < requestedAmount) {
             return res.status(400).json({ success: false, message: "Insufficient main wallet balance." });
         }
@@ -743,25 +742,22 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
             tdsAmount,
             adminChargeAmount,
             netAmount,
-            status: 'Approved' // Business plan rule 82: "Withdrawals are processed automatically and set to 'Approved' status."
+            status: 'Pending' // Admin needs to manually transfer money and approve
         });
 
-        // Add Transaction for record
         const Transaction = require('./models/Transaction');
         await Transaction.create({
+            userId: user._id,
             memberId: user.memberId,
             type: 'Debit',
-            category: 'WITHDRAWAL',
-            remark: `Bank Withdrawal (Net Payable: ₹${netAmount})`,
             amount: requestedAmount,
-            status: 'COMPLETED',
-            date: new Date()
+            description: `Withdrawal Request (Net: ₹${netAmount})`
         });
 
-        res.json({ success: true, message: `Withdrawal of ₹${requestedAmount} processed successfully! Net Payable: ₹${netAmount}`, newBalance: user.mainWallet });
+        res.json({ success: true, message: `Withdrawal of ₹${requestedAmount} requested successfully.`, newBalance: user.mainWallet });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Server error processing withdrawal" });
+        res.status(500).json({ success: false, message: "Server error processing withdrawal." });
     }
 });
 
@@ -769,11 +765,9 @@ app.get('/api/admin/withdrawals', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
     try {
         const Withdrawal = require('./models/Withdrawal');
-        const withdrawals = await Withdrawal.find().sort({ createdAt: -1 });
+        const withdrawals = await Withdrawal.find().sort({ requestDate: -1 });
         res.json({ success: true, data: withdrawals });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error fetching withdrawals" });
-    }
+    } catch (err) { res.status(500).json({ success: false, message: "Error fetching withdrawals" }); }
 });
 
 app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
@@ -783,35 +777,36 @@ app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
         const Withdrawal = require('./models/Withdrawal');
         const withdrawal = await Withdrawal.findById(req.params.id);
         
-        if (!withdrawal) return res.status(404).json({ success: false, message: "Request not found" });
+        if(!withdrawal) return res.status(404).json({ success: false, message: "Request not found" });
+        if(withdrawal.status !== 'Pending') return res.status(400).json({ success: false, message: "Already processed" });
         
-        withdrawal.status = action === 'approve' ? 'Approved' : 'Rejected';
-        
-        // If rejected, refund to user wallet
-        if (action === 'reject') {
-            const user = await User.findById(withdrawal.userId);
-            if (user) {
-                user.mainWallet += withdrawal.grossAmount;
-                await user.save();
-                
-                const Transaction = require('./models/Transaction');
-                await Transaction.create({
-                    memberId: user.memberId,
-                    type: 'Credit',
-                    category: 'REFUND',
-                    remark: `Withdrawal Rejected - Refunded`,
-                    amount: withdrawal.grossAmount,
-                    status: 'COMPLETED',
-                    date: new Date()
-                });
-            }
+        if (action === 'approve') {
+            withdrawal.status = 'Approved';
+            withdrawal.processDate = new Date();
+            await withdrawal.save();
+            return res.json({ success: true, message: "Withdrawal marked as Paid." });
+        } else {
+            // Reject - refund the gross amount to user
+            withdrawal.status = 'Rejected';
+            withdrawal.processDate = new Date();
+            await withdrawal.save();
+            
+            await User.findByIdAndUpdate(withdrawal.userId, {
+                $inc: { mainWallet: withdrawal.grossAmount }
+            });
+            
+            const Transaction = require('./models/Transaction');
+            await Transaction.create({
+                userId: withdrawal.userId,
+                memberId: withdrawal.memberId,
+                type: 'Credit',
+                amount: withdrawal.grossAmount,
+                description: `Withdrawal Rejected (Refund)`
+            });
+            
+            return res.json({ success: true, message: "Withdrawal rejected and amount refunded." });
         }
-        
-        await withdrawal.save();
-        res.json({ success: true, message: `Withdrawal ${action}d successfully.` });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error" });
-    }
+    } catch (err) { res.status(500).json({ success: false, message: "Error processing request" }); }
 });
 
 // Claim Reward
