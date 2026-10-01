@@ -165,8 +165,8 @@ function App() {
     { header: 'MAIN MENU' },
     { name: 'Dashboard', icon: '📊' },
     { name: 'Wallets', icon: '💼' },
-    { name: 'AutoPool Matrix', icon: '🔄' },
-    { name: 'Rank Income', icon: '👑' },
+    { name: 'Non-Working Cashback', icon: '💸' },
+    { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
     { name: 'Products', icon: '🛍️' },
     { name: 'Offers', icon: '🎁' },
@@ -177,7 +177,7 @@ function App() {
     { header: 'ACCOUNT' },
     { name: 'My Network', icon: '👥' },
     { name: 'Add Member', icon: '➕' },
-    { name: 'Genealogy', icon: '🕸️' },
+    { name: 'Binary Genealogy', icon: '🕸️' },
     { name: 'Profile', icon: '👤' },
     { name: 'KYC', icon: '🛡️' },
     { name: 'Bank Settings', icon: '🏦' },
@@ -198,7 +198,7 @@ function App() {
     { name: 'Member Management', icon: '👥' },
     { name: 'Fund Requests', icon: '💳' },
     { name: 'Payouts & TDS', icon: '💸' },
-    { name: 'AutoPool Settings', icon: '🔄' },
+    { name: 'Pool Distributions', icon: '🔄' },
     { name: 'KYC Approvals', icon: '📄' },
     { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
@@ -291,12 +291,13 @@ function App() {
     const mobile = e.target.mobile.value;
     const sponsorId = e.target.sponsorId.value;
     const password = e.target.password.value;
+    const placement = e.target.placement.value;
     
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, mobile, sponsorId, password })
+        body: JSON.stringify({ name, mobile, sponsorId, password, placement })
       });
       const result = await response.json();
       
@@ -441,6 +442,19 @@ function App() {
                   )}
                 </div>
                 <div className="form-group">
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Position (Placement)</label>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#334155' }}>
+                        <input type="radio" name="placement" value="Left" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#0B1437' }} />
+                        Left Team
+                     </label>
+                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#334155' }}>
+                        <input type="radio" name="placement" value="Right" style={{ width: '18px', height: '18px', accentColor: '#0B1437' }} />
+                        Right Team
+                     </label>
+                  </div>
+                </div>
+                <div className="form-group">
                   <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password (6 Digits)</label>
                   <PinInput name="password" />
                 </div>
@@ -521,14 +535,15 @@ function App() {
         { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
       ]
       : [
-        { id: 1, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
-        { id: 2, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
-        { id: 3, title: 'Direct Referral', amount: dashboardData?.directReferral || 0, icon: '👤', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
-        { id: 4, title: 'Team Income', amount: dashboardData?.teamIncome || 0, icon: '👥', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
-        { id: 5, title: 'Withdraw Fund', amount: dashboardData?.withdrawFund || 0, icon: '🔄', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e' },
-        { id: 6, title: 'Autopool Fund', amount: dashboardData?.autopoolFund || 0, icon: '♾️', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8' },
-        { id: 7, title: 'All Ranks', amount: dashboardData?.allRanks || 0, icon: '🏆', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309' },
-        { id: 8, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
+        { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
+        { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
+        { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
+        { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
+        { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: '➡️', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
+        { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: '📦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
+        { id: 7, title: 'Right Carry Fwd', amount: dashboardData?.networkStats?.rightCarryForward || 0, icon: '📦', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8', isCount: true },
+        { id: 8, title: 'Pairs Matched (Today)', amount: dashboardData?.networkStats?.todayPairsCount || 0, icon: '🔥', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309', isCount: true },
+        { id: 9, title: 'Flushed Pairs (Today)', amount: dashboardData?.networkStats?.todayPairsFlushedCount || 0, icon: '🗑️', bg: '#fef2f2', iconBg: '#fecaca', color: '#991b1b', isCount: true },
       ];
 
     return (
@@ -554,60 +569,189 @@ function App() {
               </div>
               <div className="card-content">
                 <div className="card-title" style={{ color: '#64748B', fontWeight: '700', fontSize: '12px', letterSpacing: '0.5px', marginBottom: '8px' }}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{ color: '#0F172A', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'':'₹ '} {card.amount.toLocaleString()}</div>
+                <div className="card-amount" style={{ color: '#0F172A', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : '₹ ')} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
         </div>
+        {userRole === 'admin' && (
+          <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', marginTop: '20px', border: '1px solid #FCA5A5' }}>
+            <h3 style={{ margin: '0 0 16px 0', color: '#EF4444' }}>Admin Testing Tools</h3>
+            <button 
+               onClick={async () => {
+                  try {
+                     const token = localStorage.getItem('token');
+                     const res = await fetch('/api/admin/trigger-cron', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }});
+                     const result = await res.json();
+                     alert(result.message);
+                  } catch(e) { alert('Failed to trigger cron'); }
+               }}
+               style={{ padding: '12px 20px', background: '#0F172A', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+            >
+               🚀 Trigger Daily Midnight Cron Job Now
+            </button>
+            <p style={{ fontSize: '13px', color: '#64748B', marginTop: '10px' }}>This will immediately run the daily pool distribution and flush logic as if it were 12:00 AM.</p>
+          </div>
+        )}
       </>
     );
   };
 
   // Member Views
-  const renderProfile = () => (
-    <CardWrapper>
-      <PageHeader title="My Profile & KYC" subtitle="Manage your personal details and verify identity" />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-        <div>
-          <h3 style={{ marginBottom: '16px' }}>Personal Details</h3>
-          <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px' }}>
-            <p><strong>Name:</strong> {userData?.name}</p>
-            <p><strong>Member ID:</strong> {userData?.memberId}</p>
-            <p><strong>Email:</strong> user@royalkuberaa.com</p>
-            <p><strong>Phone:</strong> +91 9876543210</p>
-          </div>
-        </div>
-        <div>
-          <h3 style={{ marginBottom: '16px' }}>KYC Status</h3>
-          <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-             <p style={{ color: '#10B981', fontWeight: 'bold' }}>✅ KYC Verified</p>
-             <p style={{ fontSize: '13px', marginTop: '8px', color: '#64748B' }}>Your PAN and Bank Account details have been approved by the administration.</p>
-          </div>
-        </div>
-      </div>
-    </CardWrapper>
-  );
+  const renderProfile = () => {
+    const [profileData, setProfileData] = useState(null);
+    const [kycForm, setKycForm] = useState({ panNumber: '', aadharNumber: '', bankName: '', accountNumber: '', ifscCode: '' });
+    
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/user/profile', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) {
+                    setProfileData(result.user);
+                    setKycForm({
+                        panNumber: result.user.panNumber || '',
+                        aadharNumber: result.user.aadharNumber || '',
+                        bankName: result.user.bankName || '',
+                        accountNumber: result.user.accountNumber || '',
+                        ifscCode: result.user.ifscCode || ''
+                    });
+                }
+            } catch(err) { console.error(err); }
+        };
+        if (activeMenu === 'Profile' || activeMenu === 'KYC') fetchProfile();
+    }, [activeMenu]);
 
-  const renderNetwork = () => (
-    <CardWrapper>
-      <PageHeader title="Network & Tree" subtitle="View your downline and direct referrals" />
-      <Table headers={['Member ID', 'Name', 'Level', 'Join Date', 'Status']}>
-        {dummyNetwork.map(user => (
-          <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-            <td style={{ padding: '15px', fontWeight: 'bold', color: '#0EA5E9' }}>{user.id}</td>
-            <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
-            <td style={{ padding: '15px' }}>Level {user.level}</td>
-            <td style={{ padding: '15px', color: '#64748B' }}>{user.joinDate}</td>
-            <td style={{ padding: '15px' }}>
-              <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>
-                {user.status}
-              </span>
-            </td>
-          </tr>
-        ))}
-      </Table>
-    </CardWrapper>
-  );
+    const handleKycSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user/kyc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(kycForm)
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) setProfileData(result.user);
+        } catch (err) {
+            alert('Failed to update KYC');
+        }
+    };
+
+    if (!profileData) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Profile...</div>;
+
+    const isReadOnly = profileData.kycStatus === 'Approved' || profileData.kycStatus === 'Submitted';
+
+    return (
+        <CardWrapper>
+          <PageHeader title="My Profile & KYC" subtitle="Manage your personal details and verify identity" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div>
+              <h3 style={{ marginBottom: '16px' }}>Personal Details</h3>
+              <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px' }}>
+                <p><strong>Name:</strong> {profileData.name}</p>
+                <p><strong>Member ID:</strong> {profileData.memberId}</p>
+                <p><strong>Mobile:</strong> {profileData.mobile}</p>
+                <p><strong>Join Date:</strong> {new Date(profileData.createdAt).toLocaleDateString()}</p>
+                <p><strong>Sponsor ID:</strong> {profileData.sponsorId || 'None'}</p>
+              </div>
+            </div>
+            <div>
+              <h3 style={{ marginBottom: '16px' }}>KYC Status</h3>
+              <div style={{ padding: '16px', background: profileData.kycStatus === 'Approved' ? 'rgba(16, 185, 129, 0.1)' : profileData.kycStatus === 'Submitted' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: `1px solid ${profileData.kycStatus === 'Approved' ? 'rgba(16, 185, 129, 0.3)' : profileData.kycStatus === 'Submitted' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}` }}>
+                 <p style={{ color: profileData.kycStatus === 'Approved' ? '#10B981' : profileData.kycStatus === 'Submitted' ? '#F59E0B' : '#EF4444', fontWeight: 'bold' }}>
+                    {profileData.kycStatus === 'Approved' ? '✅ KYC Verified' : profileData.kycStatus === 'Submitted' ? '⏳ KYC Submitted (Pending Review)' : '❌ KYC Pending'}
+                 </p>
+                 <p style={{ fontSize: '13px', marginTop: '8px', color: '#64748B' }}>
+                    {profileData.kycStatus === 'Approved' ? 'Your PAN and Bank Account details have been approved.' : 'Please update your details below to receive payouts.'}
+                 </p>
+              </div>
+            </div>
+          </div>
+
+          <h3 style={{ marginTop: '40px', marginBottom: '16px' }}>Bank & Identity Details</h3>
+          <form onSubmit={handleKycSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', maxWidth: '800px' }}>
+             <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>PAN Number</label>
+                <input type="text" className="form-input" value={kycForm.panNumber} onChange={e => setKycForm({...kycForm, panNumber: e.target.value.toUpperCase()})} readOnly={isReadOnly} required />
+             </div>
+             <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Aadhar Number</label>
+                <input type="text" className="form-input" value={kycForm.aadharNumber} onChange={e => setKycForm({...kycForm, aadharNumber: e.target.value})} readOnly={isReadOnly} required />
+             </div>
+             <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Bank Name</label>
+                <input type="text" className="form-input" value={kycForm.bankName} onChange={e => setKycForm({...kycForm, bankName: e.target.value})} readOnly={isReadOnly} required />
+             </div>
+             <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Account Number</label>
+                <input type="text" className="form-input" value={kycForm.accountNumber} onChange={e => setKycForm({...kycForm, accountNumber: e.target.value})} readOnly={isReadOnly} required />
+             </div>
+             <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>IFSC Code</label>
+                <input type="text" className="form-input" value={kycForm.ifscCode} onChange={e => setKycForm({...kycForm, ifscCode: e.target.value.toUpperCase()})} readOnly={isReadOnly} required />
+             </div>
+             
+             {!isReadOnly && (
+                <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
+                   <button type="submit" style={{ padding: '12px 24px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Submit KYC Details</button>
+                </div>
+             )}
+          </form>
+        </CardWrapper>
+    );
+  };
+
+  const renderNetwork = () => {
+    const [networkData, setNetworkData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNetwork = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/network/directs', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) setNetworkData(result.data);
+            } catch(err) { console.error(err); }
+            setLoading(false);
+        };
+        if (activeMenu === 'My Network') fetchNetwork();
+    }, [activeMenu]);
+
+    return (
+        <CardWrapper>
+          <PageHeader title="My Direct Referrals" subtitle="List of members directly referred by you" />
+          
+          {loading ? (
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Network...</div>
+          ) : networkData.length === 0 ? (
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>You haven't referred anyone yet.</div>
+          ) : (
+            <Table headers={['Member ID', 'Name', 'Rank', 'Join Date', 'Status']}>
+              {networkData.map(user => (
+                <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#0EA5E9' }}>{user.id}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
+                  <td style={{ padding: '15px' }}>
+                     <span style={{ fontWeight: 'bold', color: user.rank === 'Gold' ? '#F59E0B' : '#94A3B8' }}>{user.rank}</span>
+                  </td>
+                  <td style={{ padding: '15px', color: '#64748B' }}>{user.joinDate}</td>
+                  <td style={{ padding: '15px' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>
+                      {user.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </Table>
+          )}
+        </CardWrapper>
+    );
+  };
 
   const renderWallets = () => {
     const [transactions, setTransactions] = useState([]);
@@ -645,11 +789,11 @@ function App() {
               </div>
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
-              <h3 className="wallet-card-title">Autopool Fund</h3>
+              <h3 className="wallet-card-title">Royalty & Cashback</h3>
               <h1 className="wallet-card-amount">₹ {(dashboardData?.autopoolFund || 0).toLocaleString()}</h1>
-              <div className="wallet-card-icon">♾️</div>
+              <div className="wallet-card-icon">👑</div>
               <div className="wallet-card-action">
-                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('AutoPool Matrix')}>View Details</button>
+                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Non-Working Cashback')}>View Details</button>
               </div>
            </div>
         </div>
@@ -676,10 +820,12 @@ function App() {
   const renderWithdrawal = () => {
     const [p2pReceiver, setP2pReceiver] = useState('');
     const [p2pAmount, setP2pAmount] = useState('');
+    const [p2pTpin, setP2pTpin] = useState('');
     const [p2pMessage, setP2pMessage] = useState({ text: '', type: '' });
     const [loadingP2p, setLoadingP2p] = useState(false);
 
     const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [withdrawTpin, setWithdrawTpin] = useState('');
     const [withdrawMessage, setWithdrawMessage] = useState({ text: '', type: '' });
     const [loadingWithdraw, setLoadingWithdraw] = useState(false);
 
@@ -692,12 +838,13 @@ function App() {
          const res = await fetch('/api/withdraw', {
            method: 'POST',
            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-           body: JSON.stringify({ amount: withdrawAmount })
+           body: JSON.stringify({ amount: withdrawAmount, tpin: withdrawTpin })
          });
          const result = await res.json();
          if (result.success) {
            setWithdrawMessage({ text: result.message, type: 'success' });
            setWithdrawAmount('');
+           setWithdrawTpin('');
            if(setDashboardData) {
               setDashboardData(prev => ({ ...prev, mainWallet: result.newBalance, totalEarnings: result.newBalance }));
            }
@@ -716,16 +863,17 @@ function App() {
        setP2pMessage({ text: '', type: '' });
        try {
          const token = localStorage.getItem('token');
-         const res = await fetch('/api/p2p-transfer', {
+         const res = await fetch('/api/p2p', {
            method: 'POST',
            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-           body: JSON.stringify({ receiverId: p2pReceiver, amount: p2pAmount })
+           body: JSON.stringify({ receiverId: p2pReceiver, amount: p2pAmount, tpin: p2pTpin })
          });
          const result = await res.json();
          if (result.success) {
            setP2pMessage({ text: result.message, type: 'success' });
            setP2pReceiver('');
            setP2pAmount('');
+           setP2pTpin('');
            if(setDashboardData) {
               setDashboardData(prev => ({ ...prev, mainWallet: result.newBalance, totalEarnings: result.newBalance }));
            }
@@ -749,7 +897,8 @@ function App() {
               <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong></p>
               
               <form onSubmit={handleWithdrawSubmit}>
-                 <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min ₹500)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+                 <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min ₹200)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+                 <input type="password" value={withdrawTpin} onChange={(e) => setWithdrawTpin(e.target.value)} required placeholder="Enter Transaction PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
                  <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
                  {withdrawMessage.text && (
                     <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: withdrawMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
@@ -765,7 +914,7 @@ function App() {
            {/* P2P Transfer Form */}
            <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', background: '#F8FAFC' }}>
               <h3 style={{ marginBottom: '16px' }}>P2P Transfer</h3>
-              <p style={{ color: '#64748B', marginBottom: '16px' }}>Transfer funds to another member instantly. No deductions.</p>
+              <p style={{ color: '#64748B', marginBottom: '16px' }}>Transfer funds to another member instantly. Note: <span style={{ color: '#EF4444' }}>5% Admin Charge</span> will be deducted.</p>
               
               <form onSubmit={handleP2pSubmit}>
                  <div style={{ marginBottom: '12px' }}>
@@ -775,6 +924,10 @@ function App() {
                  <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transfer Amount</label>
                     <input type="number" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} required placeholder="Amount in ₹" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+                 </div>
+                 <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transaction PIN</label>
+                    <input type="password" value={p2pTpin} onChange={(e) => setP2pTpin(e.target.value)} required placeholder="Enter T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
                  </div>
                  {p2pMessage.text && (
                     <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: p2pMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: p2pMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
@@ -786,6 +939,79 @@ function App() {
                  </button>
               </form>
            </div>
+        </div>
+      </CardWrapper>
+    );
+  };
+
+  const renderTpinSettings = () => {
+    const [currentTpin, setCurrentTpin] = useState('');
+    const [newTpin, setNewTpin] = useState('');
+    const [confirmTpin, setConfirmTpin] = useState('');
+    const [msg, setMsg] = useState({text:'', type:''});
+    
+    // Check if user has T-PIN yet (dashboardData could have hasTpin flag)
+    const hasTpin = dashboardData?.hasTpin;
+
+    const handleTpinSubmit = async (e) => {
+       e.preventDefault();
+       setMsg({text:'', type:''});
+       if(newTpin !== confirmTpin) {
+           return setMsg({text:'New T-PIN and Confirm T-PIN do not match!', type:'error'});
+       }
+       try {
+           const token = localStorage.getItem('token');
+           const res = await fetch('/api/user/tpin', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+               body: JSON.stringify({ currentTpin: hasTpin ? currentTpin : '', newTpin })
+           });
+           const result = await res.json();
+           if(result.success) {
+               setMsg({text:result.message, type:'success'});
+               setCurrentTpin(''); setNewTpin(''); setConfirmTpin('');
+               if(setDashboardData) setDashboardData(prev => ({...prev, hasTpin: true}));
+           } else {
+               setMsg({text:result.message, type:'error'});
+           }
+       } catch(err) {
+           setMsg({text:'Server connection error', type:'error'});
+       }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Transaction PIN (T-PIN)" subtitle="Secure your withdrawals and transfers" />
+        <div style={{ maxWidth: '500px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+            <p style={{ color: '#64748B', marginBottom: '24px', lineHeight: '1.5' }}>
+               A Transaction PIN (T-PIN) is required to withdraw funds or send money via P2P. Please {hasTpin ? 'update' : 'create'} your T-PIN below and keep it safe.
+            </p>
+            <form onSubmit={handleTpinSubmit}>
+               {hasTpin && (
+                  <div style={{ marginBottom: '16px' }}>
+                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Current T-PIN</label>
+                     <input type="password" value={currentTpin} onChange={e=>setCurrentTpin(e.target.value)} required placeholder="Enter current T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                  </div>
+               )}
+               <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>New T-PIN</label>
+                  <input type="password" value={newTpin} onChange={e=>setNewTpin(e.target.value)} required placeholder="Enter new T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+               </div>
+               <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Confirm New T-PIN</label>
+                  <input type="password" value={confirmTpin} onChange={e=>setConfirmTpin(e.target.value)} required placeholder="Re-enter new T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+               </div>
+
+               {msg.text && (
+                  <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: msg.type==='success'?'#D1FAE5':'#FEE2E2', color: msg.type==='success'?'#065F46':'#991B1B', fontSize: '14px', fontWeight: 'bold' }}>
+                     {msg.text}
+                  </div>
+               )}
+
+               <button type="submit" style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
+                  {hasTpin ? 'Update T-PIN' : 'Create T-PIN'}
+               </button>
+            </form>
         </div>
       </CardWrapper>
     );
@@ -947,72 +1173,424 @@ function App() {
     </div>
   );
 
-  const renderFundRequests = () => (
-    <CardWrapper>
-      <PageHeader title="Fund Requests" subtitle="Approve or reject member deposit requests" />
-      <Table headers={['Req ID', 'Member', 'Amount', 'Date', 'Status', 'Action']}>
-        <tr><td colSpan="6" style={{ padding: '16px', textAlign: 'center' }}>No pending fund requests.</td></tr>
-      </Table>
-    </CardWrapper>
-  );
+  const renderFundRequests = () => {
+    const [requests, setRequests] = useState([]);
+    
+    useEffect(() => {
+       const fetchRequests = async () => {
+          try {
+             const token = localStorage.getItem('token');
+             const res = await fetch('/api/admin/fund-requests', { headers: { 'Authorization': `Bearer ${token}` }});
+             const result = await res.json();
+             if(result.success) setRequests(result.data);
+          } catch(err) { console.error(err); }
+       };
+       fetchRequests();
+    }, []);
 
-  const renderAutoPoolSettings = () => (
-    <CardWrapper>
-      <PageHeader title="AutoPool Settings" subtitle="Configure pool entry amounts and levels" />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-        {['Starter', 'Silver', 'Gold', 'Platinum'].map(pool => (
-          <div key={pool} style={{ padding: '20px', border: '1px solid #E2E8F0', borderRadius: '12px' }}>
-             <h4 style={{ marginBottom: '12px' }}>{pool} Pool</h4>
-             <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>Entry Fee (₹)</label>
-             <input type="number" defaultValue="500" style={{ width: '100%', padding: '10px', border: '1px solid #CBD5E1', borderRadius: '6px', marginBottom: '12px' }} />
-             <button style={{ width: '100%', padding: '10px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '6px' }}>Save</button>
+    const handleAction = async (id, action) => {
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/admin/fund-requests/${id}`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+             body: JSON.stringify({ action })
+          });
+          const result = await res.json();
+          if(result.success) {
+             setRequests(prev => prev.filter(r => r._id !== id));
+          }
+          alert(result.message);
+       } catch(err) { alert("Action failed"); }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Fund Requests" subtitle="Approve or reject member deposit requests" />
+        <Table headers={['Req ID', 'Member', 'Amount', 'UTR Number', 'Date', 'Action']}>
+          {requests.length === 0 && <tr><td colSpan="6" style={{ padding: '16px', textAlign: 'center' }}>No pending fund requests.</td></tr>}
+          {requests.map(req => (
+            <tr key={req._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+              <td style={{ padding: '15px', fontWeight: 'bold' }}>{req._id.slice(-6).toUpperCase()}</td>
+              <td style={{ padding: '15px', color: '#0EA5E9', fontWeight: 'bold' }}>{req.memberId}</td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{req.amount}</td>
+              <td style={{ padding: '15px' }}>{req.utrNumber}</td>
+              <td style={{ padding: '15px', color: '#64748B' }}>{new Date(req.requestDate).toLocaleDateString()}</td>
+              <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
+                 <button onClick={() => handleAction(req._id, 'approve')} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Approve</button>
+                 <button onClick={() => handleAction(req._id, 'reject')} style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Reject</button>
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </CardWrapper>
+    );
+  };
+
+  const renderDepositFunds = () => {
+    const [amount, setAmount] = useState('');
+    const [utrNumber, setUtrNumber] = useState('');
+    const [message, setMessage] = useState({ text: '', type: '' });
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+       e.preventDefault();
+       setLoading(true);
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/fund-request', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+             body: JSON.stringify({ amount, utrNumber })
+          });
+          const result = await res.json();
+          setMessage({ text: result.message, type: result.success ? 'success' : 'error' });
+          if(result.success) {
+             setAmount('');
+             setUtrNumber('');
+          }
+       } catch(err) { setMessage({ text: 'Error connecting to server', type: 'error' }); }
+       setLoading(false);
+    };
+
+    return (
+      <CardWrapper>
+         <PageHeader title="Deposit Funds" subtitle="Add funds to your wallet using UPI or Bank Transfer" />
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+            <div style={{ padding: '24px', background: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+               <h3 style={{ marginBottom: '16px', color: '#0F172A' }}>Company Bank Details</h3>
+               <p style={{ color: '#64748B', marginBottom: '8px' }}><strong>Bank Name:</strong> HDFC Bank</p>
+               <p style={{ color: '#64748B', marginBottom: '8px' }}><strong>A/C Name:</strong> Royal Kuberaa Solutions</p>
+               <p style={{ color: '#64748B', marginBottom: '8px' }}><strong>A/C Number:</strong> 50200012345678</p>
+               <p style={{ color: '#64748B', marginBottom: '16px' }}><strong>IFSC Code:</strong> HDFC0001234</p>
+               
+               <h4 style={{ marginBottom: '12px', color: '#0F172A' }}>UPI Payment</h4>
+               <div style={{ width: '150px', height: '150px', background: '#FFF', padding: '10px', borderRadius: '12px', border: '1px solid #CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#94A3B8', textAlign: 'center' }}>
+                  [QR Code Image Placeholder]
+               </div>
+               <p style={{ marginTop: '10px', color: '#0EA5E9', fontWeight: 'bold' }}>UPI ID: royalkuberaa@hdfcbank</p>
+            </div>
+            
+            <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+               <h3 style={{ marginBottom: '16px', color: '#0F172A' }}>Submit Request</h3>
+               <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>After making the payment, enter the UTR/Reference number here. The admin will verify and add funds to your wallet.</p>
+               
+               <form onSubmit={handleSubmit}>
+                  <div style={{ marginBottom: '16px' }}>
+                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Amount Paid (₹)</label>
+                     <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 5000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>UTR / Reference Number</label>
+                     <input type="text" value={utrNumber} onChange={e=>setUtrNumber(e.target.value)} required placeholder="12-digit UPI UTR" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                  </div>
+                  
+                  {message.text && (
+                     <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: message.type==='success'?'#D1FAE5':'#FEE2E2', color: message.type==='success'?'#065F46':'#991B1B', fontSize: '14px', fontWeight: 'bold' }}>
+                        {message.text}
+                     </div>
+                  )}
+
+                  <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
+                     {loading ? 'Submitting...' : 'Submit Fund Request'}
+                  </button>
+               </form>
+            </div>
+         </div>
+      </CardWrapper>
+    );
+  };
+
+  const renderAutoPoolSettings = () => {
+    const [pools, setPools] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPools = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/admin/pools', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) setPools(result.data);
+            } catch (err) { console.error(err); }
+            setLoading(false);
+        };
+        if (activeMenu === 'Pool Distributions' || activeMenu === 'AutoPool Settings') fetchPools();
+    }, [activeMenu]);
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Global Royalty Pools" subtitle="Live statistics of daily company turnover distribution" />
+        {loading ? (
+           <div style={{ padding: '50px', textAlign: 'center', color: '#64748B' }}>Loading Pool Data...</div>
+        ) : (
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+             {pools.length === 0 ? <p style={{ color: '#64748B' }}>No pools active yet.</p> : pools.map(pool => (
+               <div key={pool._id} style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                     <span style={{ fontSize: '24px' }}>{pool.poolName === 'GOLD' ? '🥇' : pool.poolName === 'PLATINUM' ? '🥈' : pool.poolName === 'RUBY' ? '🔴' : '💎'}</span>
+                     {pool.poolName} POOL
+                  </h3>
+                  <div style={{ marginBottom: '12px' }}>
+                     <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Total Fund Collected</span>
+                     <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>₹ {pool.totalFund.toLocaleString()}</span>
+                  </div>
+                  <div>
+                     <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Active Qualifiers</span>
+                     <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#3B82F6' }}>{pool.membersCount} Members</span>
+                  </div>
+                  <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #F1F5F9', fontSize: '12px', color: '#94A3B8' }}>
+                     * Funds will be distributed equally among qualifiers daily at midnight.
+                  </div>
+               </div>
+             ))}
+           </div>
+        )}
+      </CardWrapper>
+    );
+  };
+
+  const renderKYCApprovals = () => {
+    const [requests, setRequests] = useState([]);
+    
+    useEffect(() => {
+        const fetchKycRequests = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/admin/kyc', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) setRequests(result.data);
+            } catch(err) { console.error(err); }
+        };
+        if(activeMenu === 'KYC Approvals') fetchKycRequests();
+    }, [activeMenu]);
+
+    const handleKycAction = async (memberId, action) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/admin/kyc/${memberId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ action })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                setRequests(prev => prev.filter(req => req.memberId !== memberId));
+            }
+        } catch(err) { console.error(err); }
+    };
+
+    return (
+        <CardWrapper>
+          <PageHeader title="KYC Approvals" subtitle="Review and verify member KYC submissions" />
+          <Table headers={['Member ID', 'Name', 'PAN', 'Aadhar', 'Bank Info', 'Status', 'Action']}>
+            {requests.length === 0 && <tr><td colSpan="7" style={{ padding: '16px', textAlign: 'center' }}>No pending KYC requests.</td></tr>}
+            {requests.map(req => (
+              <tr key={req.memberId} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                <td style={{ padding: '15px', color: '#0EA5E9', fontWeight: 'bold' }}>{req.memberId}</td>
+                <td style={{ padding: '15px', fontWeight: 'bold' }}>{req.name}</td>
+                <td style={{ padding: '15px' }}>{req.panNumber}</td>
+                <td style={{ padding: '15px' }}>{req.aadharNumber}</td>
+                <td style={{ padding: '15px' }}>
+                    <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
+                        <div><strong>Bank:</strong> {req.bankName}</div>
+                        <div><strong>A/C:</strong> {req.accountNumber}</div>
+                        <div><strong>IFSC:</strong> {req.ifscCode}</div>
+                    </div>
+                </td>
+                <td style={{ padding: '15px', color: '#F59E0B', fontWeight: 'bold' }}>Pending</td>
+                <td style={{ padding: '15px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
+                  <button onClick={() => handleKycAction(req.memberId, 'approve')} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Approve</button>
+                  <button onClick={() => handleKycAction(req.memberId, 'reject')} style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Reject</button>
+                </td>
+              </tr>
+            ))}
+          </Table>
+        </CardWrapper>
+    );
+  };
+
+  const renderSupportTickets = () => {
+    const [tickets, setTickets] = useState([]);
+    const [subject, setSubject] = useState('');
+    const [message, setMessage] = useState('');
+    const [replyText, setReplyText] = useState({});
+
+    useEffect(() => {
+       const fetchTickets = async () => {
+          try {
+             const token = localStorage.getItem('token');
+             const url = userRole === 'admin' ? '/api/admin/tickets' : '/api/tickets';
+             const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` }});
+             const result = await res.json();
+             if(result.success) setTickets(result.data);
+          } catch(err) { console.error(err); }
+       };
+       if (activeMenu === 'Support Tickets') fetchTickets();
+    }, [activeMenu, userRole]);
+
+    const handleCreateTicket = async (e) => {
+       e.preventDefault();
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/tickets', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+             body: JSON.stringify({ subject, message })
+          });
+          const result = await res.json();
+          alert(result.message);
+          if(result.success) {
+             setSubject('');
+             setMessage('');
+             const res2 = await fetch('/api/tickets', { headers: { 'Authorization': `Bearer ${token}` }});
+             const result2 = await res2.json();
+             if(result2.success) setTickets(result2.data);
+          }
+       } catch(err) { alert('Error creating ticket'); }
+    };
+
+    const handleReply = async (id) => {
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/admin/tickets/${id}/reply`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+             body: JSON.stringify({ reply: replyText[id] })
+          });
+          const result = await res.json();
+          alert(result.message);
+          if(result.success) {
+             setTickets(prev => prev.map(t => t._id === id ? { ...t, status: 'Resolved', reply: replyText[id] } : t));
+          }
+       } catch(err) { alert('Error sending reply'); }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title={userRole === 'admin' ? "Support Center" : "Help & Support"} subtitle={userRole === 'admin' ? "Resolve member queries" : "Raise a ticket to get help from admin"} />
+        
+        {userRole === 'member' && (
+          <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', marginBottom: '30px' }}>
+            <h3 style={{ marginBottom: '16px' }}>Create New Ticket</h3>
+            <form onSubmit={handleCreateTicket}>
+               <input type="text" value={subject} onChange={e=>setSubject(e.target.value)} required placeholder="Subject" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px' }} />
+               <textarea value={message} onChange={e=>setMessage(e.target.value)} required placeholder="Describe your issue..." rows="4" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', resize: 'vertical' }}></textarea>
+               <button type="submit" style={{ padding: '12px 24px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Submit Ticket</button>
+            </form>
           </div>
-        ))}
-      </div>
-    </CardWrapper>
-  );
+        )}
 
-  const renderKYCApprovals = () => (
-    <CardWrapper>
-      <PageHeader title="KYC Approvals" subtitle="Verify PAN and Bank details" />
-      <Table headers={['Member ID', 'Name', 'Document Type', 'Status', 'Action']}>
-        <tr><td colSpan="5" style={{ padding: '16px', textAlign: 'center' }}>No pending KYC documents.</td></tr>
-      </Table>
-    </CardWrapper>
-  );
+        <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+           <h3 style={{ marginBottom: '20px' }}>{userRole === 'admin' ? 'All Tickets' : 'My Tickets'}</h3>
+           {tickets.length === 0 ? <p style={{ color: '#64748B' }}>No tickets found.</p> : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                 {tickets.map(t => (
+                    <div key={t._id} style={{ border: '1px solid #E2E8F0', borderRadius: '12px', padding: '20px', background: t.status==='Resolved'?'#F8FAFC':'#FFF' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                             <span style={{ background: t.status==='Open'?'#FEF3C7':'#D1FAE5', color: t.status==='Open'?'#D97706':'#065F46', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{t.status}</span>
+                             <span style={{ fontWeight: 'bold', color: '#0F172A' }}>{t.subject}</span>
+                             {userRole === 'admin' && <span style={{ color: '#0EA5E9', fontSize: '12px', fontWeight: 'bold' }}>({t.memberId})</span>}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#94A3B8' }}>{new Date(t.createdAt).toLocaleString()}</div>
+                       </div>
+                       <p style={{ color: '#475569', fontSize: '14px', margin: '0 0 16px 0', lineHeight: '1.5' }}>{t.message}</p>
+                       
+                       {t.reply && (
+                          <div style={{ background: '#F1F5F9', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #3B82F6' }}>
+                             <strong style={{ display: 'block', fontSize: '12px', color: '#3B82F6', marginBottom: '4px' }}>Admin Reply:</strong>
+                             <span style={{ color: '#334155', fontSize: '14px' }}>{t.reply}</span>
+                          </div>
+                       )}
 
-  const renderSupportTickets = () => (
-    <CardWrapper>
-      <PageHeader title="Support Tickets" subtitle="Respond to member queries" />
-      <Table headers={['Ticket ID', 'Member', 'Subject', 'Status', 'Action']}>
-        <tr><td colSpan="5" style={{ padding: '16px', textAlign: 'center' }}>No open support tickets.</td></tr>
-      </Table>
-    </CardWrapper>
-  );
+                       {userRole === 'admin' && t.status === 'Open' && (
+                          <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+                             <input type="text" value={replyText[t._id] || ''} onChange={e=>setReplyText({...replyText, [t._id]: e.target.value})} placeholder="Type your reply here..." style={{ flex: 1, padding: '10px', border: '1px solid #CBD5E1', borderRadius: '6px' }} />
+                             <button onClick={() => handleReply(t._id)} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Send Reply</button>
+                          </div>
+                       )}
+                    </div>
+                 ))}
+              </div>
+           )}
+        </div>
+      </CardWrapper>
+    );
+  };
 
-  const renderSystemSettings = () => (
-    <CardWrapper>
-      <PageHeader title="System Settings" subtitle="Manage global application settings" />
-      <div style={{ maxWidth: '600px' }}>
-         <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Website Name</label>
-            <input type="text" defaultValue="Royal Kuberaa" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
-         </div>
-         <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Maintenance Mode</label>
-            <select style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
-               <option>Disabled (Site Live)</option>
-               <option>Enabled (Under Maintenance)</option>
-            </select>
-         </div>
-         <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Admin TDS Deduction (%)</label>
-            <input type="number" defaultValue="5" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
-         </div>
-         <button style={{ padding: '12px 24px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>Save Settings</button>
-      </div>
-    </CardWrapper>
-  );
+  const renderSystemSettings = () => {
+    const [settings, setSettings] = useState({ siteName: 'Royal Kuberaa', tdsPercentage: 5, adminChargePercentage: 5, minimumWithdrawal: 200, maintenanceMode: false });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+       const fetchSettings = async () => {
+          try {
+             const res = await fetch('/api/settings');
+             const result = await res.json();
+             if(result.success && result.data) setSettings(result.data);
+          } catch(err) { console.error(err); }
+          setLoading(false);
+       };
+       if (activeMenu === 'System Settings') fetchSettings();
+    }, [activeMenu]);
+
+    const handleSave = async (e) => {
+       e.preventDefault();
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/admin/settings', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+             body: JSON.stringify(settings)
+          });
+          const result = await res.json();
+          alert(result.message);
+       } catch(err) { alert('Failed to save settings'); }
+    };
+
+    if(loading) return <div style={{ padding: '50px', textAlign: 'center', color: '#64748B' }}>Loading settings...</div>;
+
+    return (
+      <CardWrapper>
+        <PageHeader title="System Settings" subtitle="Configure core platform rules and deductions" />
+        <div style={{ maxWidth: '600px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+          <form onSubmit={handleSave}>
+             <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Site Name</label>
+                <input type="text" value={settings.siteName} onChange={e=>setSettings({...settings, siteName: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+             </div>
+             
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>TDS Percentage (%)</label>
+                    <input type="number" value={settings.tdsPercentage} onChange={e=>setSettings({...settings, tdsPercentage: Number(e.target.value)})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Admin Charge (%)</label>
+                    <input type="number" value={settings.adminChargePercentage} onChange={e=>setSettings({...settings, adminChargePercentage: Number(e.target.value)})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+             </div>
+             
+             <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Minimum Withdrawal (₹)</label>
+                <input type="number" value={settings.minimumWithdrawal} onChange={e=>setSettings({...settings, minimumWithdrawal: Number(e.target.value)})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+             </div>
+
+             <div style={{ marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input type="checkbox" checked={settings.maintenanceMode} onChange={e=>setSettings({...settings, maintenanceMode: e.target.checked})} style={{ width: '20px', height: '20px' }} />
+                <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#EF4444' }}>Enable Maintenance Mode (Blocks new logins)</label>
+             </div>
+
+             <button type="submit" style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
+                💾 Save Settings
+             </button>
+          </form>
+        </div>
+      </CardWrapper>
+    );
+  };
 
   const renderComingSoon = (moduleName) => (
     <CardWrapper>
@@ -1105,13 +1683,311 @@ function App() {
     </CardWrapper>
   );
 
+  const renderBinaryTree = () => {
+    const [treeData, setTreeData] = useState(null);
+    const [loadingTree, setLoadingTree] = useState(true);
+    
+    const fetchTree = async (memberId = '') => {
+        setLoadingTree(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/network/tree/${memberId}`, { headers: { 'Authorization': `Bearer ${token}` }});
+            const result = await res.json();
+            if(result.success) setTreeData(result.data);
+        } catch(err) { console.error(err); }
+        setLoadingTree(false);
+    };
+
+    useEffect(() => {
+        if (activeMenu === 'Binary Genealogy') {
+            fetchTree();
+        }
+    }, [activeMenu]);
+
+    const TreeNode = ({ node }) => {
+        if (!node) {
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 10px' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#E2E8F0', border: '2px dashed #94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8', fontSize: '12px', fontWeight: 'bold' }}>Empty</div>
+                </div>
+            );
+        }
+        
+        const rankColors = { 'STARTER': '#94A3B8', 'GOLD': '#F59E0B', 'PLATINUM': '#3B82F6', 'RUBY': '#EF4444', 'DIAMOND': '#8B5CF6' };
+        const borderColor = rankColors[node.rank] || '#10B981';
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+                {/* Node Box */}
+                <div 
+                    onClick={() => fetchTree(node.id)}
+                    style={{ background: '#FFF', border: `2px solid ${borderColor}`, borderRadius: '12px', padding: '12px', width: '120px', textAlign: 'center', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 2, position: 'relative' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: borderColor, color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: '18px', fontWeight: 'bold' }}>
+                        {node.name.charAt(0)}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.id}</div>
+                    <div style={{ fontSize: '10px', color: '#64748B', marginBottom: '4px' }}>{node.name}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', fontWeight: 'bold', background: '#F1F5F9', padding: '2px 6px', borderRadius: '4px' }}>
+                        <span style={{ color: '#0EA5E9' }}>L: {node.leftTeamCount}</span>
+                        <span style={{ color: '#8B5CF6' }}>R: {node.rightTeamCount}</span>
+                    </div>
+                </div>
+
+                {/* Children Connectors */}
+                {(node.left || node.right) && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                        {/* Vertical line down from parent */}
+                        <div style={{ width: '2px', height: '20px', background: '#CBD5E1' }}></div>
+                        {/* Horizontal line connecting children */}
+                        <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                            <div style={{ width: '50%', height: '2px', background: '#CBD5E1' }}></div>
+                            <div style={{ width: '50%', height: '2px', background: '#CBD5E1' }}></div>
+                        </div>
+                        {/* Children Container */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', paddingTop: '10px', gap: '20px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                                <div style={{ width: '2px', height: '10px', background: '#CBD5E1', marginTop: '-10px' }}></div>
+                                <TreeNode node={node.left} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                                <div style={{ width: '2px', height: '10px', background: '#CBD5E1', marginTop: '-10px' }}></div>
+                                <TreeNode node={node.right} />
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    return (
+        <CardWrapper>
+            <PageHeader title="Binary Genealogy Tree" subtitle="Click on any member ID to view their downline tree" />
+            
+            {loadingTree ? (
+                <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Tree...</div>
+            ) : (
+                <div style={{ overflowX: 'auto', padding: '40px 20px', display: 'flex', justifyContent: 'center', minWidth: '800px' }}>
+                    <TreeNode node={treeData} />
+                </div>
+            )}
+            
+            {treeData && treeData.id !== userData?.memberId && (
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                    <button onClick={() => fetchTree()} style={{ padding: '10px 20px', background: '#0F172A', color: '#FFF', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                        ⬆️ Back to My Top Node
+                    </button>
+                </div>
+            )}
+        </CardWrapper>
+    );
+  };
+
+  const renderRoyaltyAndCashback = () => {
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+    
+    const isRoyalty = activeMenu === 'Royalty Pools';
+    const filterCategory = isRoyalty ? 'ROYALTY' : 'CASHBACK';
+    
+    useEffect(() => {
+        const fetchHistory = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) {
+                    const filtered = result.data.filter(tx => tx.category === filterCategory);
+                    setHistory(filtered);
+                }
+            } catch(err) { console.error(err); }
+            setLoading(false);
+        };
+        if (activeMenu === 'Royalty Pools' || activeMenu === 'Non-Working Cashback') {
+            fetchHistory();
+        }
+    }, [activeMenu]);
+
+    return (
+        <CardWrapper>
+          <PageHeader 
+             title={isRoyalty ? 'Daily Royalty Pools' : 'Non-Working Cashback'} 
+             subtitle={isRoyalty ? "Your daily share from Global Royalty Pools" : "Your daily non-working cashback earnings"} 
+          />
+          
+          <div style={{ padding: '20px', background: isRoyalty ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)', borderRadius: '16px', color: '#FFF', marginBottom: '30px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
+             <h3 style={{ margin: 0, opacity: 0.9 }}>Total Earned</h3>
+             <h1 style={{ fontSize: '36px', margin: '10px 0 0' }}>
+                 ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
+             </h1>
+          </div>
+
+          {loading ? (
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading History...</div>
+          ) : history.length === 0 ? (
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No earnings yet. Check back tomorrow!</div>
+          ) : (
+            <Table headers={['Date', 'Amount', 'Type', 'Description']}>
+              {history.map((tx, idx) => (
+                <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '15px', color: '#64748B' }}>{new Date(tx.createdAt).toLocaleString()}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#10B981' }}>+ ₹{tx.amount}</td>
+                  <td style={{ padding: '15px' }}>
+                     <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
+                       {tx.category}
+                     </span>
+                  </td>
+                  <td style={{ padding: '15px', color: '#0F172A' }}>{tx.remark}</td>
+                </tr>
+              ))}
+            </Table>
+          )}
+        </CardWrapper>
+    );
+  };
+
+  const renderRebirths = () => {
+    const [rebirthData, setRebirthData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRebirths = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/network/rebirths', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) setRebirthData(result.data);
+            } catch(err) { console.error(err); }
+            setLoading(false);
+        };
+        if (activeMenu === 'Rebirth ID') fetchRebirths();
+    }, [activeMenu]);
+
+    return (
+        <CardWrapper>
+          <PageHeader title="My Rebirth IDs" subtitle="List of all new IDs generated from your Rebirth Wallet" />
+          
+          {loading ? (
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Rebirths...</div>
+          ) : rebirthData.length === 0 ? (
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>You haven't generated any Rebirth IDs yet.</div>
+          ) : (
+            <Table headers={['Rebirth ID', 'Name', 'Left Team', 'Right Team', 'Total Earnings', 'Created On']}>
+              {rebirthData.map(user => (
+                <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>{user.id}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
+                  <td style={{ padding: '15px', color: '#0EA5E9' }}>{user.leftTeam}</td>
+                  <td style={{ padding: '15px', color: '#F59E0B' }}>{user.rightTeam}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#10B981' }}>₹{user.earnings}</td>
+                  <td style={{ padding: '15px', color: '#64748B' }}>{user.joinDate}</td>
+                </tr>
+              ))}
+            </Table>
+          )}
+        </CardWrapper>
+    );
+  };
+
+  const renderRewards = () => {
+    const [rewardData, setRewardData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRewards = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/user/rewards', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) setRewardData(result);
+            } catch(err) { console.error(err); }
+            setLoading(false);
+        };
+        if (activeMenu === 'Offers' || activeMenu === 'Awards & Rewards') fetchRewards();
+    }, [activeMenu]);
+
+    const handleClaim = async (pairs) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user/rewards/claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ pairs })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if (result.success) {
+                // Refresh data
+                const res2 = await fetch('/api/user/rewards', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result2 = await res2.json();
+                if(result2.success) setRewardData(result2);
+            }
+        } catch(err) { alert('Failed to claim reward'); }
+    };
+
+    if (loading || !rewardData) return <div style={{ padding: '50px', textAlign: 'center', color: '#64748B' }}>Loading Rewards...</div>;
+
+    const { totalPairsMatched, claimedRewards, rewardsPlan } = rewardData;
+
+    return (
+        <CardWrapper>
+            <PageHeader title="Lifetime Awards & Rewards" subtitle="Achieve matching pairs to unlock exclusive rewards!" />
+            
+            <div style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', padding: '24px', borderRadius: '16px', color: '#FFF', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h3 style={{ margin: 0, color: '#94A3B8' }}>Your Lifetime Matching Pairs</h3>
+                    <h1 style={{ fontSize: '40px', margin: '8px 0 0', color: '#38BDF8' }}>{totalPairsMatched} <span style={{ fontSize: '18px', color: '#64748B' }}>Pairs</span></h1>
+                </div>
+                <div style={{ fontSize: '48px' }}>🏆</div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+                {rewardsPlan.map(reward => {
+                    const isClaimed = claimedRewards.some(r => r.pairs === reward.pairs);
+                    const isEligible = totalPairsMatched >= reward.pairs;
+                    const progress = Math.min((totalPairsMatched / reward.pairs) * 100, 100);
+
+                    return (
+                        <div key={reward.pairs} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: `1px solid ${isClaimed ? '#10B981' : isEligible ? '#F59E0B' : '#E2E8F0'}` }}>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                                    <h3 style={{ margin: 0, color: '#0F172A' }}>{reward.name}</h3>
+                                    <span style={{ background: '#E0F2FE', color: '#0284C7', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>₹{reward.cash.toLocaleString()} Cash</span>
+                                </div>
+                                <div style={{ color: '#64748B', fontSize: '13px', marginBottom: '12px' }}>Target: {reward.pairs} Pairs</div>
+                                
+                                <div style={{ width: '100%', maxWidth: '300px', height: '6px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ width: `${progress}%`, height: '100%', background: isClaimed ? '#10B981' : isEligible ? '#F59E0B' : '#3B82F6', transition: 'width 1s ease-in-out' }}></div>
+                                </div>
+                            </div>
+                            <div>
+                                {isClaimed ? (
+                                    <span style={{ color: '#10B981', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>✅ Claimed</span>
+                                ) : isEligible ? (
+                                    <button onClick={() => handleClaim(reward.pairs)} style={{ padding: '10px 20px', background: '#F59E0B', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)' }}>
+                                        🎁 Claim Reward
+                                    </button>
+                                ) : (
+                                    <span style={{ color: '#94A3B8', fontWeight: 'bold', fontSize: '14px' }}>{reward.pairs - totalPairsMatched} Pairs Left</span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </CardWrapper>
+    );
+  };
+
   const renderContent = () => {
     switch(activeMenu) {
        case 'Dashboard': return renderDashboard();
        case 'Profile':
        case 'KYC': return renderProfile();
-       case 'My Network':
-       case 'Genealogy': return renderNetwork();
+       case 'My Network': return renderNetwork();
+       case 'Binary Genealogy': return renderBinaryTree();
        case 'Wallets': 
        case 'Passbook': return renderWallets();
        case 'Withdraw / P2P': return renderWithdrawal();
@@ -1120,18 +1996,21 @@ function App() {
        case 'Payout Approvals':
        case 'Payouts & TDS': return renderPayoutApprovals();
        case 'Notifications': return renderNotifications();
-       case 'AutoPool Matrix': return renderAutoPool();
+       case 'Non-Working Cashback': return renderRoyaltyAndCashback();
        case 'Add Member': return renderAddMember();
        case 'Fund Requests': return renderFundRequests();
-       case 'AutoPool Settings': return renderAutoPoolSettings();
+       case 'AutoPool Settings':
+       case 'Pool Distributions': return renderAutoPoolSettings();
        case 'KYC Approvals': return renderKYCApprovals();
        case 'Support Tickets': return renderSupportTickets();
        case 'System Settings': return renderSystemSettings();
-       case 'Rank Income':
-       case 'Rebirth ID':
+       case 'Royalty Pools': return renderRoyaltyAndCashback();
+       case 'Rebirth ID': return renderRebirths();
+       case 'Offers': 
+       case 'Awards & Rewards': return renderRewards();
+       case 'Deposit Funds': return renderDepositFunds();
+       case 'Transaction PIN': return renderTpinSettings();
        case 'Products':
-       case 'Offers':
-       case 'Deposit Funds':
        case 'Bank Settings':
        case 'Transaction PIN':
        case 'Change Password':

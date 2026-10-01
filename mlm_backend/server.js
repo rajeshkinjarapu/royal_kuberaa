@@ -48,6 +48,17 @@ cron.schedule('1 0 * * *', async () => {
     }
 });
 
+// Manual Cron Trigger for Testing
+app.post('/api/admin/trigger-cron', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        await mlmLogic.processDailyPools();
+        res.json({ success: true, message: 'Daily Pool Distribution Triggered Successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error triggering cron" });
+    }
+});
+
 // Basic Route
 app.get('/', (req, res) => res.json({ message: "Royal Kuberaa Secure API Running on MongoDB" }));
 
@@ -82,6 +93,12 @@ app.post('/api/login', async (req, res) => {
             { expiresIn: '1d' }
         );
 
+        let calculatedRank = 'STARTER';
+        if (user.isDiamond) calculatedRank = 'DIAMOND';
+        else if (user.isRuby) calculatedRank = 'RUBY';
+        else if (user.isPlatinum) calculatedRank = 'PLATINUM';
+        else if (user.isGold) calculatedRank = 'GOLD';
+
         res.json({
             success: true,
             token,
@@ -89,7 +106,7 @@ app.post('/api/login', async (req, res) => {
                 name: user.name, 
                 memberId: user.memberId, 
                 role: user.role, 
-                rank: user.rank, 
+                rank: calculatedRank, 
                 mainWallet: user.mainWallet, 
                 sponsorId: user.sponsorId 
             }
@@ -103,11 +120,11 @@ app.post('/api/login', async (req, res) => {
 // --- Register / Activate Route ---
 app.post('/api/register', async (req, res) => {
     try {
-        const { name, mobile, password, sponsorId } = req.body;
+        const { name, mobile, password, sponsorId, placement } = req.body;
         
         // Validation
-        if (!name || !mobile || !password) {
-            return res.status(400).json({ success: false, message: 'All fields are required.' });
+        if (!name || !mobile || !password || !placement) {
+            return res.status(400).json({ success: false, message: 'All fields including Position are required.' });
         }
 
         const existingUser = await User.findOne({ mobile });
@@ -138,13 +155,14 @@ app.post('/api/register', async (req, res) => {
             mobile,
             password: hashedPassword,
             sponsorId: sponsor ? sponsor.memberId : null,
+            placement: placement, // 'Left' or 'Right'
             role: 'member'
         });
 
         await newUser.save();
 
         // Trigger the MLM core logic for 1000 Rs distribution
-        await mlmLogic.activateUser(newUser, sponsor);
+        await mlmLogic.activateUser(newUser, sponsor, placement);
 
         res.status(201).json({ success: true, message: 'Registration successful! Rs 1000 distributed correctly.', user: newUser });
     } catch (error) {
@@ -167,58 +185,6 @@ app.get('/api/sponsor/:id', async (req, res) => {
     }
 });
 
-// --- Register Member Route (Secure) ---
-app.post('/api/register', async (req, res) => {
-    try {
-        const { name, mobile, sponsorId, password } = req.body;
-
-        // Check if mobile already exists
-        const existingMobile = await User.findOne({ mobile });
-        if (existingMobile) {
-            return res.status(400).json({ success: false, message: 'Mobile number already registered!' });
-        }
-
-        // Validate Sponsor
-        if (sponsorId.toUpperCase() !== 'ADMIN') {
-            const sponsor = await User.findOne({ memberId: sponsorId.toUpperCase() });
-            if (!sponsor) {
-                return res.status(400).json({ success: false, message: 'Invalid Sponsor ID!' });
-            }
-        }
-
-        // Generate Unique Member ID (RK + 5 random digits)
-        let newMemberId;
-        let isUnique = false;
-        while (!isUnique) {
-            newMemberId = 'RK' + Math.floor(10000 + Math.random() * 90000);
-            const exists = await User.findOne({ memberId: newMemberId });
-            if (!exists) isUnique = true;
-        }
-
-        // Hash Password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = await User.create({
-            memberId: newMemberId,
-            password: hashedPassword,
-            name,
-            mobile,
-            sponsorId: sponsorId.toUpperCase(),
-            role: "member",
-            rank: "STARTER",
-            mainWallet: 0
-        });
-
-        res.json({ 
-            success: true, 
-            message: 'Member Registered Successfully!', 
-            user: { memberId: newUser.memberId, name: newUser.name } 
-        });
-    } catch (error) {
-        console.error("Registration Error:", error);
-        res.status(500).json({ success: false, message: "Server error during registration" });
-    }
-});
 
 // --- Auth Middleware ---
 const authMiddleware = (req, res, next) => {
@@ -273,8 +239,14 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 allRanks: user.goldEarnings + user.platinumEarnings + user.rubyEarnings + user.crownDiamondEarnings,
                 networkStats: { 
                     directReferrals: user.directReferralsCount, 
-                    totalTeamSize: totalTeamSize, 
-                    autopoolStatus: user.autopoolLevel || 1 
+                    totalTeamSize: totalTeamSize,
+                    leftTeamCount: user.leftTeamCount,
+                    rightTeamCount: user.rightTeamCount,
+                    leftCarryForward: user.leftCarryForward,
+                    rightCarryForward: user.rightCarryForward,
+                    todayPairsCount: user.todayPairsCount,
+                    todayPairsFlushedCount: user.todayPairsFlushedCount,
+                    totalPairsMatched: user.totalPairsMatched
                 }
             }
         });
@@ -469,12 +441,25 @@ app.post('/api/admin/users/:id/toggle-block', authMiddleware, async (req, res) =
 app.get('/api/transactions', authMiddleware, async (req, res) => {
     try {
         const Transaction = require('./models/Transaction');
-        const transactions = await Transaction.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        const transactions = await Transaction.find({ memberId: req.user.memberId }).sort({ createdAt: -1 });
         res.json({ success: true, data: transactions });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
     }
 });
+
+// Admin: Get all pending withdrawals
+app.get('/api/admin/withdrawals', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const Withdrawal = require('./models/Withdrawal');
+        const pending = await Withdrawal.find({ status: 'Pending' }).sort({ requestDate: -1 });
+        res.json({ success: true, data: pending });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching withdrawals" });
+    }
+});
+
 // Admin: Approve or Reject Withdrawal
 app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
     try {
@@ -518,6 +503,616 @@ app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
     }
+});
+
+// Binary Tree API
+app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
+    try {
+        const rootMemberId = req.params.memberId || req.user.memberId;
+        
+        // Fetch up to 3 levels deep recursively
+        async function fetchNode(memberId, level) {
+            if (!memberId || level > 3) return null;
+            const user = await User.findOne({ memberId: memberId.toUpperCase() });
+            if (!user) return null;
+            
+            return {
+                id: user.memberId,
+                name: user.name,
+                rank: user.rank || (user.isGold ? 'GOLD' : 'STARTER'),
+                isActive: user.isActive,
+                leftTeamCount: user.leftTeamCount,
+                rightTeamCount: user.rightTeamCount,
+                left: await fetchNode(user.leftUpline, level + 1),
+                right: await fetchNode(user.rightUpline, level + 1)
+            };
+        }
+
+        const treeData = await fetchNode(rootMemberId, 1);
+        if (!treeData) {
+            return res.status(404).json({ success: false, message: 'Member not found' });
+        }
+
+        res.json({ success: true, data: treeData });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching tree" });
+    }
+});
+
+// My Network (Direct Referrals) API
+app.get('/api/network/directs', authMiddleware, async (req, res) => {
+    try {
+        const directs = await User.find({ sponsorId: req.user.memberId })
+                                  .select('memberId name mobile joinDate isActive isGold')
+                                  .sort({ joinDate: -1 });
+        
+        const data = directs.map(user => ({
+            id: user.memberId,
+            name: user.name,
+            mobile: user.mobile,
+            joinDate: new Date(user.joinDate).toLocaleDateString(),
+            status: user.isActive ? 'Active' : 'Blocked',
+            rank: user.isGold ? 'Gold' : 'Starter'
+        }));
+
+        res.json({ success: true, data });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching directs" });
+    }
+});
+
+// Rebirth IDs API
+app.get('/api/network/rebirths', authMiddleware, async (req, res) => {
+    try {
+        const rebirths = await User.find({ mainUserId: req.user.id, isRebirth: true })
+                                   .select('memberId name joinDate leftTeamCount rightTeamCount totalEarnings')
+                                   .sort({ joinDate: -1 });
+        
+        const data = rebirths.map(user => ({
+            id: user.memberId,
+            name: user.name,
+            joinDate: new Date(user.joinDate).toLocaleDateString(),
+            leftTeam: user.leftTeamCount,
+            rightTeam: user.rightTeamCount,
+            earnings: user.totalEarnings
+        }));
+
+        res.json({ success: true, data });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching rebirths" });
+    }
+});
+
+// Get User Profile & KYC
+app.get('/api/user/profile', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        res.json({ success: true, user, hasTpin: !!user.tpin });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching profile" });
+    }
+});
+
+// Set / Change T-PIN
+app.post('/api/user/tpin', authMiddleware, async (req, res) => {
+    try {
+        const { currentTpin, newTpin } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        if (user.tpin && user.tpin !== currentTpin) {
+            return res.status(400).json({ success: false, message: "Incorrect current T-PIN" });
+        }
+        
+        user.tpin = newTpin;
+        await user.save();
+        res.json({ success: true, message: "T-PIN updated successfully!" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error updating T-PIN" });
+    }
+});
+
+// Update User KYC
+app.post('/api/user/kyc', authMiddleware, async (req, res) => {
+    try {
+        const { panNumber, aadharNumber, bankName, accountNumber, ifscCode } = req.body;
+        const user = await User.findById(req.user.id);
+        
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        // Cannot edit if already approved
+        if (user.kycStatus === 'Approved') {
+            return res.status(400).json({ success: false, message: 'KYC is already approved and cannot be edited.' });
+        }
+
+        user.panNumber = panNumber || user.panNumber;
+        user.aadharNumber = aadharNumber || user.aadharNumber;
+        user.bankName = bankName || user.bankName;
+        user.accountNumber = accountNumber || user.accountNumber;
+        user.ifscCode = ifscCode || user.ifscCode;
+        user.kycStatus = 'Submitted'; // Mark as submitted for admin review
+
+        await user.save();
+        res.json({ success: true, message: 'KYC Details Submitted Successfully!', user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error updating KYC" });
+    }
+});
+
+// Admin: Fetch pending KYC requests
+app.get('/api/admin/kyc', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const users = await User.find({ kycStatus: 'Submitted' }).select('memberId name panNumber aadharNumber bankName accountNumber ifscCode kycStatus');
+        res.json({ success: true, data: users });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching KYC requests" });
+    }
+});
+
+// Admin: Approve/Reject KYC
+app.post('/api/admin/kyc/:memberId', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const { action } = req.body; // 'approve' or 'reject'
+        const user = await User.findOne({ memberId: req.params.memberId });
+        
+        if (!user || user.kycStatus !== 'Submitted') {
+            return res.status(400).json({ success: false, message: 'Invalid or already processed request.' });
+        }
+
+        user.kycStatus = action === 'approve' ? 'Approved' : 'Rejected';
+        await user.save();
+
+        res.json({ success: true, message: `KYC ${action}d successfully for ${user.memberId}` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error processing KYC" });
+    }
+});
+
+// Master list of rewards
+const REWARDS_PLAN = [
+    { pairs: 50, name: "Smartphone", cash: 5000 },
+    { pairs: 150, name: "Smart TV / Laptop", cash: 15000 },
+    { pairs: 500, name: "Bike Fund", cash: 50000 },
+    { pairs: 1500, name: "Royal Enfield / Gold", cash: 150000 },
+    { pairs: 5000, name: "Car Fund", cash: 500000 },
+    { pairs: 15000, name: "Luxury Car Fund", cash: 1500000 },
+    { pairs: 50000, name: "Dream Villa", cash: 5000000 }
+];
+
+// Get User Rewards Status
+app.get('/api/user/rewards', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('totalPairsMatched claimedRewards');
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        res.json({
+            success: true,
+            totalPairsMatched: user.totalPairsMatched,
+            claimedRewards: user.claimedRewards,
+            rewardsPlan: REWARDS_PLAN
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching rewards" });
+    }
+});
+
+// --- Withdrawals API ---
+app.post('/api/withdraw', authMiddleware, async (req, res) => {
+    try {
+        const { amount, tpin } = req.body;
+        const requestedAmount = Number(amount);
+
+        const user = await User.findById(req.user.id);
+        
+        if (!user.tpin || user.tpin !== tpin) {
+            return res.status(400).json({ success: false, message: "Invalid Transaction PIN (T-PIN)." });
+        }
+
+        const SystemSetting = require('./models/SystemSetting');
+        let settings = await SystemSetting.findOne();
+        const minWithdrawal = settings ? settings.minimumWithdrawal : 200;
+
+        if (!requestedAmount || requestedAmount < minWithdrawal) {
+            return res.status(400).json({ success: false, message: `Minimum withdrawal amount is ₹${minWithdrawal}.` });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (user.mainWallet < requestedAmount) {
+            return res.status(400).json({ success: false, message: "Insufficient main wallet balance." });
+        }
+
+        const tds = settings ? settings.tdsPercentage : 5;
+        const adminCharge = settings ? settings.adminChargePercentage : 5;
+        
+        const tdsAmount = (requestedAmount * tds) / 100;
+        const adminChargeAmount = (requestedAmount * adminCharge) / 100;
+        const netAmount = requestedAmount - (tdsAmount + adminChargeAmount);
+
+        // Deduct from wallet
+        user.mainWallet -= requestedAmount;
+        await user.save();
+
+        const Withdrawal = require('./models/Withdrawal');
+        await Withdrawal.create({
+            userId: user._id,
+            memberId: user.memberId,
+            grossAmount: requestedAmount,
+            tdsAmount,
+            adminChargeAmount,
+            netAmount,
+            status: 'Approved' // Business plan rule 82: "Withdrawals are processed automatically and set to 'Approved' status."
+        });
+
+        // Add Transaction for record
+        const Transaction = require('./models/Transaction');
+        await Transaction.create({
+            memberId: user.memberId,
+            type: 'Debit',
+            category: 'WITHDRAWAL',
+            remark: `Bank Withdrawal (Net Payable: ₹${netAmount})`,
+            amount: requestedAmount,
+            status: 'COMPLETED',
+            date: new Date()
+        });
+
+        res.json({ success: true, message: `Withdrawal of ₹${requestedAmount} processed successfully! Net Payable: ₹${netAmount}`, newBalance: user.mainWallet });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error processing withdrawal" });
+    }
+});
+
+app.get('/api/admin/withdrawals', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const Withdrawal = require('./models/Withdrawal');
+        const withdrawals = await Withdrawal.find().sort({ createdAt: -1 });
+        res.json({ success: true, data: withdrawals });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching withdrawals" });
+    }
+});
+
+app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { action } = req.body;
+        const Withdrawal = require('./models/Withdrawal');
+        const withdrawal = await Withdrawal.findById(req.params.id);
+        
+        if (!withdrawal) return res.status(404).json({ success: false, message: "Request not found" });
+        
+        withdrawal.status = action === 'approve' ? 'Approved' : 'Rejected';
+        
+        // If rejected, refund to user wallet
+        if (action === 'reject') {
+            const user = await User.findById(withdrawal.userId);
+            if (user) {
+                user.mainWallet += withdrawal.grossAmount;
+                await user.save();
+                
+                const Transaction = require('./models/Transaction');
+                await Transaction.create({
+                    memberId: user.memberId,
+                    type: 'Credit',
+                    category: 'REFUND',
+                    remark: `Withdrawal Rejected - Refunded`,
+                    amount: withdrawal.grossAmount,
+                    status: 'COMPLETED',
+                    date: new Date()
+                });
+            }
+        }
+        
+        await withdrawal.save();
+        res.json({ success: true, message: `Withdrawal ${action}d successfully.` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// Claim Reward
+app.post('/api/user/rewards/claim', authMiddleware, async (req, res) => {
+    try {
+        const { pairs } = req.body;
+        const user = await User.findById(req.user.id);
+        
+        const rewardConfig = REWARDS_PLAN.find(r => r.pairs === pairs);
+        if (!rewardConfig) return res.status(400).json({ success: false, message: 'Invalid reward tier' });
+
+        if (user.totalPairsMatched < rewardConfig.pairs) {
+            return res.status(400).json({ success: false, message: `You need ${rewardConfig.pairs} pairs to claim this reward.` });
+        }
+
+        const alreadyClaimed = user.claimedRewards.some(r => r.pairs === pairs);
+        if (alreadyClaimed) {
+            return res.status(400).json({ success: false, message: 'Reward already claimed.' });
+        }
+
+        // Add to claimed array
+        user.claimedRewards.push({
+            pairs: rewardConfig.pairs,
+            rewardName: rewardConfig.name,
+            amount: rewardConfig.cash
+        });
+
+        // Add income via MLM Logic (distributes 80/20 if we use addIncome, BUT rewards are lifetime cash bonus!
+        // The business plan doesn't specify if rewards go through 80/20 rebirth split. 
+        // Usually rewards are 100% credited to main wallet or given as cash/gift. Let's credit to mainWallet directly to avoid Rebirth deduction on Gifts.
+        user.mainWallet += rewardConfig.cash;
+        user.totalEarnings += rewardConfig.cash;
+        
+        await user.save();
+
+        const Transaction = require('./models/Transaction');
+        await Transaction.create({
+            memberId: user.memberId,
+            type: 'Credit',
+            category: 'REWARD',
+            remark: `${rewardConfig.name} Reward Claimed (${rewardConfig.pairs} Pairs)`,
+            amount: rewardConfig.cash,
+            status: 'COMPLETED',
+            date: new Date()
+        });
+
+        res.json({ success: true, message: `Congratulations! ${rewardConfig.name} cash value added to your Main Wallet.` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error claiming reward" });
+    }
+});
+
+// P2P Transfer API
+app.post('/api/p2p', authMiddleware, async (req, res) => {
+    try {
+        const { receiverId, amount, tpin } = req.body;
+        const transferAmount = Number(amount);
+
+        if (!receiverId || transferAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid amount or receiver ID" });
+        }
+
+        const sender = await User.findById(req.user.id);
+        if (!sender) return res.status(404).json({ success: false, message: "Sender not found" });
+
+        if (!sender.tpin || sender.tpin !== tpin) {
+            return res.status(400).json({ success: false, message: "Invalid Transaction PIN (T-PIN)." });
+        }
+
+        if (sender.memberId === receiverId) {
+            return res.status(400).json({ success: false, message: "You cannot transfer to yourself" });
+        }
+
+        if (sender.mainWallet < transferAmount) {
+            return res.status(400).json({ success: false, message: "Insufficient balance for transfer" });
+        }
+
+        const receiver = await User.findOne({ memberId: receiverId, isRebirth: false });
+        if (!receiver) {
+            return res.status(404).json({ success: false, message: "Receiver not found or is a Rebirth ID" });
+        }
+
+        // 5% P2P Charge
+        const adminCharge = transferAmount * 0.05;
+        const finalAmountForReceiver = transferAmount - adminCharge;
+
+        // Deduct from Sender
+        sender.mainWallet -= transferAmount;
+        await sender.save();
+
+        // Add to Receiver
+        receiver.mainWallet += finalAmountForReceiver;
+        receiver.totalEarnings += finalAmountForReceiver; // Optional: whether P2P counts as earnings
+        await receiver.save();
+
+        // Create Transactions
+        const Transaction = require('./models/Transaction');
+        
+        // Sender Debit Transaction
+        await Transaction.create({
+            memberId: sender.memberId,
+            type: 'Debit',
+            category: 'P2P_TRANSFER',
+            remark: `P2P Transfer to ${receiver.name} (${receiverId})`,
+            amount: transferAmount,
+            status: 'COMPLETED',
+            date: new Date()
+        });
+
+        // Receiver Credit Transaction
+        await Transaction.create({
+            memberId: receiver.memberId,
+            type: 'Credit',
+            category: 'P2P_RECEIVE',
+            remark: `P2P Received from ${sender.name} (${sender.memberId}) - 5% Charge applied`,
+            amount: finalAmountForReceiver,
+            status: 'COMPLETED',
+            date: new Date()
+        });
+
+        res.json({ 
+            success: true, 
+            message: `Successfully transferred ₹${transferAmount} to ${receiver.name}.`,
+            newBalance: sender.mainWallet
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error during P2P transfer" });
+    }
+});
+
+// --- Fund Requests API ---
+app.post('/api/fund-request', authMiddleware, async (req, res) => {
+    try {
+        const { amount, utrNumber, receiptUrl } = req.body;
+        if (!amount || !utrNumber) return res.status(400).json({ success: false, message: "Amount and UTR Number are required." });
+
+        const FundRequest = require('./models/FundRequest');
+        await FundRequest.create({
+            userId: req.user.id,
+            memberId: req.user.memberId,
+            amount: Number(amount),
+            utrNumber,
+            receiptUrl
+        });
+
+        res.json({ success: true, message: "Fund request submitted successfully. Waiting for admin approval." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error creating fund request" });
+    }
+});
+
+app.get('/api/admin/fund-requests', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const FundRequest = require('./models/FundRequest');
+        const requests = await FundRequest.find({ status: 'Pending' }).sort({ requestDate: -1 });
+        res.json({ success: true, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error fetching requests" });
+    }
+});
+
+app.post('/api/admin/fund-requests/:id', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { action } = req.body; // 'approve' or 'reject'
+        const FundRequest = require('./models/FundRequest');
+        const request = await FundRequest.findById(req.params.id);
+        
+        if (!request || request.status !== 'Pending') {
+            return res.status(400).json({ success: false, message: 'Invalid or already processed request.' });
+        }
+
+        if (action === 'approve') {
+            request.status = 'Approved';
+            request.processDate = new Date();
+            await request.save();
+
+            const user = await User.findById(request.userId);
+            if (user) {
+                user.mainWallet += request.amount;
+                await user.save();
+
+                const Transaction = require('./models/Transaction');
+                await Transaction.create({
+                    memberId: user.memberId,
+                    type: 'Credit',
+                    category: 'DEPOSIT',
+                    remark: `Fund Request Approved (UTR: ${request.utrNumber})`,
+                    amount: request.amount,
+                    status: 'COMPLETED',
+                    date: new Date()
+                });
+            }
+        } else if (action === 'reject') {
+            request.status = 'Rejected';
+            request.processDate = new Date();
+            await request.save();
+        }
+
+        res.json({ success: true, message: `Fund request ${action}d successfully.` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error processing request" });
+    }
+});
+
+// --- Royalty Pools API ---
+app.get('/api/admin/pools', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const GlobalPool = require('./models/GlobalPool');
+        const pools = await GlobalPool.find().lean();
+        
+        const poolStats = pools.map(pool => ({
+            _id: pool._id,
+            poolName: pool.poolName,
+            totalFund: pool.totalFund,
+            membersCount: pool.activeQueue ? pool.activeQueue.length : 0
+        }));
+        res.json({ success: true, data: poolStats });
+    } catch (err) { res.status(500).json({ success: false, message: "Error fetching pools" }); }
+});
+
+// --- Support Tickets API ---
+app.post('/api/tickets', authMiddleware, async (req, res) => {
+    try {
+        const { subject, message } = req.body;
+        const SupportTicket = require('./models/SupportTicket');
+        await SupportTicket.create({
+            userId: req.user.id,
+            memberId: req.user.memberId,
+            subject,
+            message
+        });
+        res.json({ success: true, message: "Ticket created successfully!" });
+    } catch (err) { res.status(500).json({ success: false, message: "Error creating ticket" }); }
+});
+
+app.get('/api/tickets', authMiddleware, async (req, res) => {
+    try {
+        const SupportTicket = require('./models/SupportTicket');
+        const tickets = await SupportTicket.find({ userId: req.user.id }).sort({ createdAt: -1 });
+        res.json({ success: true, data: tickets });
+    } catch (err) { res.status(500).json({ success: false, message: "Error fetching tickets" }); }
+});
+
+app.get('/api/admin/tickets', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const SupportTicket = require('./models/SupportTicket');
+        const tickets = await SupportTicket.find().sort({ createdAt: -1 });
+        res.json({ success: true, data: tickets });
+    } catch (err) { res.status(500).json({ success: false, message: "Error fetching tickets" }); }
+});
+
+app.post('/api/admin/tickets/:id/reply', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { reply } = req.body;
+        const SupportTicket = require('./models/SupportTicket');
+        const ticket = await SupportTicket.findById(req.params.id);
+        if(!ticket) return res.status(404).json({ success: false, message: "Ticket not found" });
+        
+        ticket.reply = reply;
+        ticket.status = 'Resolved';
+        ticket.replyDate = new Date();
+        await ticket.save();
+        res.json({ success: true, message: "Reply sent successfully!" });
+    } catch (err) { res.status(500).json({ success: false, message: "Error replying to ticket" }); }
+});
+
+// --- System Settings API ---
+app.get('/api/settings', async (req, res) => {
+    try {
+        const SystemSetting = require('./models/SystemSetting');
+        let settings = await SystemSetting.findOne();
+        if (!settings) {
+            settings = await SystemSetting.create({});
+        }
+        res.json({ success: true, data: settings });
+    } catch (err) { res.status(500).json({ success: false, message: "Error fetching settings" }); }
+});
+
+app.post('/api/admin/settings', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const SystemSetting = require('./models/SystemSetting');
+        let settings = await SystemSetting.findOne();
+        if (!settings) settings = new SystemSetting();
+        
+        settings.siteName = req.body.siteName ?? settings.siteName;
+        settings.tdsPercentage = req.body.tdsPercentage ?? settings.tdsPercentage;
+        settings.adminChargePercentage = req.body.adminChargePercentage ?? settings.adminChargePercentage;
+        settings.minimumWithdrawal = req.body.minimumWithdrawal ?? settings.minimumWithdrawal;
+        settings.maintenanceMode = req.body.maintenanceMode ?? settings.maintenanceMode;
+        
+        await settings.save();
+        res.json({ success: true, message: "Settings updated successfully!", data: settings });
+    } catch (err) { res.status(500).json({ success: false, message: "Error saving settings" }); }
 });
 
 const PORT = process.env.PORT || 5000;
