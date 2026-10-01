@@ -540,7 +540,26 @@ body {
 }
 
 .login-logo {
-  display: none;
+  display: block;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(108, 40, 217, 0.15);
+  border: 3px solid #ffffff;
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(108, 40, 217, 0.15);
+  }
+  100% {
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(108, 40, 217, 0.4);
+  }
 }
 
 .login-brand-name {
@@ -730,13 +749,14 @@ body {
 
   .login-logo {
     display: block;
-    width: 64px;
-    height: 64px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 12px;
     box-shadow: 0 4px 12px rgba(108, 40, 217, 0.2);
     border: 3px solid #ffffff;
+    animation: pulseGlow 2s ease-in-out infinite alternate;
   }
   
   .login-content {
