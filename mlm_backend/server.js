@@ -37,7 +37,7 @@ mongoose.connect(MONGO_URI)
 
 
 // Basic Route
-app.get('/', (req, res) => res.json({ message: "Royal Kuberaa Secure API Running" }));
+app.get('/', (req, res) => res.json({ message: "Royal Kuberaa Secure API Running on MongoDB" }));
 
 // --- Auth Routes ---
 app.post('/api/login', async (req, res) => {
@@ -151,7 +151,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Dashboard Data Route (Mocked for now, will connect to real logic later)
+// Dashboard Data Route (Mocked for now)
 app.get('/api/dashboard', async (req, res) => {
     const userCount = await User.countDocuments();
     res.json({
