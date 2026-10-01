@@ -369,7 +369,8 @@ function App() {
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
                 <div className="form-group">
-                  <input type="text" name="memberId" className="form-input" placeholder="User ID or Mobile No" required />
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>User ID / Mobile Number</label>
+                  <input type="text" name="memberId" className="form-input" placeholder="Enter your ID or Mobile" required />
                 </div>
                 <div className="form-group">
                   <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password (6 Digits)</label>
@@ -393,13 +394,16 @@ function App() {
             ) : (
               <form className="login-form" onSubmit={handleRegister}>
                 <div className="form-group">
-                  <input type="text" name="name" className="form-input" placeholder="Full Name" required />
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Full Name</label>
+                  <input type="text" name="name" className="form-input" placeholder="Enter Full Name" required />
                 </div>
                 <div className="form-group">
-                  <input type="tel" name="mobile" className="form-input" placeholder="Mobile Number" required pattern="[0-9]{10}" maxLength="10" />
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Mobile Number</label>
+                  <input type="tel" name="mobile" className="form-input" placeholder="Enter Mobile Number" required pattern="[0-9]{10}" maxLength="10" />
                 </div>
                 <div className="form-group">
-                  <input type="text" name="sponsorId" className="form-input" placeholder="Sponsor ID" required onBlur={handleSponsorCheck} />
+                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Sponsor ID</label>
+                  <input type="text" name="sponsorId" className="form-input" placeholder="Enter Sponsor ID" required onBlur={handleSponsorCheck} />
                   {sponsorName && (
                     <div style={{ marginTop: '6px', fontSize: '13px', fontWeight: '600', color: sponsorName === 'Invalid Sponsor ID' || sponsorName === 'Network Error' ? '#e11d48' : '#10b981' }}>
                       {checkingSponsor ? 'Checking...' : (sponsorName !== 'Invalid Sponsor ID' && sponsorName !== 'Network Error' ? `✓ Sponsor: ${sponsorName}` : `✕ ${sponsorName}`)}
