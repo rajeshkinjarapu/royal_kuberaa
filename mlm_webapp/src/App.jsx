@@ -388,7 +388,7 @@ function App() {
             </div>
             {/* App Store Buttons Placeholder */}
             {authView === 'login' && (
-               <div style={{ display: 'flex', gap: '16px', marginTop: '32px', justifyContent: 'flex-start' }}>
+               <div style={{ display: 'flex', gap: '16px', marginTop: '32px', justifyContent: 'center' }}>
                  <a href="#" style={{ display: 'inline-block', transition: 'transform 0.2s', ':hover': { transform: 'scale(1.05)' } }}>
                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" style={{ height: '40px', cursor: 'pointer' }} />
                  </a>
