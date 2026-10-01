@@ -437,7 +437,7 @@ function App() {
   );
 
   const CardWrapper = ({ children }) => (
-    <div style={{ background: 'white', padding: '30px', borderRadius: '24px', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)' }}>
+    <div className="content-card-wrapper">
       {children}
     </div>
   );
