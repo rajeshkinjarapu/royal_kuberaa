@@ -69,6 +69,7 @@ function App() {
   const [registeredDetails, setRegisteredDetails] = useState(null);
   const captureRef = useRef(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // States
   const [userData, setUserData] = useState(null);
@@ -641,7 +642,8 @@ function App() {
 
   return (
     <div className="app-container">
-      <aside className="sidebar">
+      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}></div>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0 16px 0', gap: '12px' }}>
           <img src="/royal-kuberaa-logo.jpg" alt="Logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }} />
           <div className="brand-title" style={{ fontSize: '22px' }}>Royal Kuberaa</div>
@@ -655,7 +657,7 @@ function App() {
               <div 
                 key={item.name} 
                 className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
-                onClick={() => setActiveMenu(item.name)}
+                onClick={() => { setActiveMenu(item.name); setSidebarOpen(false); }}
               >
                 <span className="menu-icon">{item.icon}</span>
                 {item.name}
@@ -675,7 +677,10 @@ function App() {
 
       <main className="main-content">
         <header className="topbar" style={{ background: '#0B1437' }}>
-          <div className="page-title" style={{ color: 'white' }}>{activeMenu}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', display: 'none' }}>☰</button>
+            <div className="page-title" style={{ color: 'white' }}>{activeMenu}</div>
+          </div>
           <div className="topbar-actions">
             <button className="notification-btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', width: '44px', height: '44px', borderRadius: '50%', cursor: 'pointer' }}>🔔</button>
           </div>
