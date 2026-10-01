@@ -59,9 +59,13 @@ const PinInput = ({ name }) => {
 };
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('isLoggedIn') === 'true';
+  });
   const [authView, setAuthView] = useState('login'); 
-  const [userRole, setUserRole] = useState('member'); 
+  const [userRole, setUserRole] = useState(() => {
+    return localStorage.getItem('userRole') || 'member';
+  });
   const [activeMenu, setActiveMenu] = useState('Dashboard');
   const [loading, setLoading] = useState(false);
   const [sponsorName, setSponsorName] = useState('');
@@ -72,8 +76,21 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // States
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(() => {
+    const savedData = localStorage.getItem('userData');
+    return savedData ? JSON.parse(savedData) : null;
+  });
   const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem('isLoggedIn', isLoggedIn);
+    localStorage.setItem('userRole', userRole);
+    if (userData) {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    } else {
+      localStorage.removeItem('userData');
+    }
+  }, [isLoggedIn, userRole, userData]);
 
   // Fallback Dummy Data for UI Completeness
   const dummyWallets = {
@@ -703,7 +720,7 @@ function App() {
         </div>
         <div style={{ padding: '20px', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
           <button 
-            onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); }}
+            onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); localStorage.clear(); }}
             style={{ width: '100%', padding: '12px', background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48', border: '1px solid rgba(225, 29, 72, 0.2)', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
           >
             <span>🚪</span> Logout
