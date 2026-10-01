@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
+import * as htmlToImage from 'html-to-image';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -9,7 +10,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [sponsorName, setSponsorName] = useState('');
   const [checkingSponsor, setCheckingSponsor] = useState(false);
-  const [registeredMemberId, setRegisteredMemberId] = useState(null);
+  const [registeredDetails, setRegisteredDetails] = useState(null);
+  const captureRef = useRef(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   // States
@@ -171,7 +173,7 @@ function App() {
       const result = await response.json();
       
       if (result.success) {
-        setRegisteredMemberId(result.user.memberId);
+        setRegisteredDetails({ memberId: result.user.memberId, mobile, password });
       } else {
         setErrorMsg(result.message || 'Registration failed');
       }
@@ -182,8 +184,22 @@ function App() {
     }
   };
 
+  const handleDownloadImage = async () => {
+    if (captureRef.current) {
+      try {
+        const dataUrl = await htmlToImage.toPng(captureRef.current, { quality: 1, backgroundColor: '#ffffff' });
+        const link = document.createElement('a');
+        link.download = 'RoyalKuberaa-AccountDetails.png';
+        link.href = dataUrl;
+        link.click();
+      } catch (err) {
+        console.error('Failed to save image', err);
+      }
+    }
+  };
+
   if (!isLoggedIn) {
-    if (registeredMemberId) {
+    if (registeredDetails) {
       return (
         <div className="login-wrapper">
           <div className="login-container">
@@ -195,19 +211,45 @@ function App() {
               <h2 className="login-title">Registration Successful!</h2>
               <p className="login-subtitle" style={{ marginBottom: '24px' }}>Welcome to Royal Kuberaa. Your account has been created.</p>
               
-              <div style={{ background: '#f8faff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '32px' }}>
-                <p style={{ color: '#6c28d9', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: '700' }}>Your Login ID</p>
-                <h1 style={{ color: '#1e1b4b', fontSize: '32px', fontWeight: '900', margin: 0, letterSpacing: '2px' }}>{registeredMemberId}</h1>
-                <p style={{ color: '#f43f5e', fontSize: '13px', marginTop: '12px', fontWeight: '600' }}>⚠️ Please copy and save this ID safely!</p>
+              <div ref={captureRef} style={{ background: '#f8faff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                <p style={{ color: '#6c28d9', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontWeight: '800' }}>Your Account Details</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', background: 'white', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Login ID</span>
+                      <span style={{ fontSize: '18px', color: '#1e1b4b', fontWeight: '800' }}>{registeredDetails.memberId}</span>
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }}></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Mobile</span>
+                      <span style={{ fontSize: '15px', color: '#1e1b4b', fontWeight: '700' }}>{registeredDetails.mobile}</span>
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }}></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password</span>
+                      <span style={{ fontSize: '15px', color: '#1e1b4b', fontWeight: '700' }}>{registeredDetails.password}</span>
+                   </div>
+                </div>
+
+                <p style={{ color: '#f43f5e', fontSize: '12px', marginTop: '16px', fontWeight: '600' }}>⚠️ Please save these details safely!</p>
               </div>
 
-              <button 
-                onClick={() => { setRegisteredMemberId(null); setAuthView('login'); }}
-                className="login-submit-btn" 
-                style={{ width: '100%' }}
-              >
-                Proceed to Login
-              </button>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={handleDownloadImage}
+                  className="login-submit-btn" 
+                  style={{ flex: 1, background: '#10b981', boxShadow: '0 4px 14px 0 rgba(16, 185, 129, 0.39)', marginTop: 0 }}
+                >
+                  📥 Save Image
+                </button>
+                <button 
+                  onClick={() => { setRegisteredDetails(null); setAuthView('login'); }}
+                  className="login-submit-btn" 
+                  style={{ flex: 1, marginTop: 0 }}
+                >
+                  Login Now
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -222,6 +264,7 @@ function App() {
           </div>
           <div className="login-content">
             <div className="login-header">
+              <h3 style={{ color: '#6c28d9', fontSize: '16px', fontWeight: '800', marginBottom: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>Royal Kuberaa</h3>
               <h1 className="login-title">{authView === 'login' ? 'Hello,' : 'Welcome,'}</h1>
               <h1 className="login-title">{authView === 'login' ? 'Welcome back' : 'Create Account'}</h1>
             </div>
