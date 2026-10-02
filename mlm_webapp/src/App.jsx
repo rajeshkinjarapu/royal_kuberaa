@@ -502,13 +502,13 @@ function App() {
   );
 
   const CardWrapper = ({ children }) => (
-    <div className="content-card-wrapper">
+    <div className="content-card-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
       {children}
     </div>
   );
 
   const Table = ({ headers, children }) => (
-    <div style={{ overflowX: 'auto' }}>
+    <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
         <thead>
           <tr style={{ background: '#F1F5F9', color: '#64748B' }}>
