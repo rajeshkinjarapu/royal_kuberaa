@@ -652,7 +652,7 @@ function App() {
                 }
             } catch(err) { console.error(err); }
         };
-        if (activeMenu === 'Profile' || activeMenu === 'KYC') fetchProfile();
+        fetchProfile();
     }, [activeMenu]);
 
     const handleKycSubmit = async (e) => {
@@ -1692,25 +1692,52 @@ function App() {
   const renderAddMember = () => (
     <CardWrapper>
       <PageHeader title="Add New Member" subtitle="Register a new member in your downline" />
-      <form onSubmit={handleAddMember} style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Sponsor ID</label>
-          <input type="text" className="form-input" value={userData?.memberId} readOnly style={{ background: '#F1F5F9' }} />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Full Name</label>
-          <input type="text" name="name" className="form-input" placeholder="Enter member name" required />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Mobile Number</label>
-          <input type="tel" name="mobile" className="form-input" placeholder="10-digit mobile number" required />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Password</label>
-          <input type="password" name="password" className="form-input" placeholder="Set password" required />
-        </div>
-        <button type="submit" name="submitBtn" className="login-submit-btn">Register Member</button>
-      </form>
+      <div style={{ padding: '32px', background: '#F8FAFC', borderRadius: '24px', border: '1px solid #E2E8F0', maxWidth: '600px', margin: '0 auto' }}>
+          <form onSubmit={handleAddMember} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Sponsor ID</label>
+                  <input type="text" name="sponsorId" className="form-input" value={userData?.memberId} readOnly style={{ background: '#E2E8F0', color: '#64748B', fontWeight: 'bold' }} />
+                </div>
+                
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Full Name</label>
+                  <input type="text" name="name" className="form-input" placeholder="Enter member name" required />
+                </div>
+                
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Mobile Number</label>
+                  <input type="tel" name="mobile" className="form-input" placeholder="10-digit mobile number" required pattern="[0-9]{10}" maxLength="10" />
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Position (Placement)</label>
+                  <div style={{ display: 'flex', gap: '24px', padding: '12px', background: '#FFF', borderRadius: '12px', border: '1px solid #CBD5E1' }}>
+                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', color: '#334155' }}>
+                        <input type="radio" name="placement" value="Left" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#4F46E5' }} />
+                        Left Team
+                     </label>
+                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', color: '#334155' }}>
+                        <input type="radio" name="placement" value="Right" style={{ width: '20px', height: '20px', accentColor: '#4F46E5' }} />
+                        Right Team
+                     </label>
+                  </div>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Password (6 Digits)</label>
+                  <div style={{ padding: '8px 0' }}>
+                     <PinInput name="password" />
+                  </div>
+                </div>
+            </div>
+
+            <button type="submit" name="submitBtn" style={{ marginTop: '16px', padding: '16px', background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '16px', boxShadow: '0 10px 25px -5px rgba(79,70,229,0.4)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
+               Register Member
+            </button>
+          </form>
+      </div>
     </CardWrapper>
   );
 
