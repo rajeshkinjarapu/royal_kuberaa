@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
-const PinInput = ({ name }) => {
-  const [pin, setPin] = useState(['', '', '', '', '', '']);
+const PinInput = ({ name, length = 6 }) => {
+  const [pin, setPin] = useState(Array(length).fill(''));
   const inputRefs = useRef([]);
 
   const handleChange = (index, value) => {
@@ -11,7 +11,7 @@ const PinInput = ({ name }) => {
     const newPin = [...pin];
     newPin[index] = value;
     setPin(newPin);
-    if (value !== '' && index < 5) {
+    if (value !== '' && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -24,20 +24,20 @@ const PinInput = ({ name }) => {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const paste = e.clipboardData.getData('text').slice(0, 6).replace(/[^0-9]/g, '');
+    const paste = e.clipboardData.getData('text').slice(0, length).replace(/[^0-9]/g, '');
     if (paste) {
       const newPin = [...pin];
       paste.split('').forEach((char, i) => {
         newPin[i] = char;
       });
       setPin(newPin);
-      const nextIndex = Math.min(paste.length, 5);
+      const nextIndex = Math.min(paste.length, length - 1);
       inputRefs.current[nextIndex]?.focus();
     }
   };
 
   return (
-    <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', width: '100%' }}>
+    <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', width: '100%', maxWidth: `${length * 60}px` }}>
       <input type="hidden" name={name} value={pin.join('')} />
       {pin.map((digit, index) => (
         <input
@@ -51,7 +51,7 @@ const PinInput = ({ name }) => {
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={index === 0 ? handlePaste : undefined}
           className="form-input"
-          style={{ flex: 1, minWidth: '0', height: '48px', textAlign: 'center', fontSize: '24px', padding: '0', fontWeight: '800' }}
+          style={{ flex: 1, minWidth: '40px', height: '48px', textAlign: 'center', fontSize: '24px', padding: '0', fontWeight: '800' }}
         />
       ))}
     </div>
@@ -977,9 +977,6 @@ function App() {
   };
 
   const renderTpinSettings = () => {
-    const [currentTpin, setCurrentTpin] = useState('');
-    const [newTpin, setNewTpin] = useState('');
-    const [confirmTpin, setConfirmTpin] = useState('');
     const [msg, setMsg] = useState({text:'', type:''});
     
     // Check if user has T-PIN yet (dashboardData could have hasTpin flag)
@@ -988,6 +985,13 @@ function App() {
     const handleTpinSubmit = async (e) => {
        e.preventDefault();
        setMsg({text:'', type:''});
+       const currentTpin = hasTpin ? e.target.elements.currentTpin.value : '';
+       const newTpin = e.target.elements.newTpin.value;
+       const confirmTpin = e.target.elements.confirmTpin.value;
+
+       if(newTpin.length !== 4) {
+           return setMsg({text:'T-PIN must be exactly 4 digits.', type:'error'});
+       }
        if(newTpin !== confirmTpin) {
            return setMsg({text:'New T-PIN and Confirm T-PIN do not match!', type:'error'});
        }
@@ -1001,8 +1005,9 @@ function App() {
            const result = await res.json();
            if(result.success) {
                setMsg({text:result.message, type:'success'});
-               setCurrentTpin(''); setNewTpin(''); setConfirmTpin('');
+               e.target.reset(); // clear form
                if(setDashboardData) setDashboardData(prev => ({...prev, hasTpin: true}));
+               setTimeout(() => window.location.reload(), 1500); // refresh to clear pin inputs fully
            } else {
                setMsg({text:result.message, type:'error'});
            }
@@ -1014,33 +1019,39 @@ function App() {
     return (
       <CardWrapper>
         <PageHeader title="Transaction PIN (T-PIN)" subtitle="Secure your withdrawals and transfers" />
-        <div style={{ maxWidth: '500px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-            <p style={{ color: '#64748B', marginBottom: '24px', lineHeight: '1.5' }}>
-               A Transaction PIN (T-PIN) is required to withdraw funds or send money via P2P. Please {hasTpin ? 'update' : 'create'} your T-PIN below and keep it safe.
+        <div style={{ maxWidth: '400px', background: '#FFF', padding: '30px', borderRadius: '24px', border: '1px solid #E2E8F0', margin: '0 auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <p style={{ color: '#475569', marginBottom: '24px', lineHeight: '1.6', fontSize: '14px', textAlign: 'center' }}>
+               A Transaction PIN (T-PIN) is required to withdraw funds or send money via P2P. Please <strong>{hasTpin ? 'update' : 'create'}</strong> your 4-digit T-PIN below.
             </p>
-            <form onSubmit={handleTpinSubmit}>
+            <form onSubmit={handleTpinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                {hasTpin && (
-                  <div style={{ marginBottom: '16px' }}>
-                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Current T-PIN</label>
-                     <input type="password" value={currentTpin} onChange={e=>setCurrentTpin(e.target.value)} required placeholder="Enter current T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                  <div>
+                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: '#1E293B', textAlign: 'center' }}>Current T-PIN</label>
+                     <div style={{ display: 'flex', justifyContent: 'center' }}>
+                         <PinInput name="currentTpin" length={4} />
+                     </div>
                   </div>
                )}
-               <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>New T-PIN</label>
-                  <input type="password" value={newTpin} onChange={e=>setNewTpin(e.target.value)} required placeholder="Enter new T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+               <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: '#1E293B', textAlign: 'center' }}>New T-PIN (4 Digits)</label>
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <PinInput name="newTpin" length={4} />
+                  </div>
                </div>
-               <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Confirm New T-PIN</label>
-                  <input type="password" value={confirmTpin} onChange={e=>setConfirmTpin(e.target.value)} required placeholder="Re-enter new T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+               <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: '#1E293B', textAlign: 'center' }}>Confirm New T-PIN</label>
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <PinInput name="confirmTpin" length={4} />
+                  </div>
                </div>
 
                {msg.text && (
-                  <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: msg.type==='success'?'#D1FAE5':'#FEE2E2', color: msg.type==='success'?'#065F46':'#991B1B', fontSize: '14px', fontWeight: 'bold' }}>
+                  <div style={{ padding: '12px', borderRadius: '12px', background: msg.type==='success'?'#D1FAE5':'#FEE2E2', color: msg.type==='success'?'#065F46':'#991B1B', fontSize: '14px', fontWeight: 'bold', textAlign: 'center' }}>
                      {msg.text}
                   </div>
                )}
 
-               <button type="submit" style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
+               <button type="submit" style={{ marginTop: '10px', padding: '16px', background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '15px', boxShadow: '0 10px 25px -5px rgba(37, 99, 235, 0.4)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
                   {hasTpin ? 'Update T-PIN' : 'Create T-PIN'}
                </button>
             </form>
