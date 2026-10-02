@@ -494,12 +494,14 @@ function App() {
 
   const activeMenuItems = userRole === 'admin' ? adminMenu : menuItems;
 
-  const PageHeader = ({ title, subtitle }) => (
-    <div style={{ marginBottom: '24px' }}>
-      <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', marginBottom: '4px' }}>{title}</h2>
-      <p style={{ color: '#64748B', fontSize: '14px' }}>{subtitle}</p>
-    </div>
-  );
+  const PageHeader = ({ title, subtitle }) => {
+    if (!subtitle) return null;
+    return (
+      <div style={{ marginBottom: '16px' }}>
+        <p style={{ color: '#64748B', fontSize: '14px' }}>{subtitle}</p>
+      </div>
+    );
+  };
 
   const CardWrapper = ({ children }) => (
     <div className="content-card-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -1626,7 +1628,6 @@ function App() {
       <PageHeader title={moduleName} subtitle="Coming Soon" />
       <div style={{ padding: '60px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', border: '2px dashed #CBD5E1' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚀</div>
-        <h3 style={{ color: '#0F172A', marginBottom: '8px' }}>{moduleName}</h3>
         <p style={{ color: '#64748B' }}>This feature is currently under development. Stay tuned!</p>
       </div>
     </CardWrapper>
