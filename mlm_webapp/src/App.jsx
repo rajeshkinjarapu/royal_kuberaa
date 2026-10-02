@@ -562,9 +562,14 @@ function App() {
           </div>
         </div>
         {!userData?.isActive && userRole === 'member' && (
-          <div style={{ background: '#FEF2F2', padding: '24px', borderRadius: '16px', border: '1px solid #FCA5A5', marginBottom: '24px', textAlign: 'center', boxShadow: '0 4px 10px rgba(239, 68, 68, 0.1)' }}>
-            <h3 style={{ margin: '0 0 10px 0', color: '#EF4444', fontSize: '20px' }}>⚠️ Account Not Activated</h3>
-            <p style={{ color: '#7F1D1D', marginBottom: '16px', fontSize: '14px' }}>Your account is currently inactive. You need ₹1000 in your Main Wallet to activate your account and start earning commissions.</p>
+          <div style={{ background: '#FEF2F2', padding: '16px', borderRadius: '12px', border: '1px solid #FCA5A5', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>⚠️</span>
+                <div>
+                   <h3 style={{ margin: '0 0 4px 0', color: '#EF4444', fontSize: '16px' }}>Account Not Activated</h3>
+                   <span style={{ fontSize: '13px', color: '#991B1B', fontWeight: '600' }}>Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
+                </div>
+            </div>
             <button 
                onClick={async () => {
                   try {
@@ -579,11 +584,10 @@ function App() {
                      }
                   } catch(e) { alert('Activation failed'); }
                }}
-               style={{ padding: '12px 24px', background: '#EF4444', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none', transition: 'all 0.2s' }}
+               style={{ padding: '10px 20px', background: '#EF4444', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none', transition: 'all 0.2s', fontSize: '13px', whiteSpace: 'nowrap' }}
             >
-               Activate ID Now (₹1000)
+               Activate ID (₹1000)
             </button>
-            <p style={{ fontSize: '13px', color: '#991B1B', marginTop: '12px', fontWeight: '600' }}>Current Main Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</p>
           </div>
         )}
         <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
