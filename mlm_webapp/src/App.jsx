@@ -197,6 +197,7 @@ function App() {
     { header: 'ADMIN PANEL' },
     { name: 'Dashboard', icon: '👑' },
     { name: 'Member Management', icon: '👥' },
+    { name: 'Fund Management', icon: '💰' },
     { name: 'Fund Requests', icon: '💳' },
     { name: 'Payouts & TDS', icon: '💸' },
     { name: 'Pool Distributions', icon: '🔄' },
@@ -565,16 +566,22 @@ function App() {
           </div>
         </div>
         {!userData?.isActive && userRole === 'member' && (
-          <div style={{ background: '#FEF2F2', padding: '16px', borderRadius: '12px', border: '1px solid #FCA5A5', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>⚠️</span>
+          <div style={{ background: '#FEF2F2', padding: '24px', borderRadius: '16px', border: '1px solid #FCA5A5', marginBottom: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.1)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
+                <span style={{ fontSize: '32px' }}>⚠️</span>
                 <div>
-                   <h3 style={{ margin: '0 0 4px 0', color: '#EF4444', fontSize: '16px' }}>Account Not Activated</h3>
-                   <span style={{ fontSize: '13px', color: '#991B1B', fontWeight: '600' }}>Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
+                   <h3 style={{ margin: '0 0 8px 0', color: '#EF4444', fontSize: '20px', fontWeight: '800' }}>Account Not Activated</h3>
+                   <span style={{ fontSize: '15px', color: '#991B1B', fontWeight: '700', background: '#FEE2E2', padding: '4px 12px', borderRadius: '12px' }}>Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
                 </div>
             </div>
             <button 
                onClick={async () => {
+                  const balance = dashboardData?.mainWallet || 0;
+                  if (balance < 1000) {
+                      setActiveMenu('Deposit Funds');
+                      if(window.innerWidth <= 768) setIsMobileMenuOpen(false);
+                      return;
+                  }
                   try {
                      const token = localStorage.getItem('token');
                      const res = await fetch('/api/user/activate', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }});
@@ -587,9 +594,9 @@ function App() {
                      }
                   } catch(e) { alert('Activation failed'); }
                }}
-               style={{ padding: '10px 20px', background: '#EF4444', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none', transition: 'all 0.2s', fontSize: '13px', whiteSpace: 'nowrap' }}
+               style={{ padding: '14px 32px', background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)', color: '#FFF', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', border: 'none', transition: 'all 0.2s', fontSize: '16px', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}
             >
-               Activate ID (₹1000)
+               {(dashboardData?.mainWallet || 0) < 1000 ? 'Deposit Funds to Activate' : 'Activate ID (₹1000)'}
             </button>
           </div>
         )}
@@ -1390,6 +1397,49 @@ function App() {
            </div>
         )}
       </CardWrapper>
+    );
+  };
+
+  const renderFundManagement = () => {
+    const [memberId, setMemberId] = useState('');
+    const [amount, setAmount] = useState('');
+    const [msg, setMsg] = useState('');
+
+    const handleAddFund = async (e) => {
+       e.preventDefault();
+       try {
+           const token = localStorage.getItem('token');
+           const res = await fetch('/api/admin/add-funds', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+               body: JSON.stringify({ memberId, amount: Number(amount) })
+           });
+           const result = await res.json();
+           setMsg(result.message);
+           if(result.success) {
+               setMemberId(''); setAmount('');
+           }
+       } catch(err) { setMsg('Error adding funds'); }
+    };
+
+    return (
+        <CardWrapper>
+          <PageHeader title="Fund Management" subtitle="Add funds directly to a member's Main Wallet" />
+          <div style={{ maxWidth: '500px', background: '#FFF', padding: '30px', borderRadius: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <form onSubmit={handleAddFund} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+               <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Member ID</label>
+                  <input type="text" value={memberId} onChange={e=>setMemberId(e.target.value.toUpperCase())} required placeholder="Enter Member ID (e.g., RK001)" style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '12px', fontSize: '15px' }} />
+               </div>
+               <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Amount to Add (₹)</label>
+                  <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required min="1" placeholder="Enter amount" style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '12px', fontSize: '15px' }} />
+               </div>
+               {msg && <div style={{ padding: '12px', borderRadius: '12px', background: '#F1F5F9', color: '#0F172A', fontWeight: 'bold', textAlign: 'center' }}>{msg}</div>}
+               <button type="submit" style={{ padding: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', fontSize: '15px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}>Generate Fund</button>
+            </form>
+          </div>
+        </CardWrapper>
     );
   };
 

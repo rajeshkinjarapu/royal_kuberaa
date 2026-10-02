@@ -1143,6 +1143,33 @@ app.get('/api/admin/tickets', authMiddleware, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "Error fetching tickets" }); }
 });
 
+app.post('/api/admin/add-funds', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { memberId, amount } = req.body;
+        const User = require('./models/User');
+        const Transaction = require('./models/Transaction');
+        
+        const user = await User.findOne({ memberId });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'Invalid amount' });
+        
+        user.mainWallet += amount;
+        await user.save();
+        
+        await Transaction.create({
+            userId: user._id,
+            amount: amount,
+            type: 'Credit',
+            description: 'Funds Added by Admin',
+            status: 'Completed'
+        });
+        
+        res.json({ success: true, message: `Successfully added ₹${amount} to ${memberId}'s wallet.` });
+    } catch (err) { res.status(500).json({ success: false, message: 'Error adding funds' }); }
+});
+
 app.post('/api/admin/tickets/:id/reply', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
     try {
