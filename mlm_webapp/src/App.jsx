@@ -590,15 +590,15 @@ function App() {
             </button>
           </div>
         )}
-        <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+        <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
           {cards.map(card => (
-            <div key={card.id} className="vibrant-card metric-card" style={{ background: card.bg, borderRadius: '16px', padding: '24px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                 <div className="card-icon" style={{ width: '40px', height: '40px', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '20px' }}>{card.icon}</div>
+            <div key={card.id} className="vibrant-card metric-card" style={{ background: card.bg, borderRadius: '12px', padding: '16px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                 <div className="card-icon" style={{ width: '32px', height: '32px', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '16px' }}>{card.icon}</div>
               </div>
               <div className="card-content">
-                <div className="card-title" style={{ color: '#64748B', fontWeight: '700', fontSize: '12px', letterSpacing: '0.5px', marginBottom: '8px' }}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{ color: '#0F172A', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : '₹ ')} {card.amount.toLocaleString()}</div>
+                <div className="card-title" style={{ color: '#64748B', fontWeight: '700', fontSize: '11px', letterSpacing: '0.5px', marginBottom: '4px' }}>{card.title.toUpperCase()}</div>
+                <div className="card-amount" style={{ color: '#0F172A', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : '₹ ')} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
