@@ -173,7 +173,8 @@ function App() {
     { header: 'FINANCE' },
     { name: 'Deposit Funds', icon: '💳' },
     { name: 'Passbook', icon: '📒' },
-    { name: 'Withdraw / P2P', icon: '💸' },
+    { name: 'Bank Withdrawal', icon: '🏦' },
+    { name: 'P2P Transfer', icon: '💸' },
     { header: 'ACCOUNT' },
     { name: 'My Network', icon: '👥' },
     { name: 'Add Member', icon: '➕' },
@@ -808,7 +809,7 @@ function App() {
               <h1 className="wallet-card-amount">₹ {(dashboardData?.mainWallet || 0).toLocaleString()}</h1>
               <div className="wallet-card-icon">💳</div>
               <div className="wallet-card-action">
-                 <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('Withdraw / P2P')}>Transfer (P2P)</button>
+                 <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('P2P Transfer')}>Transfer (P2P)</button>
               </div>
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)' }}>
@@ -816,7 +817,7 @@ function App() {
               <h1 className="wallet-card-amount">₹ {(dashboardData?.totalEarnings || 0).toLocaleString()}</h1>
               <div className="wallet-card-icon">💰</div>
               <div className="wallet-card-action">
-                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Withdraw / P2P')}>Withdraw</button>
+                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Bank Withdrawal')}>Withdraw</button>
               </div>
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
@@ -848,13 +849,7 @@ function App() {
     );
   };
 
-  const renderWithdrawal = () => {
-    const [p2pReceiver, setP2pReceiver] = useState('');
-    const [p2pAmount, setP2pAmount] = useState('');
-    const [p2pTpin, setP2pTpin] = useState('');
-    const [p2pMessage, setP2pMessage] = useState({ text: '', type: '' });
-    const [loadingP2p, setLoadingP2p] = useState(false);
-
+  const renderBankWithdrawal = () => {
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [withdrawTpin, setWithdrawTpin] = useState('');
     const [withdrawMessage, setWithdrawMessage] = useState({ text: '', type: '' });
@@ -888,6 +883,37 @@ function App() {
        setLoadingWithdraw(false);
     };
 
+    return (
+      <CardWrapper>
+        <PageHeader title="Bank Withdrawal" subtitle="Withdraw your available funds to your bank account" />
+        <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px' }}>
+           <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong></p>
+           
+           <form onSubmit={handleWithdrawSubmit}>
+              <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min ₹200)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+              <input type="password" value={withdrawTpin} onChange={(e) => setWithdrawTpin(e.target.value)} required placeholder="Enter Transaction PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+              <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
+              {withdrawMessage.text && (
+                 <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: withdrawMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
+                    {withdrawMessage.text}
+                 </div>
+              )}
+              <button type="submit" disabled={loadingWithdraw} style={{ width: '100%', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', cursor: loadingWithdraw ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', opacity: loadingWithdraw ? 0.7 : 1 }}>
+                {loadingWithdraw ? 'Processing...' : 'Submit Withdrawal'}
+              </button>
+           </form>
+        </div>
+      </CardWrapper>
+    );
+  };
+
+  const renderP2PTransfer = () => {
+    const [p2pReceiver, setP2pReceiver] = useState('');
+    const [p2pAmount, setP2pAmount] = useState('');
+    const [p2pTpin, setP2pTpin] = useState('');
+    const [p2pMessage, setP2pMessage] = useState({ text: '', type: '' });
+    const [loadingP2p, setLoadingP2p] = useState(false);
+
     const handleP2pSubmit = async (e) => {
        e.preventDefault();
        setLoadingP2p(true);
@@ -919,57 +945,32 @@ function App() {
 
     return (
       <CardWrapper>
-        <PageHeader title="Withdraw / P2P Transfer" subtitle="Withdraw your available funds or transfer to another member" />
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-           {/* Withdrawal Form */}
-           <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px' }}>
-              <h3 style={{ marginBottom: '16px' }}>Bank Withdrawal</h3>
-              <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong></p>
-              
-              <form onSubmit={handleWithdrawSubmit}>
-                 <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min ₹200)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
-                 <input type="password" value={withdrawTpin} onChange={(e) => setWithdrawTpin(e.target.value)} required placeholder="Enter Transaction PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
-                 <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
-                 {withdrawMessage.text && (
-                    <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: withdrawMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: withdrawMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
-                       {withdrawMessage.text}
-                    </div>
-                 )}
-                 <button type="submit" disabled={loadingWithdraw} style={{ width: '100%', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '8px', cursor: loadingWithdraw ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', opacity: loadingWithdraw ? 0.7 : 1 }}>
-                   {loadingWithdraw ? 'Processing...' : 'Submit Withdrawal'}
-                 </button>
-              </form>
-           </div>
-
-           {/* P2P Transfer Form */}
-           <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', background: '#F8FAFC' }}>
-              <h3 style={{ marginBottom: '16px' }}>P2P Transfer</h3>
-              <p style={{ color: '#64748B', marginBottom: '16px' }}>Transfer funds to another member instantly. Note: <span style={{ color: '#EF4444' }}>5% Admin Charge</span> will be deducted.</p>
-              
-              <form onSubmit={handleP2pSubmit}>
-                 <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Receiver Member ID</label>
-                    <input type="text" value={p2pReceiver} onChange={(e) => setP2pReceiver(e.target.value)} required placeholder="e.g. RK12345" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+        <PageHeader title="P2P Transfer" subtitle="Transfer funds to another member instantly" />
+        <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', background: '#F8FAFC' }}>
+           <p style={{ color: '#64748B', marginBottom: '16px' }}>Available Balance: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong> <br/> Note: <span style={{ color: '#EF4444' }}>5% Admin Charge</span> will be deducted.</p>
+           
+           <form onSubmit={handleP2pSubmit}>
+              <div style={{ marginBottom: '12px' }}>
+                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Receiver Member ID</label>
+                 <input type="text" value={p2pReceiver} onChange={(e) => setP2pReceiver(e.target.value)} required placeholder="e.g. RK12345" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transfer Amount</label>
+                 <input type="number" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} required placeholder="Amount in ₹" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transaction PIN</label>
+                 <input type="password" value={p2pTpin} onChange={(e) => setP2pTpin(e.target.value)} required placeholder="Enter T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+              </div>
+              {p2pMessage.text && (
+                 <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: p2pMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: p2pMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
+                    {p2pMessage.text}
                  </div>
-                 <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transfer Amount</label>
-                    <input type="number" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} required placeholder="Amount in ₹" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
-                 </div>
-                 <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transaction PIN</label>
-                    <input type="password" value={p2pTpin} onChange={(e) => setP2pTpin(e.target.value)} required placeholder="Enter T-PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
-                 </div>
-                 {p2pMessage.text && (
-                    <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: p2pMessage.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: p2pMessage.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: '600' }}>
-                       {p2pMessage.text}
-                    </div>
-                 )}
-                 <button type="submit" disabled={loadingP2p} style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: loadingP2p ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', opacity: loadingP2p ? 0.7 : 1 }}>
-                    {loadingP2p ? 'Processing...' : 'Transfer Funds Now'}
-                 </button>
-              </form>
-           </div>
+              )}
+              <button type="submit" disabled={loadingP2p} style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: loadingP2p ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', opacity: loadingP2p ? 0.7 : 1 }}>
+                 {loadingP2p ? 'Processing...' : 'Transfer Funds Now'}
+              </button>
+           </form>
         </div>
       </CardWrapper>
     );
@@ -2116,7 +2117,8 @@ function App() {
        case 'Binary Genealogy': renderFn = renderBinaryTree; break;
        case 'Wallets': 
        case 'Passbook': renderFn = renderWallets; break;
-       case 'Withdraw / P2P': renderFn = renderWithdrawal; break;
+       case 'Bank Withdrawal': renderFn = renderBankWithdrawal; break;
+       case 'P2P Transfer': renderFn = renderP2PTransfer; break;
        case 'Manage Users':
        case 'Member Management': renderFn = renderManageUsers; break;
        case 'Payout Approvals':
