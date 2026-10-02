@@ -138,6 +138,8 @@ body {
   margin-left: 280px; /* Accounts for sidebar width */
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 /* Topbar (Proper Header) */
@@ -658,24 +660,33 @@ body {
   }
   .wallet-card {
     padding: 20px;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .wallet-card-title {
-    font-size: 13px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    opacity: 0.8;
   }
   .wallet-card-amount {
-    font-size: 30px;
+    font-size: 28px;
+    font-weight: 900;
   }
   .wallet-card-icon {
-    font-size: 80px;
-    right: -15px;
-    top: -15px;
+    font-size: 70px;
+    right: -10px;
+    top: 5px;
+    opacity: 0.15;
   }
   .wallet-card-action {
     margin-top: 20px;
   }
   .wallet-btn {
-    padding: 10px;
-    font-size: 13px;
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 12px;
   }
   .metric-card {
     padding: 12px;
