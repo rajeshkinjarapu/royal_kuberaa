@@ -1515,43 +1515,55 @@ function App() {
         <PageHeader title={userRole === 'admin' ? "Support Center" : "Help & Support"} subtitle={userRole === 'admin' ? "Resolve member queries" : "Raise a ticket to get help from admin"} />
         
         {userRole === 'member' && (
-          <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', marginBottom: '30px' }}>
-            <h3 style={{ marginBottom: '16px' }}>Create New Ticket</h3>
-            <form onSubmit={handleCreateTicket}>
-               <input type="text" value={subject} onChange={e=>setSubject(e.target.value)} required placeholder="Subject" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px' }} />
-               <textarea value={message} onChange={e=>setMessage(e.target.value)} required placeholder="Describe your issue..." rows="4" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', resize: 'vertical' }}></textarea>
-               <button type="submit" style={{ padding: '12px 24px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Submit Ticket</button>
+          <div style={{ background: '#FFF', padding: '30px', borderRadius: '24px', border: '1px solid #E2E8F0', marginBottom: '30px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <h3 style={{ marginBottom: '24px', color: '#1E293B', fontSize: '18px' }}>Create New Ticket</h3>
+            <form onSubmit={handleCreateTicket} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+               <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Subject</label>
+                  <input type="text" value={subject} onChange={e=>setSubject(e.target.value)} required placeholder="E.g., Issue with withdrawal" style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '12px', fontSize: '15px' }} />
+               </div>
+               <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Message</label>
+                  <textarea value={message} onChange={e=>setMessage(e.target.value)} required placeholder="Describe your issue in detail..." rows="4" style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '12px', resize: 'vertical', fontSize: '15px', fontFamily: 'inherit' }}></textarea>
+               </div>
+               <button type="submit" style={{ padding: '14px 24px', background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', fontSize: '15px', alignSelf: 'flex-start', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
+                  Submit Ticket
+               </button>
             </form>
           </div>
         )}
 
-        <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-           <h3 style={{ marginBottom: '20px' }}>{userRole === 'admin' ? 'All Tickets' : 'My Tickets'}</h3>
-           {tickets.length === 0 ? <p style={{ color: '#64748B' }}>No tickets found.</p> : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ background: '#FFF', padding: '30px', borderRadius: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+           <h3 style={{ marginBottom: '24px', color: '#1E293B', fontSize: '18px' }}>{userRole === 'admin' ? 'All Support Tickets' : 'My Ticket History'}</h3>
+           {tickets.length === 0 ? (
+               <div style={{ padding: '40px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', color: '#64748B', fontWeight: '500' }}>
+                   No tickets found.
+               </div>
+           ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                  {tickets.map(t => (
-                    <div key={t._id} style={{ border: '1px solid #E2E8F0', borderRadius: '12px', padding: '20px', background: t.status==='Resolved'?'#F8FAFC':'#FFF' }}>
-                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                             <span style={{ background: t.status==='Open'?'#FEF3C7':'#D1FAE5', color: t.status==='Open'?'#D97706':'#065F46', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{t.status}</span>
-                             <span style={{ fontWeight: 'bold', color: '#0F172A' }}>{t.subject}</span>
-                             {userRole === 'admin' && <span style={{ color: '#0EA5E9', fontSize: '12px', fontWeight: 'bold' }}>({t.memberId})</span>}
+                    <div key={t._id} style={{ border: '1px solid #E2E8F0', borderRadius: '16px', padding: '24px', background: t.status==='Resolved'?'#F8FAFC':'#FFF', transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                             <span style={{ background: t.status==='Open'?'#FEF3C7':'#D1FAE5', color: t.status==='Open'?'#D97706':'#065F46', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.5px' }}>{t.status.toUpperCase()}</span>
+                             <span style={{ fontWeight: '800', color: '#0F172A', fontSize: '16px' }}>{t.subject}</span>
+                             {userRole === 'admin' && <span style={{ color: '#0EA5E9', fontSize: '13px', fontWeight: 'bold', background: '#E0F2FE', padding: '4px 8px', borderRadius: '6px' }}>ID: {t.memberId}</span>}
                           </div>
-                          <div style={{ fontSize: '12px', color: '#94A3B8' }}>{new Date(t.createdAt).toLocaleString()}</div>
+                          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: '500' }}>{new Date(t.createdAt).toLocaleString()}</div>
                        </div>
-                       <p style={{ color: '#475569', fontSize: '14px', margin: '0 0 16px 0', lineHeight: '1.5' }}>{t.message}</p>
+                       <p style={{ color: '#475569', fontSize: '15px', margin: '0 0 20px 0', lineHeight: '1.6' }}>{t.message}</p>
                        
                        {t.reply && (
-                          <div style={{ background: '#F1F5F9', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #3B82F6' }}>
-                             <strong style={{ display: 'block', fontSize: '12px', color: '#3B82F6', marginBottom: '4px' }}>Admin Reply:</strong>
-                             <span style={{ color: '#334155', fontSize: '14px' }}>{t.reply}</span>
+                          <div style={{ background: '#EFF6FF', padding: '16px', borderRadius: '12px', borderLeft: '4px solid #3B82F6' }}>
+                             <strong style={{ display: 'block', fontSize: '13px', color: '#1D4ED8', marginBottom: '8px' }}>Admin Reply:</strong>
+                             <span style={{ color: '#1E293B', fontSize: '15px', lineHeight: '1.5' }}>{t.reply}</span>
                           </div>
                        )}
 
                        {userRole === 'admin' && t.status === 'Open' && (
-                          <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-                             <input type="text" value={replyText[t._id] || ''} onChange={e=>setReplyText({...replyText, [t._id]: e.target.value})} placeholder="Type your reply here..." style={{ flex: 1, padding: '10px', border: '1px solid #CBD5E1', borderRadius: '6px' }} />
-                             <button onClick={() => handleReply(t._id)} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Send Reply</button>
+                          <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+                             <input type="text" value={replyText[t._id] || ''} onChange={e=>setReplyText({...replyText, [t._id]: e.target.value})} placeholder="Type your reply to resolve this ticket..." style={{ flex: 1, padding: '12px 16px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px' }} />
+                             <button onClick={() => handleReply(t._id)} style={{ padding: '12px 24px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 6px rgba(16,185,129,0.2)' }}>Send Reply & Resolve</button>
                           </div>
                        )}
                     </div>
