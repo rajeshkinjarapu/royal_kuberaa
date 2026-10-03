@@ -617,6 +617,269 @@ app.get('/api/user/profile', authMiddleware, async (req, res) => {
     }
 });
 
+// --- Dynamic Notifications API (Member & Admin) ---
+app.get('/api/user/notifications', authMiddleware, async (req, res) => {
+    try {
+        const User = require('./models/User');
+        const Transaction = require('./models/Transaction');
+        const Withdrawal = require('./models/Withdrawal');
+        const FundRequest = require('./models/FundRequest');
+        const SupportTicket = require('./models/SupportTicket');
+
+        const currentUser = await User.findById(req.user.id || req.user._id);
+        if (!currentUser) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const notifications = [];
+
+        const formatTimeAgo = (date) => {
+            if (!date) return 'Recently';
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            if (seconds < 60) return `${Math.max(1, seconds)}s ago`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        };
+
+        if (req.user.role === 'admin') {
+            // ADMIN NOTIFICATIONS
+            // 1. Pending Withdrawals
+            const pendingWithdrawals = await Withdrawal.find({ status: 'Pending' }).sort({ createdAt: -1 }).limit(10);
+            for (const w of pendingWithdrawals) {
+                notifications.push({
+                    id: `admin_w_${w._id}`,
+                    title: 'Pending Withdrawal Payout',
+                    desc: `Member ${w.memberId} requested bank payout of ₹${w.netAmount.toLocaleString()} (Gross ₹${w.grossAmount.toLocaleString()})`,
+                    time: formatTimeAgo(w.createdAt),
+                    timestamp: new Date(w.createdAt).getTime(),
+                    icon: '💸',
+                    color: '#BE123C',
+                    type: 'WITHDRAWAL_ALERT'
+                });
+            }
+
+            // 2. Pending Fund Requests
+            const pendingFunds = await FundRequest.find({ status: 'Pending' }).sort({ requestDate: -1 }).limit(10);
+            for (const f of pendingFunds) {
+                notifications.push({
+                    id: `admin_f_${f._id}`,
+                    title: 'New Deposit Fund Request',
+                    desc: `Member ${f.memberId} submitted ₹${f.amount.toLocaleString()} with UTR: ${f.utrNumber}`,
+                    time: formatTimeAgo(f.requestDate),
+                    timestamp: new Date(f.requestDate).getTime(),
+                    icon: '💳',
+                    color: '#2563EB',
+                    type: 'DEPOSIT_ALERT'
+                });
+            }
+
+            // 3. Pending KYC
+            const pendingKycs = await User.find({ kycStatus: 'Submitted' }).sort({ updatedAt: -1 }).limit(10);
+            for (const k of pendingKycs) {
+                notifications.push({
+                    id: `admin_kyc_${k._id}`,
+                    title: 'New KYC Awaiting Verification',
+                    desc: `Member ${k.name} (${k.memberId}) submitted PAN and Bank details for verification.`,
+                    time: formatTimeAgo(k.updatedAt),
+                    timestamp: new Date(k.updatedAt).getTime(),
+                    icon: '🛡️',
+                    color: '#D97706',
+                    type: 'KYC_ALERT'
+                });
+            }
+
+            // 4. Open Support Tickets
+            const openTickets = await SupportTicket.find({ status: 'Open' }).sort({ createdAt: -1 }).limit(10);
+            for (const t of openTickets) {
+                notifications.push({
+                    id: `admin_ticket_${t._id}`,
+                    title: 'Open Support Ticket',
+                    desc: `[${t.memberId}] ${t.subject}: ${t.message.slice(0, 80)}...`,
+                    time: formatTimeAgo(t.createdAt),
+                    timestamp: new Date(t.createdAt).getTime(),
+                    icon: '🎧',
+                    color: '#0EA5E9',
+                    type: 'SUPPORT_ALERT'
+                });
+            }
+
+            // 5. Recent Joinings
+            const recentMembers = await User.find({ role: 'member' }).sort({ createdAt: -1 }).limit(10);
+            for (const m of recentMembers) {
+                notifications.push({
+                    id: `admin_reg_${m._id}`,
+                    title: 'New Member Registration',
+                    desc: `${m.name} (${m.memberId}) joined Royal Kuberaa${m.sponsorId ? ` under ${m.sponsorId}` : ''}`,
+                    time: formatTimeAgo(m.createdAt),
+                    timestamp: new Date(m.createdAt).getTime(),
+                    icon: '👤',
+                    color: '#10B981',
+                    type: 'MEMBER_ALERT'
+                });
+            }
+        } else {
+            // REGULAR MEMBER NOTIFICATIONS
+            // 1. Transactions (Commissions & Credits/Debits)
+            const txns = await Transaction.find({
+                $or: [{ userId: currentUser._id }, { memberId: currentUser.memberId }]
+            }).sort({ createdAt: -1 }).limit(20);
+
+            for (const tx of txns) {
+                let icon = '💰';
+                let color = '#10B981';
+                let title = 'Transaction Update';
+
+                switch(tx.category) {
+                    case 'DIRECT':
+                        icon = '👥'; color = '#0EA5E9'; title = 'Direct Referral Bonus Credited'; break;
+                    case 'BINARY':
+                        icon = '⚖️'; color = '#10B981'; title = 'Binary Matching Bonus Credited'; break;
+                    case 'LEVEL':
+                        icon = '📈'; color = '#8B5CF6'; title = 'Level Team Bonus Credited'; break;
+                    case 'ROYALTY':
+                        icon = '👑'; color = '#F59E0B'; title = 'Daily Royalty Pool Share Credited'; break;
+                    case 'CASHBACK':
+                        icon = '💸'; color = '#059669'; title = 'Daily Non-Working Cashback Credited'; break;
+                    case 'REBIRTH_GENERATED':
+                        icon = '🌱'; color = '#D946EF'; title = 'New Rebirth ID Generated!'; break;
+                    case 'ADMIN_CREDIT':
+                        icon = '🎁'; color = '#059669'; title = 'Admin Fund Credit'; break;
+                    case 'ADMIN_DEBIT':
+                        icon = '⚠️'; color = '#EF4444'; title = 'Admin Fund Adjustment'; break;
+                    case 'P2P_TRANSFER':
+                    case 'P2P Transfer':
+                        icon = tx.type === 'Credit' ? '📥' : '📤';
+                        color = tx.type === 'Credit' ? '#10B981' : '#64748B';
+                        title = tx.type === 'Credit' ? 'P2P Transfer Received' : 'P2P Transfer Sent';
+                        break;
+                    default:
+                        icon = tx.type === 'Credit' ? '📥' : '📤';
+                        color = tx.type === 'Credit' ? '#10B981' : '#64748B';
+                        title = `${tx.type} Transaction`;
+                }
+
+                notifications.push({
+                    id: `tx_${tx._id}`,
+                    title,
+                    desc: `${tx.type === 'Credit' ? '+' : '-'}₹${tx.amount.toLocaleString()} — ${tx.remark || tx.category}`,
+                    time: formatTimeAgo(tx.createdAt || tx.date),
+                    timestamp: new Date(tx.createdAt || tx.date).getTime(),
+                    icon,
+                    color,
+                    type: 'TRANSACTION'
+                });
+            }
+
+            // 2. Withdrawals
+            const withdrawals = await Withdrawal.find({ userId: currentUser._id }).sort({ createdAt: -1 }).limit(5);
+            for (const w of withdrawals) {
+                const isApproved = w.status === 'Approved';
+                const isRejected = w.status === 'Rejected';
+                notifications.push({
+                    id: `w_${w._id}`,
+                    title: isApproved ? 'Withdrawal Payout Approved ✅' : (isRejected ? 'Withdrawal Rejected ❌' : 'Withdrawal Request Submitted ⏳'),
+                    desc: isApproved 
+                        ? `₹${w.netAmount.toLocaleString()} has been processed to your bank account (Deductions: 5% TDS + 5% Admin).` 
+                        : (isRejected ? `Your withdrawal of ₹${w.grossAmount.toLocaleString()} was not approved.` : `₹${w.grossAmount.toLocaleString()} withdrawal request is currently under review by Admin.`),
+                    time: formatTimeAgo(w.createdAt),
+                    timestamp: new Date(w.createdAt).getTime(),
+                    icon: isApproved ? '🏦' : (isRejected ? '❌' : '⏳'),
+                    color: isApproved ? '#10B981' : (isRejected ? '#EF4444' : '#F59E0B'),
+                    type: 'WITHDRAWAL'
+                });
+            }
+
+            // 3. Fund Requests (Deposits)
+            const fundReqs = await FundRequest.find({ userId: currentUser._id }).sort({ requestDate: -1 }).limit(5);
+            for (const fr of fundReqs) {
+                const isApproved = fr.status === 'Approved';
+                const isRejected = fr.status === 'Rejected';
+                notifications.push({
+                    id: `fr_${fr._id}`,
+                    title: isApproved ? 'Deposit Approved & Added ✅' : (isRejected ? 'Deposit Rejected ❌' : 'Deposit Request Submitted ⏳'),
+                    desc: isApproved 
+                        ? `₹${fr.amount.toLocaleString()} deposit (UTR: ${fr.utrNumber}) has been verified and added to your Main Wallet.`
+                        : (isRejected ? `Deposit request for ₹${fr.amount.toLocaleString()} was rejected. Please contact support.` : `₹${fr.amount.toLocaleString()} deposit with UTR ${fr.utrNumber} is awaiting verification.`),
+                    time: formatTimeAgo(fr.requestDate),
+                    timestamp: new Date(fr.requestDate).getTime(),
+                    icon: isApproved ? '💳' : (isRejected ? '❌' : '⏳'),
+                    color: isApproved ? '#10B981' : (isRejected ? '#EF4444' : '#3B82F6'),
+                    type: 'DEPOSIT'
+                });
+            }
+
+            // 4. KYC Status
+            if (currentUser.kycStatus === 'Approved') {
+                notifications.push({
+                    id: `kyc_approved_${currentUser._id}`,
+                    title: 'KYC Verified Successfully 🛡️',
+                    desc: 'Your PAN card and bank account details have been verified. You can now request unlimited withdrawals.',
+                    time: formatTimeAgo(currentUser.updatedAt),
+                    timestamp: new Date(currentUser.updatedAt).getTime(),
+                    icon: '🛡️',
+                    color: '#10B981',
+                    type: 'KYC'
+                });
+            } else if (currentUser.kycStatus === 'Rejected') {
+                notifications.push({
+                    id: `kyc_rejected_${currentUser._id}`,
+                    title: 'KYC Verification Failed ⚠️',
+                    desc: 'Your submitted KYC documents were rejected. Please check your bank details and resubmit in Profile.',
+                    time: formatTimeAgo(currentUser.updatedAt),
+                    timestamp: new Date(currentUser.updatedAt).getTime(),
+                    icon: '⚠️',
+                    color: '#EF4444',
+                    type: 'KYC'
+                });
+            }
+
+            // 5. Support Tickets
+            const userTickets = await SupportTicket.find({ userId: currentUser._id, status: 'Resolved' }).sort({ updatedAt: -1 }).limit(5);
+            for (const ut of userTickets) {
+                notifications.push({
+                    id: `ticket_${ut._id}`,
+                    title: 'Support Ticket Resolved 🎧',
+                    desc: `Reply on "${ut.subject}": ${ut.reply || 'Your ticket has been marked as resolved.'}`,
+                    time: formatTimeAgo(ut.updatedAt),
+                    timestamp: new Date(ut.updatedAt).getTime(),
+                    icon: '🎧',
+                    color: '#2563EB',
+                    type: 'SUPPORT'
+                });
+            }
+
+            // 6. Direct Referrals
+            const directs = await User.find({ sponsorId: currentUser.memberId }).sort({ createdAt: -1 }).limit(5);
+            for (const d of directs) {
+                notifications.push({
+                    id: `direct_${d._id}`,
+                    title: 'New Team Referral Joined 👤',
+                    desc: `${d.name} (${d.memberId}) registered under you on ${d.placement || 'Team'}. Status: ${d.isActive ? 'Active' : 'Unactivated'}`,
+                    time: formatTimeAgo(d.createdAt),
+                    timestamp: new Date(d.createdAt).getTime(),
+                    icon: '👤',
+                    color: '#0EA5E9',
+                    type: 'TEAM'
+                });
+            }
+        }
+
+        // Sort all notifications by most recent first
+        notifications.sort((a, b) => b.timestamp - a.timestamp);
+
+        res.json({
+            success: true,
+            data: notifications.slice(0, 30),
+            unreadCount: Math.min(notifications.length, 5)
+        });
+    } catch (err) {
+        console.error("Notifications API error:", err);
+        res.status(500).json({ success: false, message: 'Error fetching notifications' });
+    }
+});
+
 // Activate ID
 app.post('/api/user/activate', authMiddleware, async (req, res) => {
     try {

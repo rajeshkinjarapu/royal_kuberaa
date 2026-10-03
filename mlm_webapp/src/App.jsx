@@ -1197,32 +1197,96 @@ function App() {
     </CardWrapper>
   );
 
-  const renderNotifications = () => (
-    <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-      <PageHeader title="Notifications" subtitle="Recent updates and alerts" />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {[
-          { id: 1, title: 'Payout Processed', desc: 'Your withdrawal request of ₹4,500 has been processed successfully.', time: '2 mins ago', icon: '💸', color: '#10B981' },
-          { id: 2, title: 'New Direct Referral', desc: 'Ramesh (RK98234) joined your direct downline.', time: '1 hour ago', icon: '👤', color: '#0EA5E9' },
-          { id: 3, title: 'Daily ROI Credited', desc: '₹500 has been credited to your Main Wallet.', time: '5 hours ago', icon: '💰', color: '#F59E0B' },
-          { id: 4, title: 'Rank Upgraded', desc: 'Congratulations! You have reached Silver rank.', time: '1 day ago', icon: '🏆', color: '#8B5CF6' },
-        ].map(n => (
-          <div key={n.id} style={{ display: 'flex', gap: '16px', padding: '16px', background: '#FFFFFF', borderRadius: '16px', alignItems: 'flex-start', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid #F1F5F9', cursor: 'pointer', transition: 'transform 0.2s', ':hover': { transform: 'translateY(-2px)' } }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${n.color}15`, color: n.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-              {n.icon}
-            </div>
-            <div style={{ flex: 1, marginTop: '2px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <h4 style={{ margin: 0, color: '#0F172A', fontSize: '15px', fontWeight: '700' }}>{n.title}</h4>
-                <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600' }}>{n.time}</div>
-              </div>
-              <p style={{ margin: 0, color: '#64748B', fontSize: '13px', lineHeight: '1.4' }}>{n.desc}</p>
-            </div>
+  const renderNotifications = () => {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/user/notifications', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await res.json();
+        if (result.success && Array.isArray(result.data)) {
+          setNotifications(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      }
+      setLoading(false);
+    };
+
+    useEffect(() => {
+      if (activeMenu === 'Notifications') {
+        fetchNotifications();
+      }
+    }, [activeMenu]);
+
+    return (
+      <div style={{ maxWidth: '850px', margin: '0 auto', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', margin: '0 0 4px 0' }}>🔔 Live Notifications</h2>
+            <p style={{ color: '#64748B', fontSize: '14px', margin: 0 }}>Real-time updates, commission credits, payouts & account alerts</p>
           </div>
-        ))}
+          <button 
+            onClick={fetchNotifications} 
+            disabled={loading}
+            style={{ padding: '8px 16px', background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', color: '#334155' }}
+          >
+            {loading ? 'Refreshing...' : '🔄 Refresh'}
+          </button>
+        </div>
+
+        {loading ? (
+          <div style={{ padding: '60px', textAlign: 'center', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', color: '#64748B' }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>⏳</div>
+            Loading your live notifications...
+          </div>
+        ) : notifications.length === 0 ? (
+          <div style={{ padding: '60px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', border: '2px dashed #CBD5E1' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
+            <h3 style={{ color: '#0F172A', marginBottom: '8px' }}>No Notifications Yet</h3>
+            <p style={{ color: '#64748B', margin: 0 }}>You're all caught up! New transaction and account alerts will appear here in real time.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {notifications.map(n => (
+              <div 
+                key={n.id} 
+                style={{ 
+                  display: 'flex', 
+                  gap: '16px', 
+                  padding: '18px', 
+                  background: '#FFFFFF', 
+                  borderRadius: '16px', 
+                  alignItems: 'flex-start', 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)', 
+                  border: '1px solid #F1F5F9', 
+                  transition: 'transform 0.15s, box-shadow 0.15s' 
+                }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `${n.color}18`, color: n.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
+                  {n.icon}
+                </div>
+                <div style={{ flex: 1, marginTop: '2px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <h4 style={{ margin: 0, color: '#0F172A', fontSize: '15px', fontWeight: '700' }}>{n.title}</h4>
+                    <span style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600', background: '#F8FAFC', padding: '2px 8px', borderRadius: '10px' }}>
+                      {n.time}
+                    </span>
+                  </div>
+                  <p style={{ margin: 0, color: '#475569', fontSize: '13px', lineHeight: '1.5' }}>{n.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderFundManagement = () => {
     const [stats, setStats] = useState(null);
@@ -3156,7 +3220,10 @@ function App() {
             <div className="page-title">{activeMenu}</div>
           </div>
           <div className="topbar-actions">
-            <button className="notification-btn" onClick={() => { setActiveMenu('Notifications'); setSidebarOpen(false); }}>🔔</button>
+            <button className="notification-btn" onClick={() => { setActiveMenu('Notifications'); setSidebarOpen(false); }} style={{ position: 'relative' }}>
+              🔔
+              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', background: '#EF4444', borderRadius: '50%' }}></span>
+            </button>
           </div>
         </header>
 
