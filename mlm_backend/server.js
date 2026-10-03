@@ -1104,18 +1104,30 @@ app.post('/api/admin/fund-requests/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// --- Royalty Pools API ---
+// --- Royalty & Non-Working Pools API ---
 app.get('/api/admin/pools', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
     try {
         const GlobalPool = require('./models/GlobalPool');
         const pools = await GlobalPool.find().lean();
         
-        const poolStats = pools.map(pool => ({
-            _id: pool._id,
-            poolName: pool.poolName,
-            totalFund: pool.totalFund,
-            membersCount: pool.activeQueue ? pool.activeQueue.length : 0
+        const poolStats = await Promise.all(pools.map(async pool => {
+            let membersCount = pool.activeQueue ? pool.activeQueue.length : 0;
+            if (pool.poolName === 'NON_WORKING') {
+                membersCount = await User.countDocuments({
+                    directReferralsCount: 0,
+                    totalPairsMatched: 0,
+                    cashbackEarnings: { $lt: 1000 },
+                    isActive: true,
+                    isRebirth: false
+                });
+            }
+            return {
+                _id: pool._id,
+                poolName: pool.poolName,
+                totalFund: pool.totalFund,
+                membersCount
+            };
         }));
         res.json({ success: true, data: poolStats });
     } catch (err) { res.status(500).json({ success: false, message: "Error fetching pools" }); }

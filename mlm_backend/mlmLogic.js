@@ -318,7 +318,8 @@ async function processDailyPools() {
     // 2. Global Non-Working Cashback Distribution
     const nwPool = await GlobalPool.findOne({ poolName: 'NON_WORKING' });
     if (nwPool && nwPool.totalFund > 0) {
-        // Business Plan Rule: Equal distribution among active non-working members (no team commissions) until ₹1000 joining fee is recovered
+        // Business Plan Rule: Equal distribution ONLY among active non-working members (0 Directs & 0 Binary Pairs)
+        // until ₹1000 joining fee is recovered. If a user makes even 1 direct referral, they stop receiving cashback permanently!
         const eligibleCashbackUsers = await User.find({ 
             directReferralsCount: 0,
             totalPairsMatched: 0,
@@ -328,8 +329,15 @@ async function processDailyPools() {
         });
 
         if (eligibleCashbackUsers.length > 0) {
-            const rawShare = nwPool.totalFund / eligibleCashbackUsers.length;
+            const rawShare = Math.floor((nwPool.totalFund / eligibleCashbackUsers.length) * 100) / 100;
+            let totalDistributed = 0;
+
             for (const user of eligibleCashbackUsers) {
+                // Double check they haven't sponsored anyone
+                if (user.directReferralsCount > 0 || (user.directs && user.directs.length > 0)) {
+                    continue;
+                }
+
                 const currentEarnings = user.cashbackEarnings || 0;
                 const maxAllowed = 1000 - currentEarnings;
                 const amountToGive = Math.min(rawShare, maxAllowed);
@@ -337,12 +345,15 @@ async function processDailyPools() {
                 if (amountToGive > 0) {
                     user.cashbackEarnings = currentEarnings + amountToGive;
                     await user.save();
-                    await addIncome(user, amountToGive, 'CASHBACK', `Daily Non-Working Cashback (Total: ₹${user.cashbackEarnings}/1000)`);
+                    await addIncome(user, amountToGive, 'CASHBACK', `Daily Non-Working Cashback (Recovered: ₹${user.cashbackEarnings}/1000)`);
+                    totalDistributed += amountToGive;
                 }
             }
+            
+            // Retain any leftover funds in the pool (e.g., from users capped at ₹1000) for tomorrow's distribution
+            nwPool.totalFund = Math.max(0, nwPool.totalFund - totalDistributed);
+            await nwPool.save();
         }
-        nwPool.totalFund = 0;
-        await nwPool.save();
     }
 
     // 3. Reset Binary Daily Capping & Flushed Counts
