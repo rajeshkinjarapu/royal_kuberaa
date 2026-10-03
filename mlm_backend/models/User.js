@@ -102,7 +102,9 @@ const UserSchema = new mongoose.Schema({
         pairs: Number,
         rewardName: String,
         amount: Number,
-        claimedAt: { type: Date, default: Date.now }
+        status: { type: String, default: 'Pending Dispatch' }, // 'Pending Dispatch', 'Dispatched', 'Delivered'
+        claimedAt: { type: Date, default: Date.now },
+        dispatchedAt: Date
     }]
 }, { timestamps: true });
 

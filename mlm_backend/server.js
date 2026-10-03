@@ -898,7 +898,7 @@ app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "Error processing request" }); }
 });
 
-// Claim Reward
+// Claim Reward (Physical Gift Only - No Cash Added to Wallet)
 app.post('/api/user/rewards/claim', authMiddleware, async (req, res) => {
     try {
         const { pairs } = req.body;
@@ -916,35 +916,91 @@ app.post('/api/user/rewards/claim', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Reward already claimed.' });
         }
 
-        // Add to claimed array
+        // Add to claimed array with Pending Dispatch status
         user.claimedRewards.push({
             pairs: rewardConfig.pairs,
             rewardName: rewardConfig.name,
-            amount: rewardConfig.cash
+            amount: rewardConfig.cash, // approximate gift value
+            status: 'Pending Dispatch',
+            claimedAt: new Date()
         });
 
-        // Add income via MLM Logic (distributes 80/20 if we use addIncome, BUT rewards are lifetime cash bonus!
-        // The business plan doesn't specify if rewards go through 80/20 rebirth split. 
-        // Usually rewards are 100% credited to main wallet or given as cash/gift. Let's credit to mainWallet directly to avoid Rebirth deduction on Gifts.
-        user.mainWallet += rewardConfig.cash;
-        user.totalEarnings += rewardConfig.cash;
-        
+        // Business Rule: ONLY physical gift is awarded (no direct cash added to wallet)
         await user.save();
 
         const Transaction = require('./models/Transaction');
         await Transaction.create({
             memberId: user.memberId,
             type: 'Credit',
-            category: 'REWARD',
-            remark: `${rewardConfig.name} Reward Claimed (${rewardConfig.pairs} Pairs)`,
-            amount: rewardConfig.cash,
+            category: 'REWARD_GIFT',
+            remark: `${rewardConfig.name} Gift Claimed (${rewardConfig.pairs} Pairs) - Submitted for Dispatch`,
+            amount: 0,
             status: 'COMPLETED',
             date: new Date()
         });
 
-        res.json({ success: true, message: `Congratulations! ${rewardConfig.name} cash value added to your Main Wallet.` });
+        res.json({ success: true, message: `🎉 Congratulations! Your claim for ${rewardConfig.name} (${rewardConfig.pairs} Pairs) has been submitted. The admin team will dispatch your gift!` });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error claiming reward" });
+    }
+});
+
+// Admin: Fetch all rewards achievers
+app.get('/api/admin/rewards', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const users = await User.find({ 'claimedRewards.0': { $exists: true } })
+                                .select('memberId name mobile totalPairsMatched claimedRewards')
+                                .lean();
+        
+        const achieversList = [];
+        users.forEach(u => {
+            u.claimedRewards.forEach(r => {
+                achieversList.push({
+                    userId: u._id,
+                    memberId: u.memberId,
+                    name: u.name,
+                    mobile: u.mobile,
+                    totalPairsMatched: u.totalPairsMatched,
+                    pairs: r.pairs,
+                    rewardName: r.rewardName,
+                    amount: r.amount,
+                    status: r.status || 'Pending Dispatch',
+                    claimedAt: r.claimedAt,
+                    dispatchedAt: r.dispatchedAt
+                });
+            });
+        });
+
+        // Sort latest claims first
+        achieversList.sort((a, b) => new Date(b.claimedAt) - new Date(a.claimedAt));
+        res.json({ success: true, data: achieversList });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Error fetching rewards achievers" });
+    }
+});
+
+// Admin: Update reward dispatch / delivery status
+app.post('/api/admin/rewards/:userId/:pairs', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { status } = req.body; // 'Dispatched', 'Delivered'
+        const pairsNumber = Number(req.params.pairs);
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        const rewardIndex = user.claimedRewards.findIndex(r => r.pairs === pairsNumber);
+        if (rewardIndex === -1) return res.status(404).json({ success: false, message: "Reward claim not found" });
+
+        user.claimedRewards[rewardIndex].status = status;
+        if (status === 'Dispatched' || status === 'Delivered') {
+            user.claimedRewards[rewardIndex].dispatchedAt = new Date();
+        }
+        await user.save();
+
+        res.json({ success: true, message: `Reward marked as ${status} successfully!` });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Error updating reward status" });
     }
 });
 

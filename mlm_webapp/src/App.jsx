@@ -169,7 +169,7 @@ function App() {
     { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
     { name: 'Products', icon: '🛍️' },
-    { name: 'Offers', icon: '🎁' },
+    { name: 'Awards & Rewards', icon: '🏆' },
     { header: 'FINANCE' },
     { name: 'Deposit Funds', icon: '💳' },
     { name: 'Passbook', icon: '📒' },
@@ -201,6 +201,7 @@ function App() {
     { name: 'Fund Requests', icon: '💳' },
     { name: 'Payouts & TDS', icon: '💸' },
     { name: 'Pool Distributions', icon: '🔄' },
+    { name: 'Rewards Achievers', icon: '🏆' },
     { name: 'KYC Approvals', icon: '📄' },
     { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
@@ -2128,7 +2129,8 @@ function App() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
                 {rewardsPlan.map(reward => {
-                    const isClaimed = claimedRewards.some(r => r.pairs === reward.pairs);
+                    const claimedObj = claimedRewards.find(r => r.pairs === reward.pairs);
+                    const isClaimed = !!claimedObj;
                     const isEligible = totalPairsMatched >= reward.pairs;
                     const progress = Math.min((totalPairsMatched / reward.pairs) * 100, 100);
 
@@ -2136,10 +2138,10 @@ function App() {
                         <div key={reward.pairs} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: `1px solid ${isClaimed ? '#10B981' : isEligible ? '#F59E0B' : '#E2E8F0'}` }}>
                             <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                    <h3 style={{ margin: 0, color: '#0F172A' }}>{reward.name}</h3>
-                                    <span style={{ background: '#E0F2FE', color: '#0284C7', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>₹{reward.cash.toLocaleString()} Cash</span>
+                                    <h3 style={{ margin: 0, color: '#0F172A' }}>🎁 {reward.name}</h3>
+                                    <span style={{ background: '#FEF3C7', color: '#D97706', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>Gift Value: ₹{reward.cash.toLocaleString()}</span>
                                 </div>
-                                <div style={{ color: '#64748B', fontSize: '13px', marginBottom: '12px' }}>Target: {reward.pairs} Pairs</div>
+                                <div style={{ color: '#64748B', fontSize: '13px', marginBottom: '12px' }}>Target: {reward.pairs} Pairs (Physical Gift delivered by Company)</div>
                                 
                                 <div style={{ width: '100%', maxWidth: '300px', height: '6px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
                                     <div style={{ width: `${progress}%`, height: '100%', background: isClaimed ? '#10B981' : isEligible ? '#F59E0B' : '#3B82F6', transition: 'width 1s ease-in-out' }}></div>
@@ -2147,10 +2149,12 @@ function App() {
                             </div>
                             <div>
                                 {isClaimed ? (
-                                    <span style={{ color: '#10B981', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>✅ Claimed</span>
+                                    <span style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', background: claimedObj?.status === 'Delivered' ? '#D1FAE5' : claimedObj?.status === 'Dispatched' ? '#E0F2FE' : '#FEF3C7', color: claimedObj?.status === 'Delivered' ? '#065F46' : claimedObj?.status === 'Dispatched' ? '#0369A1' : '#D97706', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        {claimedObj?.status === 'Delivered' ? '✅ Gift Delivered' : claimedObj?.status === 'Dispatched' ? '🚚 Dispatched' : '⏳ Claimed (Dispatch Pending)'}
+                                    </span>
                                 ) : isEligible ? (
-                                    <button onClick={() => handleClaim(reward.pairs)} style={{ padding: '10px 20px', background: '#F59E0B', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)' }}>
-                                        🎁 Claim Reward
+                                    <button onClick={() => handleClaim(reward.pairs)} style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)' }}>
+                                        🎁 Claim Gift
                                     </button>
                                 ) : (
                                     <span style={{ color: '#94A3B8', fontWeight: 'bold', fontSize: '14px' }}>{reward.pairs - totalPairsMatched} Pairs Left</span>
@@ -2161,6 +2165,80 @@ function App() {
                 })}
             </div>
         </CardWrapper>
+    );
+  };
+
+  const renderRewardsAchievers = () => {
+    const [achievers, setAchievers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchAchievers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/admin/rewards', { headers: { 'Authorization': `Bearer ${token}` } });
+        const result = await res.json();
+        if(result.success) setAchievers(result.data);
+      } catch(err) { console.error(err); }
+      setLoading(false);
+    };
+
+    useEffect(() => {
+      if (activeMenu === 'Rewards Achievers') fetchAchievers();
+    }, [activeMenu]);
+
+    const handleUpdateStatus = async (userId, pairs, status) => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/rewards/${userId}/${pairs}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ status })
+        });
+        const result = await res.json();
+        alert(result.message);
+        if(result.success) fetchAchievers();
+      } catch(err) { alert('Failed to update status'); }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Rewards Achievers List" subtitle="Track and dispatch physical gifts to qualified leaders" />
+        {loading ? (
+           <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Achievers...</div>
+        ) : achievers.length === 0 ? (
+           <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No reward claims yet.</div>
+        ) : (
+           <Table headers={['Member ID', 'Name', 'Mobile', 'Reward Gift', 'Pairs', 'Status', 'Date', 'Action']}>
+             {achievers.map((a, idx) => (
+               <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                 <td style={{ padding: '15px', fontWeight: 'bold', color: '#0EA5E9' }}>{a.memberId}</td>
+                 <td style={{ padding: '15px', fontWeight: '600' }}>{a.name}</td>
+                 <td style={{ padding: '15px', color: '#64748B' }}>{a.mobile}</td>
+                 <td style={{ padding: '15px', fontWeight: 'bold', color: '#0F172A' }}>🎁 {a.rewardName}</td>
+                 <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>{a.pairs} Pairs</td>
+                 <td style={{ padding: '15px' }}>
+                   <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: a.status==='Delivered'?'#D1FAE5':a.status==='Dispatched'?'#E0F2FE':'#FEF3C7', color: a.status==='Delivered'?'#065F46':a.status==='Dispatched'?'#0369A1':'#D97706' }}>
+                     {a.status}
+                   </span>
+                 </td>
+                 <td style={{ padding: '15px', color: '#64748B' }}>{new Date(a.claimedAt).toLocaleDateString()}</td>
+                 <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
+                   {a.status === 'Pending Dispatch' && (
+                     <button onClick={() => handleUpdateStatus(a.userId, a.pairs, 'Dispatched')} style={{ padding: '6px 12px', background: '#0284C7', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>
+                       Mark Dispatched
+                     </button>
+                   )}
+                   {a.status !== 'Delivered' && (
+                     <button onClick={() => handleUpdateStatus(a.userId, a.pairs, 'Delivered')} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}>
+                       Mark Delivered
+                     </button>
+                   )}
+                 </td>
+               </tr>
+             ))}
+           </Table>
+        )}
+      </CardWrapper>
     );
   };
 
@@ -2281,6 +2359,7 @@ function App() {
        case 'Fund Requests': renderFn = renderFundRequests; break;
        case 'AutoPool Settings':
        case 'Pool Distributions': renderFn = renderAutoPoolSettings; break;
+       case 'Rewards Achievers': renderFn = renderRewardsAchievers; break;
        case 'KYC Approvals': renderFn = renderKYCApprovals; break;
        case 'Support Tickets': renderFn = renderSupportTickets; break;
        case 'System Settings': renderFn = renderSystemSettings; break;
