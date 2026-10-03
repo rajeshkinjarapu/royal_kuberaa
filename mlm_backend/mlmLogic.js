@@ -130,59 +130,66 @@ async function activateUser(user, sponsor, placement) {
 
     // 4. Binary Matching Income (Traverse up Binary Tree)
     let currentNode = user;
+    let childMemberId = user.memberId;
     while (currentNode && currentNode.uplineId) {
         let upline = await User.findOne({ memberId: currentNode.uplineId });
         if (!upline) break;
 
-        // Was currentNode on left or right of THIS upline?
-        // Since we traverse extreme bottom, we just check where it came from.
-        if (upline.leftUpline === currentNode.memberId || currentNode.placement === 'Left') {
+        // Accurately determine if child arrived via left or right subtree
+        const isLeft = (upline.leftUpline === childMemberId);
+        if (isLeft) {
             upline.leftTeamCount += 1;
             upline.leftCarryForward += 1;
-            currentNode.placement = 'Left'; // preserve direction for next jump
         } else {
             upline.rightTeamCount += 1;
             upline.rightCarryForward += 1;
-            currentNode.placement = 'Right'; 
         }
+
+        // Qualification Check: User must have at least 1 Active Direct on Left and 1 Active Direct on Right to earn binary income
+        const activeDirects = await User.find({ sponsorId: upline.memberId, isActive: true });
+        const hasLeftDirect = activeDirects.some(d => d.placement === 'Left');
+        const hasRightDirect = activeDirects.some(d => d.placement === 'Right');
+        const isBinaryQualified = hasLeftDirect && hasRightDirect;
 
         let matched = false;
-        // First Pair: 1:2 or 2:1
-        if (!upline.hasCompletedFirstPair) {
-            if (upline.leftCarryForward >= 2 && upline.rightCarryForward >= 1) {
-                upline.leftCarryForward -= 2;
-                upline.rightCarryForward -= 1;
-                matched = true;
-            } else if (upline.leftCarryForward >= 1 && upline.rightCarryForward >= 2) {
-                upline.leftCarryForward -= 1;
-                upline.rightCarryForward -= 2;
-                matched = true;
-            }
-            if (matched) upline.hasCompletedFirstPair = true;
-        } else {
-            // Subsequent Pairs: 1:1
-            if (upline.leftCarryForward >= 1 && upline.rightCarryForward >= 1) {
-                upline.leftCarryForward -= 1;
-                upline.rightCarryForward -= 1;
-                matched = true;
-            }
-        }
-
-        if (matched) {
-            upline.totalPairsMatched += 1;
-            
-            if (upline.todayPairsCount < MAX_DAILY_PAIRS) {
-                upline.todayPairsCount += 1;
-                await addIncome(upline, BINARY_INCOME, 'BINARY', `Binary Matching Bonus`);
+        if (isBinaryQualified) {
+            // First Pair Condition: 1:2 or 2:1
+            if (!upline.hasCompletedFirstPair) {
+                if (upline.leftCarryForward >= 2 && upline.rightCarryForward >= 1) {
+                    upline.leftCarryForward -= 2;
+                    upline.rightCarryForward -= 1;
+                    matched = true;
+                } else if (upline.leftCarryForward >= 1 && upline.rightCarryForward >= 2) {
+                    upline.leftCarryForward -= 1;
+                    upline.rightCarryForward -= 2;
+                    matched = true;
+                }
+                if (matched) upline.hasCompletedFirstPair = true;
             } else {
-                // FLUSH OUT logic: Capping reached, so we track this extra matched volume as completely flushed out.
-                // Notice that carryForwards were already deducted above but no income is given here.
-                upline.todayPairsFlushedCount += 1;
-                console.log(`Flush out applied for user: ${upline.memberId}`);
+                // Subsequent Pairs: 1:1
+                if (upline.leftCarryForward >= 1 && upline.rightCarryForward >= 1) {
+                    upline.leftCarryForward -= 1;
+                    upline.rightCarryForward -= 1;
+                    matched = true;
+                }
+            }
+
+            if (matched) {
+                upline.totalPairsMatched += 1;
+                
+                if (upline.todayPairsCount < MAX_DAILY_PAIRS) {
+                    upline.todayPairsCount += 1;
+                    await addIncome(upline, BINARY_INCOME, 'BINARY', `Binary Matching Bonus (Pair #${upline.totalPairsMatched})`);
+                } else {
+                    // FLUSH OUT logic: Capping reached (5 pairs/day). Extra matched business is permanently flushed out.
+                    upline.todayPairsFlushedCount += 1;
+                    console.log(`Flush out recorded for user: ${upline.memberId}, today extra pair: ${upline.todayPairsFlushedCount}`);
+                }
             }
         }
 
         await upline.save();
+        childMemberId = upline.memberId;
         currentNode = upline;
     }
 
@@ -301,12 +308,27 @@ async function processDailyPools() {
     // 2. Global Non-Working Cashback Distribution
     const nwPool = await GlobalPool.findOne({ poolName: 'NON_WORKING' });
     if (nwPool && nwPool.totalFund > 0) {
-        // Find users who haven't earned any money yet
-        const zeroEarners = await User.find({ totalEarnings: 0, isActive: true, isRebirth: false });
-        if (zeroEarners.length > 0) {
-            const nwShare = nwPool.totalFund / zeroEarners.length;
-            for (const user of zeroEarners) {
-                await addIncome(user, nwShare, 'CASHBACK', 'Daily Non-Working Cashback');
+        // Business Plan Rule: Equal distribution among active non-working members (no team commissions) until ₹1000 joining fee is recovered
+        const eligibleCashbackUsers = await User.find({ 
+            directReferralsCount: 0,
+            totalPairsMatched: 0,
+            cashbackEarnings: { $lt: 1000 },
+            isActive: true, 
+            isRebirth: false 
+        });
+
+        if (eligibleCashbackUsers.length > 0) {
+            const rawShare = nwPool.totalFund / eligibleCashbackUsers.length;
+            for (const user of eligibleCashbackUsers) {
+                const currentEarnings = user.cashbackEarnings || 0;
+                const maxAllowed = 1000 - currentEarnings;
+                const amountToGive = Math.min(rawShare, maxAllowed);
+                
+                if (amountToGive > 0) {
+                    user.cashbackEarnings = currentEarnings + amountToGive;
+                    await user.save();
+                    await addIncome(user, amountToGive, 'CASHBACK', `Daily Non-Working Cashback (Total: ₹${user.cashbackEarnings}/1000)`);
+                }
             }
         }
         nwPool.totalFund = 0;

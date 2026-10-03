@@ -79,9 +79,10 @@ const UserSchema = new mongoose.Schema({
     rubyEarnings: { type: Number, default: 0 },
     diamondEarnings: { type: Number, default: 0 },
 
-    // Autopool Status
+    // Autopool & Cashback Status
     autopoolLevel: { type: Number, default: 1 }, // 1 to 5
     autopoolBalance: { type: Number, default: 0 },
+    cashbackEarnings: { type: Number, default: 0 }, // Tracks non-working cashback received towards ₹1000 recovery
 
     isActive: {
         type: Boolean,
