@@ -1288,6 +1288,12 @@ app.post('/api/admin/settings', authMiddleware, async (req, res) => {
         settings.adminChargePercentage = req.body.adminChargePercentage ?? settings.adminChargePercentage;
         settings.minimumWithdrawal = req.body.minimumWithdrawal ?? settings.minimumWithdrawal;
         settings.maintenanceMode = req.body.maintenanceMode ?? settings.maintenanceMode;
+        settings.companyBankName = req.body.companyBankName ?? settings.companyBankName;
+        settings.companyAccountName = req.body.companyAccountName ?? settings.companyAccountName;
+        settings.companyAccountNumber = req.body.companyAccountNumber ?? settings.companyAccountNumber;
+        settings.companyIfsc = req.body.companyIfsc ?? settings.companyIfsc;
+        settings.companyUpiId = req.body.companyUpiId ?? settings.companyUpiId;
+        settings.companyQrUrl = req.body.companyQrUrl ?? settings.companyQrUrl;
         
         await settings.save();
         res.json({ success: true, message: "Settings updated successfully!", data: settings });

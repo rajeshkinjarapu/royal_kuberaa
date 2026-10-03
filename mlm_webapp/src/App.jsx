@@ -1283,6 +1283,41 @@ function App() {
     const [utrNumber, setUtrNumber] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
     const [loading, setLoading] = useState(false);
+    const [companyInfo, setCompanyInfo] = useState({
+      companyBankName: 'HDFC Bank',
+      companyAccountName: 'Royal Kuberaa Solutions',
+      companyAccountNumber: '50200012345678',
+      companyIfsc: 'HDFC0001234',
+      companyUpiId: 'royalkuberaa@hdfcbank',
+      companyQrUrl: ''
+    });
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+      fetch('/api/settings')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setCompanyInfo({
+              companyBankName: data.data.companyBankName || 'HDFC Bank',
+              companyAccountName: data.data.companyAccountName || 'Royal Kuberaa Solutions',
+              companyAccountNumber: data.data.companyAccountNumber || '50200012345678',
+              companyIfsc: data.data.companyIfsc || 'HDFC0001234',
+              companyUpiId: data.data.companyUpiId || 'royalkuberaa@hdfcbank',
+              companyQrUrl: data.data.companyQrUrl || ''
+            });
+          }
+        })
+        .catch(err => console.error("Error loading settings:", err));
+    }, []);
+
+    const qrSrc = companyInfo.companyQrUrl || `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`upi://pay?pa=${companyInfo.companyUpiId}&pn=${companyInfo.companyAccountName}&cu=INR`)}`;
+
+    const copyUpi = () => {
+      navigator.clipboard.writeText(companyInfo.companyUpiId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
 
     const handleSubmit = async (e) => {
        e.preventDefault();
@@ -1307,33 +1342,60 @@ function App() {
     return (
       <CardWrapper>
          <PageHeader title="Deposit Funds" subtitle="Add funds to your wallet using UPI or Bank Transfer" />
-         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
             <div style={{ padding: '24px', background: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-               <h3 style={{ marginBottom: '16px', color: '#0F172A' }}>Company Bank Details</h3>
-               <p style={{ color: '#64748B', marginBottom: '8px' }}><strong>Bank Name:</strong> HDFC Bank</p>
-               <p style={{ color: '#64748B', marginBottom: '8px' }}><strong>A/C Name:</strong> Royal Kuberaa Solutions</p>
-               <p style={{ color: '#64748B', marginBottom: '8px' }}><strong>A/C Number:</strong> 50200012345678</p>
-               <p style={{ color: '#64748B', marginBottom: '16px' }}><strong>IFSC Code:</strong> HDFC0001234</p>
-               
-               <h4 style={{ marginBottom: '12px', color: '#0F172A' }}>UPI Payment</h4>
-               <div style={{ width: '150px', height: '150px', background: '#FFF', padding: '10px', borderRadius: '12px', border: '1px solid #CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#94A3B8', textAlign: 'center' }}>
-                  [QR Code Image Placeholder]
+               <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🏦</span> Company Bank Details
+               </h3>
+               <div style={{ background: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
+                 <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>Bank Name:</strong> {companyInfo.companyBankName}</p>
+                 <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>A/C Name:</strong> {companyInfo.companyAccountName}</p>
+                 <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>A/C Number:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#0F172A' }}>{companyInfo.companyAccountNumber}</span></p>
+                 <p style={{ color: '#64748B', fontSize: '14px' }}><strong>IFSC Code:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#0F172A' }}>{companyInfo.companyIfsc}</span></p>
                </div>
-               <p style={{ marginTop: '10px', color: '#0EA5E9', fontWeight: 'bold' }}>UPI ID: royalkuberaa@hdfcbank</p>
+               
+               <h4 style={{ marginBottom: '12px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📱</span> UPI QR Code Payment
+               </h4>
+               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#FFF', padding: '16px', borderRadius: '12px', border: '1px solid #CBD5E1', marginBottom: '12px' }}>
+                  <img src={qrSrc} alt="UPI QR Code" style={{ width: '180px', height: '180px', objectFit: 'contain', borderRadius: '8px' }} />
+                  <p style={{ fontSize: '11px', color: '#64748B', marginTop: '8px' }}>Scan with PhonePe / GPay / Paytm</p>
+               </div>
+
+               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#EFF6FF', padding: '12px', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
+                  <div>
+                    <span style={{ fontSize: '11px', color: '#3B82F6', fontWeight: 'bold', display: 'block' }}>UPI ID:</span>
+                    <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#1E40AF' }}>{companyInfo.companyUpiId}</span>
+                  </div>
+                  <button onClick={copyUpi} type="button" style={{ padding: '6px 12px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                     {copied ? '✅ Copied!' : '📋 Copy'}
+                  </button>
+               </div>
+
+               <div style={{ marginTop: '12px' }}>
+                  <a 
+                    href={`upi://pay?pa=${companyInfo.companyUpiId}&pn=${encodeURIComponent(companyInfo.companyAccountName)}&cu=INR`}
+                    style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#059669', color: '#FFF', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', fontSize: '13px' }}
+                  >
+                     ⚡ Pay Directly via UPI App (Mobile Only)
+                  </a>
+               </div>
             </div>
             
             <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-               <h3 style={{ marginBottom: '16px', color: '#0F172A' }}>Submit Request</h3>
-               <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>After making the payment, enter the UTR/Reference number here. The admin will verify and add funds to your wallet.</p>
+               <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📝</span> Submit UTR Reference
+               </h3>
+               <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>After completing the payment on your UPI app or Net Banking, enter the 12-digit UTR/Reference number below. Admin will verify and activate your wallet balance.</p>
                
                <form onSubmit={handleSubmit}>
                   <div style={{ marginBottom: '16px' }}>
                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Amount Paid (₹)</label>
-                     <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 5000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                     <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
                   </div>
                   <div style={{ marginBottom: '20px' }}>
                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>UTR / Reference Number</label>
-                     <input type="text" value={utrNumber} onChange={e=>setUtrNumber(e.target.value)} required placeholder="12-digit UPI UTR" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                     <input type="text" value={utrNumber} onChange={e=>setUtrNumber(e.target.value)} required placeholder="12-digit UPI UTR / Transaction No" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
                   </div>
                   
                   {message.text && (
@@ -1627,7 +1689,19 @@ function App() {
   };
 
   const renderSystemSettings = () => {
-    const [settings, setSettings] = useState({ siteName: 'Royal Kuberaa', tdsPercentage: 5, adminChargePercentage: 5, minimumWithdrawal: 200, maintenanceMode: false });
+    const [settings, setSettings] = useState({ 
+      siteName: 'Royal Kuberaa', 
+      tdsPercentage: 5, 
+      adminChargePercentage: 5, 
+      minimumWithdrawal: 200, 
+      maintenanceMode: false,
+      companyBankName: 'HDFC Bank',
+      companyAccountName: 'Royal Kuberaa Solutions',
+      companyAccountNumber: '50200012345678',
+      companyIfsc: 'HDFC0001234',
+      companyUpiId: 'royalkuberaa@hdfcbank',
+      companyQrUrl: ''
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -1660,9 +1734,10 @@ function App() {
 
     return (
       <CardWrapper>
-        <PageHeader title="System Settings" subtitle="Configure core platform rules and deductions" />
-        <div style={{ maxWidth: '600px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <PageHeader title="System Settings" subtitle="Configure core platform rules, deductions, and company banking" />
+        <div style={{ maxWidth: '700px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
           <form onSubmit={handleSave}>
+             <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0F172A', marginBottom: '16px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>⚙️ General Platform Rules</h3>
              <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Site Name</label>
                 <input type="text" value={settings.siteName} onChange={e=>setSettings({...settings, siteName: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
@@ -1684,13 +1759,48 @@ function App() {
                 <input type="number" value={settings.minimumWithdrawal} onChange={e=>setSettings({...settings, minimumWithdrawal: Number(e.target.value)})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
              </div>
 
-             <div style={{ marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+             <div style={{ marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input type="checkbox" checked={settings.maintenanceMode} onChange={e=>setSettings({...settings, maintenanceMode: e.target.checked})} style={{ width: '20px', height: '20px' }} />
                 <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#EF4444' }}>Enable Maintenance Mode (Blocks new logins)</label>
              </div>
 
+             <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0F172A', marginBottom: '16px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>🏦 Company Banking & UPI (Deposit Funds Screen)</h3>
+             
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Company Bank Name</label>
+                    <input type="text" value={settings.companyBankName || ''} onChange={e=>setSettings({...settings, companyBankName: e.target.value})} placeholder="e.g. HDFC Bank" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Account Holder / Entity Name</label>
+                    <input type="text" value={settings.companyAccountName || ''} onChange={e=>setSettings({...settings, companyAccountName: e.target.value})} placeholder="e.g. Royal Kuberaa Solutions" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+             </div>
+
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Bank Account Number</label>
+                    <input type="text" value={settings.companyAccountNumber || ''} onChange={e=>setSettings({...settings, companyAccountNumber: e.target.value})} placeholder="e.g. 50200012345678" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>IFSC Code</label>
+                    <input type="text" value={settings.companyIfsc || ''} onChange={e=>setSettings({...settings, companyIfsc: e.target.value})} placeholder="e.g. HDFC0001234" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+             </div>
+
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Official UPI ID</label>
+                    <input type="text" value={settings.companyUpiId || ''} onChange={e=>setSettings({...settings, companyUpiId: e.target.value})} placeholder="e.g. royalkuberaa@hdfcbank" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Custom QR Image URL (Optional)</label>
+                    <input type="text" value={settings.companyQrUrl || ''} onChange={e=>setSettings({...settings, companyQrUrl: e.target.value})} placeholder="Leave blank to auto-generate dynamic QR" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                 </div>
+             </div>
+
              <button type="submit" style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
-                💾 Save Settings
+                💾 Save Settings & Company Bank Details
              </button>
           </form>
         </div>
@@ -1698,12 +1808,298 @@ function App() {
     );
   };
 
-  const renderComingSoon = (moduleName) => (
+  const renderProducts = () => (
     <CardWrapper>
-      <PageHeader title={moduleName} subtitle="Coming Soon" />
-      <div style={{ padding: '60px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', border: '2px dashed #CBD5E1' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚀</div>
-        <p style={{ color: '#64748B' }}>This feature is currently under development. Stay tuned!</p>
+      <PageHeader title="Welcome Product Packages" subtitle="Select your preferred high-value product kit included with your ₹1,000 ID activation" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginTop: '16px' }}>
+        
+        {/* Product 1 */}
+        <div style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#DEF7EC', color: '#03543F', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
+            BEST SELLER
+          </div>
+          <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
+            🌿
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Royal Ayurvedic Health Vitality Kit</h3>
+          <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
+            Complete immunity & natural vitality pack with Organic Noni Extract, Tulsi Drops, and Himalayan Shilajit capsules for complete daily rejuvenation.
+          </p>
+          <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
+              <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
+              <strong style={{ color: '#0F172A' }}>100 BV (100% Volume)</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#64748B' }}>Delivery:</span>
+              <strong style={{ color: '#10B981' }}>Free All-India Home Delivery</strong>
+            </div>
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: '12px', color: '#94A3B8', textDecoration: 'line-through' }}>₹1,500</span>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹1,000 <span style={{ fontSize: '12px', color: '#10B981', fontWeight: '600' }}>(Active with ID)</span></div>
+            </div>
+            <span style={{ padding: '8px 14px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>Kit Choice 1</span>
+          </div>
+        </div>
+
+        {/* Product 2 */}
+        <div style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#E0F2FE', color: '#0369A1', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
+            DIGITAL SKILL
+          </div>
+          <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
+            💻
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Royal Digital Marketing & Affiliate Academy</h3>
+          <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
+            Full Lifetime Access to practical affiliate marketing courses, social media promotional creatives, WhatsApp automation scripts, and digital business tools.
+          </p>
+          <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
+              <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
+              <strong style={{ color: '#0F172A' }}>100 BV (100% Volume)</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#64748B' }}>Access:</span>
+              <strong style={{ color: '#0284C7' }}>Instant Portal & Download Access</strong>
+            </div>
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: '12px', color: '#94A3B8', textDecoration: 'line-through' }}>₹2,499</span>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹1,000 <span style={{ fontSize: '12px', color: '#0284C7', fontWeight: '600' }}>(Active with ID)</span></div>
+            </div>
+            <span style={{ padding: '8px 14px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>Kit Choice 2</span>
+          </div>
+        </div>
+
+        {/* Product 3 */}
+        <div style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#FEE2E2', color: '#991B1B', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
+            ORGANIC CARE
+          </div>
+          <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #F43F5E 0%, #E11D48 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
+            🧴
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Royal Organic Luxury Personal Care Kit</h3>
+          <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
+            Handcrafted ayurvedic bath soap combo, natural almond-enriched hair spa therapy oil, and glowing herbal face scrub formulated with certified natural ingredients.
+          </p>
+          <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
+              <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
+              <strong style={{ color: '#0F172A' }}>100 BV (100% Volume)</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#64748B' }}>Delivery:</span>
+              <strong style={{ color: '#10B981' }}>Free All-India Home Delivery</strong>
+            </div>
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: '12px', color: '#94A3B8', textDecoration: 'line-through' }}>₹1,600</span>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹1,000 <span style={{ fontSize: '12px', color: '#E11D48', fontWeight: '600' }}>(Active with ID)</span></div>
+            </div>
+            <span style={{ padding: '8px 14px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>Kit Choice 3</span>
+          </div>
+        </div>
+
+      </div>
+    </CardWrapper>
+  );
+
+  const renderAboutUs = () => (
+    <CardWrapper>
+      <PageHeader title="About Royal Kuberaa" subtitle="Empowering individuals through transparent affiliate networking and community wealth sharing" />
+      <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', padding: '20px', borderRadius: '12px', color: '#FFF' }}>
+          <img src="/royal-kuberaa-logo.jpg" alt="Logo" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #38BDF8' }} />
+          <div>
+            <h2 style={{ fontSize: '22px', fontWeight: '800', margin: 0, color: '#F8FAFC' }}>Royal Kuberaa Solutions</h2>
+            <p style={{ margin: 0, fontSize: '13px', color: '#94A3B8' }}>Pioneering ethical, high-yield digital community commerce</p>
+          </div>
+        </div>
+
+        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>🎯 Our Vision & Mission</h3>
+        <p style={{ marginBottom: '20px' }}>
+          At Royal Kuberaa, our mission is to build a sustainable, transparent, and technology-driven networking ecosystem that enables every motivated individual across India to achieve genuine financial independence. We combine tangible, high-value consumer products with an automated, mathematically disciplined profit-sharing plan.
+        </p>
+
+        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>⭐ Why Royal Kuberaa Stands Apart</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>👑 100% Binary Fairness</strong>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>1:1 pair matching with a solid 5 pairs daily cap to guarantee long-term company stability.</span>
+          </div>
+          <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🔄 Daily Midnight Pools</strong>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>₹250 from every active ID is pooled and split evenly every single night at 12:01 AM among achievers.</span>
+          </div>
+          <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🌱 Perpetual Rebirth IDs</strong>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>Automatic 20% re-investment cycle creating fresh IDs, fresh sponsor bonuses, and new pool fuel.</span>
+          </div>
+          <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🛡️ 100% Legal & Compliant</strong>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>Strict compliance with Direct Selling Guidelines 2021, statutory 5% TDS with PAN, and 7-day cooling policy.</span>
+          </div>
+        </div>
+
+        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>📞 Official Support & Office</h3>
+        <p style={{ margin: 0, fontSize: '14px', color: '#64748B' }}>
+          <strong>Corporate Email:</strong> support@royalkuberaa.com<br />
+          <strong>Working Hours:</strong> Monday – Saturday, 10:00 AM – 6:00 PM IST<br />
+          <strong>Headquarters:</strong> Andhra Pradesh & Telangana, India
+        </p>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderTermsAndConditions = () => (
+    <CardWrapper>
+      <PageHeader title="Terms & Conditions" subtitle="Official rules, distributor agreement, and compensation plan terms" />
+      <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155', fontSize: '14px' }}>
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>1. Acceptance of Terms & Eligibility</h4>
+        <p style={{ marginBottom: '16px' }}>
+          By registering on Royal Kuberaa, you confirm that you are an Indian citizen of at least 18 years of age. You agree to act as an Independent Affiliate Distributor and not an employee or agent of the company.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. One-Time Membership & Product Package</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Membership activation requires a one-time fee of ₹1,000 (inclusive of taxes and selected product kit). Activation grants access to the member portal, educational resources, and binary network placement.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Binary Matching Compensation & Capping</h4>
+        <p style={{ marginBottom: '16px' }}>
+          The first binary pair payout requires a 2:1 or 1:2 ratio with at least 1 personally sponsored direct active member on the Left and 1 on the Right. Subsequent pairs are matched on a 1:1 basis at ₹100 per matched pair. A maximum daily capping limit of 5 pairs (₹500 per day) applies to every active ID. Unmatched volume beyond the daily cap is flushed out to preserve network integrity.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Daily Royalty Pools & Lifetime Limits</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Royalty pools (Gold, Platinum, Ruby, Diamond) require active direct referrals and carry defined lifetime payout caps: Gold (₹20,000), Platinum (₹1,00,000), Ruby (₹5,00,000), and Diamond (₹25,00,000). Once the lifetime cap is reached, pool distributions for that tier cease.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. Non-Working Cashback Policy</h4>
+        <p style={{ marginBottom: '16px' }}>
+          The daily non-working cashback fund is distributed strictly among active members who have zero (0) direct referrals until their ₹1,000 joining fee is recovered. If a user sponsors even 1 direct member, cashback eligibility stops permanently as they transition to the active earning plan.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>6. Rebirth ID System</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Twenty percent (20%) of all earnings are systematically directed to the member's Rebirth Wallet. When this wallet accumulates ₹1,000, an automated new position is generated in the binary tree under the sponsor, distributing ₹300 sponsor bonus and ₹700 into community pools.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>7. Statutory Deductions & Payouts</h4>
+        <p style={{ marginBottom: '16px' }}>
+          All wallet withdrawals are subject to a mandatory 5% TDS (Section 194H) and a 5% platform administrative charge. Minimum withdrawal limit is ₹200. Payouts require verified KYC and valid bank account details.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>8. Code of Conduct & Termination</h4>
+        <p style={{ margin: 0 }}>
+          Cross-sponsoring, defamatory remarks against the company, or fraudulent claims of fixed passive returns will result in immediate termination of the member ID and forfeiture of pending balances.
+        </p>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderPrivacyPolicy = () => (
+    <CardWrapper>
+      <PageHeader title="Privacy Policy" subtitle="How Royal Kuberaa safeguards your personal and financial information" />
+      <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155', fontSize: '14px' }}>
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>1. Information We Collect</h4>
+        <p style={{ marginBottom: '16px' }}>
+          When you register and use the Royal Kuberaa platform, we collect essential identifying information including your Full Name, Mobile Number, Email Address, PAN Card (required for statutory TDS compliance), Aadhaar details for KYC verification, and Bank Account details (Bank Name, Account Number, IFSC) for commission disbursements.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. Use of Collected Data</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Your data is used strictly for user identification, binary genealogy processing, automated commission payouts, statutory tax filings (Form 16A TDS certificates), and vital system notifications.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Data Protection & Security</h4>
+        <p style={{ marginBottom: '16px' }}>
+          All data transmitted between your device and our servers is secured using industry-standard 256-bit SSL encryption. Critical actions including withdrawals and password changes require secondary PIN authorization.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Zero Third-Party Selling</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Royal Kuberaa will NEVER sell, lease, or rent your personal data to any marketing agencies or third parties. Data is shared only with government tax authorities and verified banking gateways for payout fulfillment.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. User Access & Control</h4>
+        <p style={{ margin: 0 }}>
+          You retain the right to inspect your personal profile and submitted KYC documents at any time via your member portal. For data updates or corrections, please contact our support team.
+        </p>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderReturnAndRefund = () => (
+    <CardWrapper>
+      <PageHeader title="Return & Refund Policy" subtitle="Transparent 7-day cooling-off period and product return guidelines" />
+      <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155', fontSize: '14px' }}>
+        <div style={{ background: '#EFF6FF', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #3B82F6', marginBottom: '20px' }}>
+          <strong style={{ color: '#1D4ED8', display: 'block', marginBottom: '4px' }}>🛡️ Mandatory 7-Day Cooling-Off Period</strong>
+          <span style={{ fontSize: '13px', color: '#1E293B' }}>
+            In accordance with the Consumer Protection (Direct Selling) Rules 2021, newly registered members have 7 calendar days from their activation date to cancel membership and request a full refund.
+          </span>
+        </div>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>1. Physical Product Kit Returns</h4>
+        <p style={{ marginBottom: '16px' }}>
+          To qualify for a refund on physical welcome kits (Ayurvedic/Personal Care), the products must be returned unopened, unused, with all safety seals intact, and in their original packaging. Return shipping expenses are borne by the customer.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. Digital Products & E-Learning Packages</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Digital marketing courses, downloadable software templates, and e-learning resources are non-refundable once the course materials or downloadable assets have been accessed or logged into.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Refund Claim Procedure</h4>
+        <p style={{ marginBottom: '16px' }}>
+          To initiate a refund request within 7 calendar days, submit a support ticket via the Support section under category "Refund Request" with your Member ID, payment reference (UTR), and reason.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Disbursement Timeline</h4>
+        <p style={{ margin: 0 }}>
+          Approved refund amounts will be credited back to the member's source bank account within 5 to 7 business working days after deduction of applicable bank/admin processing charges. Upon refund completion, the associated Member ID is permanently decommissioned.
+        </p>
+      </div>
+    </CardWrapper>
+  );
+
+  const renderDisclaimer = () => (
+    <CardWrapper>
+      <PageHeader title="Legal Disclaimer" subtitle="Affiliate disclosure, earnings disclaimer, and regulatory compliance" />
+      <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155', fontSize: '14px' }}>
+        <div style={{ background: '#FEF2F2', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #EF4444', marginBottom: '20px' }}>
+          <strong style={{ color: '#991B1B', display: 'block', marginBottom: '4px' }}>⚠️ Not an Investment or Fixed Yield Scheme</strong>
+          <span style={{ fontSize: '13px', color: '#7F1D1D' }}>
+            Royal Kuberaa is an affiliate marketing and direct selling business platform. It does NOT offer financial investment services, daily interest on deposits, or guaranteed passive income.
+          </span>
+        </div>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>1. Earnings & Income Representation</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Any earnings examples, binary match figures, or pool distributions displayed in promotional presentations are for educational illustration only. Income is strictly contingent upon genuine product distribution, sales volume, and individual performance. There is no guaranteed minimum earning.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. Regulatory Compliance</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Royal Kuberaa operates in strict accordance with the Consumer Protection (Direct Selling) Rules 2021 and the Prize Chits and Money Circulation Schemes (Banning) Act, 1978. Enrollment fees are strictly associated with tangible products and digital training courses.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Independent Contractor Relationship</h4>
+        <p style={{ marginBottom: '16px' }}>
+          Affiliates are independent contractors responsible for their own tax obligations, regional registration requirements, and business conduct. Affiliates are strictly prohibited from misrepresenting the company's business plan.
+        </p>
+
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Modification Rights</h4>
+        <p style={{ margin: 0 }}>
+          Royal Kuberaa reserves the right to modify compensation plans, operational guidelines, or product packages with due notice to maintain mathematical equilibrium and network solvency.
+        </p>
       </div>
     </CardWrapper>
   );
@@ -2405,13 +2801,12 @@ function App() {
        case 'Support':
        case 'Support Tickets': renderFn = renderSupportTickets; break;
        case 'Change Password': renderFn = renderChangePassword; break;
-       case 'Products':
-       case 'About Us':
-       case 'Terms & Conditions':
-       case 'Privacy Policy':
-       case 'Return & Refund':
-       case 'Disclaimer':
-           renderFn = () => renderComingSoon(activeMenu); break;
+       case 'Products': renderFn = renderProducts; break;
+       case 'About Us': renderFn = renderAboutUs; break;
+       case 'Terms & Conditions': renderFn = renderTermsAndConditions; break;
+       case 'Privacy Policy': renderFn = renderPrivacyPolicy; break;
+       case 'Return & Refund': renderFn = renderReturnAndRefund; break;
+       case 'Disclaimer': renderFn = renderDisclaimer; break;
        default: renderFn = renderGeneric; break;
     }
     return <DynamicView key={activeMenu} renderFn={renderFn} />;
