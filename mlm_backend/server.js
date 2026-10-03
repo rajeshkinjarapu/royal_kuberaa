@@ -1221,31 +1221,168 @@ app.get('/api/admin/tickets', authMiddleware, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "Error fetching tickets" }); }
 });
 
-app.post('/api/admin/add-funds', authMiddleware, async (req, res) => {
+// --- Admin Fund Management APIs (Stats, Manual Credit/Debit) ---
+app.get('/api/admin/fund-stats', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
     try {
-        const { memberId, amount } = req.body;
+        const User = require('./models/User');
+        const Transaction = require('./models/Transaction');
+        const Withdrawal = require('./models/Withdrawal');
+        const FundRequest = require('./models/FundRequest');
+
+        // Aggregates for all users' wallet balances
+        const userWallets = await User.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalMainWallet: { $sum: '$mainWallet' },
+                    totalRebirthWallet: { $sum: '$rebirthWallet' },
+                    totalEarnings: { $sum: '$totalEarnings' },
+                    totalMembers: { $sum: 1 },
+                    activeMembers: { $sum: { $cond: ['$isActive', 1, 0] } }
+                }
+            }
+        ]);
+
+        const pendingWithdrawalsAgg = await Withdrawal.aggregate([
+            { $match: { status: 'Pending' } },
+            { $group: { _id: null, totalPending: { $sum: '$netAmount' }, count: { $sum: 1 } } }
+        ]);
+
+        const pendingFundRequestsAgg = await FundRequest.aggregate([
+            { $match: { status: 'Pending' } },
+            { $group: { _id: null, totalPending: { $sum: '$amount' }, count: { $sum: 1 } } }
+        ]);
+
+        const stats = userWallets[0] || {
+            totalMainWallet: 0,
+            totalRebirthWallet: 0,
+            totalEarnings: 0,
+            totalMembers: 0,
+            activeMembers: 0
+        };
+
+        const pendingWithdrawals = pendingWithdrawalsAgg[0] || { totalPending: 0, count: 0 };
+        const pendingFundRequests = pendingFundRequestsAgg[0] || { totalPending: 0, count: 0 };
+
+        // Recent 20 Admin Manual Transactions
+        const recentAdminTransactions = await Transaction.find({
+            category: { $in: ['ADMIN_CREDIT', 'ADMIN_DEBIT'] }
+        }).sort({ createdAt: -1 }).limit(20);
+
+        res.json({
+            success: true,
+            data: {
+                totalMainWallet: stats.totalMainWallet,
+                totalRebirthWallet: stats.totalRebirthWallet,
+                totalSystemLiability: stats.totalMainWallet + stats.totalRebirthWallet,
+                totalEarnings: stats.totalEarnings,
+                totalMembers: stats.totalMembers,
+                activeMembers: stats.activeMembers,
+                pendingWithdrawalsAmount: pendingWithdrawals.totalPending,
+                pendingWithdrawalsCount: pendingWithdrawals.count,
+                pendingFundRequestsAmount: pendingFundRequests.totalPending,
+                pendingFundRequestsCount: pendingFundRequests.count,
+                recentAdminTransactions
+            }
+        });
+    } catch (err) {
+        console.error("Error fetching fund stats:", err);
+        res.status(500).json({ success: false, message: 'Error fetching fund statistics' });
+    }
+});
+
+app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const { memberId, amount, actionType = 'credit', walletType = 'main', remark } = req.body;
         const User = require('./models/User');
         const Transaction = require('./models/Transaction');
         
-        const user = await User.findOne({ memberId });
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        const numAmount = Number(amount);
+        if (!numAmount || numAmount <= 0) return res.status(400).json({ success: false, message: 'Please enter a valid positive amount' });
         
-        if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'Invalid amount' });
-        
-        user.mainWallet += amount;
+        const targetMemberId = (memberId || '').trim();
+        const user = await User.findOne({ memberId: new RegExp(`^${targetMemberId}$`, 'i') });
+        if (!user) return res.status(404).json({ success: false, message: `Member ID "${targetMemberId}" not found in system` });
+
+        const isCredit = actionType === 'credit';
+        const isRebirth = walletType === 'rebirth';
+        const walletField = isRebirth ? 'rebirthWallet' : 'mainWallet';
+
+        if (!isCredit) {
+            // Debit check
+            if (user[walletField] < numAmount) {
+                return res.status(400).json({
+                    success: false, 
+                    message: `Insufficient ${isRebirth ? 'Rebirth' : 'Main'} Wallet balance! User only has ₹${user[walletField].toLocaleString()}`
+                });
+            }
+            user[walletField] -= numAmount;
+        } else {
+            user[walletField] += numAmount;
+        }
+
         await user.save();
-        
+
+        const category = isCredit ? 'ADMIN_CREDIT' : 'ADMIN_DEBIT';
+        const actionWord = isCredit ? 'Credited' : 'Debited';
+        const walletName = isRebirth ? 'Rebirth Wallet' : 'Main Wallet';
+        const customRemark = remark?.trim() || `Manual Admin ${actionWord} to ${walletName}`;
+
         await Transaction.create({
             userId: user._id,
-            amount: amount,
-            type: 'Credit',
-            description: 'Funds Added by Admin',
-            status: 'Completed'
+            memberId: user.memberId,
+            amount: numAmount,
+            type: isCredit ? 'Credit' : 'Debit',
+            category: category,
+            remark: customRemark,
+            date: new Date()
         });
-        
-        res.json({ success: true, message: `Successfully added ₹${amount} to ${memberId}'s wallet.` });
-    } catch (err) { res.status(500).json({ success: false, message: 'Error adding funds' }); }
+
+        res.json({
+            success: true,
+            message: `Successfully ${actionWord.toLowerCase()} ₹${numAmount.toLocaleString()} ${isCredit ? 'to' : 'from'} ${user.name} (${user.memberId})'s ${walletName}. New Balance: ₹${user[walletField].toLocaleString()}`,
+            data: {
+                memberId: user.memberId,
+                name: user.name,
+                mainWallet: user.mainWallet,
+                rebirthWallet: user.rebirthWallet
+            }
+        });
+    } catch (err) {
+        console.error("Fund action error:", err);
+        res.status(500).json({ success: false, message: 'Error processing fund action' });
+    }
+});
+
+// Backward compatibility alias for add-funds
+app.post('/api/admin/add-funds', authMiddleware, async (req, res) => {
+    req.body.actionType = 'credit';
+    req.body.walletType = 'main';
+    const User = require('./models/User');
+    const Transaction = require('./models/Transaction');
+    try {
+        const { memberId, amount } = req.body;
+        const numAmount = Number(amount);
+        if (!numAmount || numAmount <= 0) return res.status(400).json({ success: false, message: 'Invalid amount' });
+        const user = await User.findOne({ memberId: new RegExp(`^${(memberId || '').trim()}$`, 'i') });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        user.mainWallet += numAmount;
+        await user.save();
+        await Transaction.create({
+            userId: user._id,
+            memberId: user.memberId,
+            amount: numAmount,
+            type: 'Credit',
+            category: 'ADMIN_CREDIT',
+            remark: 'Funds Added by Admin',
+            date: new Date()
+        });
+        res.json({ success: true, message: `Successfully added ₹${numAmount} to ${user.memberId}'s wallet.` });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Error adding funds' });
+    }
 });
 
 app.post('/api/admin/tickets/:id/reply', authMiddleware, async (req, res) => {

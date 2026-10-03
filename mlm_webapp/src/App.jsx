@@ -1224,6 +1224,307 @@ function App() {
     </div>
   );
 
+  const renderFundManagement = () => {
+    const [stats, setStats] = useState(null);
+    const [loadingStats, setLoadingStats] = useState(true);
+    const [memberId, setMemberId] = useState('');
+    const [verifiedMember, setVerifiedMember] = useState(null);
+    const [checkingMember, setCheckingMember] = useState(false);
+    const [amount, setAmount] = useState('');
+    const [actionType, setActionType] = useState('credit');
+    const [walletType, setWalletType] = useState('main');
+    const [remark, setRemark] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useState({ text: '', type: '' });
+
+    const fetchStats = async () => {
+      setLoadingStats(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/admin/fund-stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await res.json();
+        if (result.success) setStats(result.data);
+      } catch (err) {
+        console.error("Error loading fund stats:", err);
+      }
+      setLoadingStats(false);
+    };
+
+    useEffect(() => {
+      if (activeMenu === 'Fund Management') {
+        fetchStats();
+      }
+    }, [activeMenu]);
+
+    const handleCheckMember = async (id) => {
+      const trimmed = id.trim();
+      if (trimmed.length >= 3) {
+        setCheckingMember(true);
+        try {
+          const res = await fetch(`/api/sponsor/${trimmed}`);
+          const result = await res.json();
+          if (result.success) {
+            setVerifiedMember({ id: trimmed, name: result.name });
+          } else {
+            setVerifiedMember(null);
+          }
+        } catch (e) {
+          setVerifiedMember(null);
+        }
+        setCheckingMember(false);
+      } else {
+        setVerifiedMember(null);
+      }
+    };
+
+    const handleFundSubmit = async (e) => {
+      e.preventDefault();
+      if (!amount || Number(amount) <= 0) {
+        setMessage({ text: 'Please enter a valid amount', type: 'error' });
+        return;
+      }
+
+      setSubmitting(true);
+      setMessage({ text: '', type: '' });
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/admin/fund-action', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            memberId: memberId.trim(),
+            amount: Number(amount),
+            actionType,
+            walletType,
+            remark
+          })
+        });
+
+        const result = await res.json();
+        setMessage({
+          text: result.message,
+          type: result.success ? 'success' : 'error'
+        });
+
+        if (result.success) {
+          setAmount('');
+          setRemark('');
+          fetchStats();
+        }
+      } catch (err) {
+        setMessage({ text: 'Error connecting to server', type: 'error' });
+      }
+      setSubmitting(false);
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader 
+          title="Fund Management & Platform Liability" 
+          subtitle="Real-time system balances and manual credit / debit controls for member wallets" 
+        />
+
+        {/* 1. Live Liability & Balance Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: '#FFF', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(15,23,42,0.15)' }}>
+            <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total System Liability</span>
+            <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#38BDF8' }}>
+              ₹ {(stats?.totalSystemLiability || 0).toLocaleString()}
+            </div>
+            <span style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '4px', display: 'block' }}>Main + Rebirth Wallets combined</span>
+          </div>
+
+          <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '20px', borderRadius: '16px' }}>
+            <span style={{ fontSize: '11px', color: '#166534', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Main Wallets</span>
+            <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#15803D' }}>
+              ₹ {(stats?.totalMainWallet || 0).toLocaleString()}
+            </div>
+            <span style={{ fontSize: '11px', color: '#16A34A', marginTop: '4px', display: 'block' }}>Available for Payouts / P2P</span>
+          </div>
+
+          <div style={{ background: '#FDF4FF', border: '1px solid #F5D0FE', padding: '20px', borderRadius: '16px' }}>
+            <span style={{ fontSize: '11px', color: '#86198F', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rebirth Engine Wallet</span>
+            <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#A21CAF' }}>
+              ₹ {(stats?.totalRebirthWallet || 0).toLocaleString()}
+            </div>
+            <span style={{ fontSize: '11px', color: '#C026D3', marginTop: '4px', display: 'block' }}>Locked for auto ID generation</span>
+          </div>
+
+          <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', padding: '20px', borderRadius: '16px' }}>
+            <span style={{ fontSize: '11px', color: '#9F1239', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending Payouts Queue</span>
+            <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#BE123C' }}>
+              ₹ {(stats?.pendingWithdrawalsAmount || 0).toLocaleString()}
+            </div>
+            <span style={{ fontSize: '11px', color: '#E11D48', marginTop: '4px', display: 'block' }}>{stats?.pendingWithdrawalsCount || 0} requests awaiting transfer</span>
+          </div>
+
+          <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '20px', borderRadius: '16px' }}>
+            <span style={{ fontSize: '11px', color: '#1E40AF', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending UPI Deposits</span>
+            <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#2563EB' }}>
+              ₹ {(stats?.pendingFundRequestsAmount || 0).toLocaleString()}
+            </div>
+            <span style={{ fontSize: '11px', color: '#3B82F6', marginTop: '4px', display: 'block' }}>{stats?.pendingFundRequestsCount || 0} UTR verification requests</span>
+          </div>
+        </div>
+
+        {/* 2. Manual Action Form */}
+        <div style={{ background: '#FFFFFF', padding: '28px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '32px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>⚡</span> Manual Member Wallet Credit / Debit
+          </h3>
+          <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '24px' }}>
+            Directly adjust any member's wallet balance. System automatically logs passbook records and prevents negative balance debits.
+          </p>
+
+          <form onSubmit={handleFundSubmit}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+              {/* Member ID Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Member ID</label>
+                <input 
+                  type="text" 
+                  value={memberId} 
+                  onChange={e => {
+                    setMemberId(e.target.value);
+                    handleCheckMember(e.target.value);
+                  }} 
+                  placeholder="e.g. RK10001 or rajeshkinjarapu" 
+                  required
+                  style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px', textTransform: 'uppercase' }} 
+                />
+                {checkingMember ? (
+                  <span style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', display: 'block' }}>Verifying ID...</span>
+                ) : verifiedMember ? (
+                  <span style={{ fontSize: '12px', color: '#16A34A', fontWeight: 'bold', marginTop: '4px', display: 'block' }}>
+                    ✓ Member Found: {verifiedMember.name}
+                  </span>
+                ) : memberId.length >= 3 ? (
+                  <span style={{ fontSize: '12px', color: '#DC2626', fontWeight: 'bold', marginTop: '4px', display: 'block' }}>
+                    ✕ Member not found in system
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Action Type */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Action Type</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setActionType('credit')}
+                    style={{ padding: '11px', borderRadius: '8px', border: actionType === 'credit' ? '2px solid #10B981' : '1px solid #CBD5E1', background: actionType === 'credit' ? '#ECFDF5' : '#FFF', color: actionType === 'credit' ? '#065F46' : '#64748B', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
+                  >
+                    🟢 Credit (Add)
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setActionType('debit')}
+                    style={{ padding: '11px', borderRadius: '8px', border: actionType === 'debit' ? '2px solid #EF4444' : '1px solid #CBD5E1', background: actionType === 'debit' ? '#FEF2F2' : '#FFF', color: actionType === 'debit' ? '#991B1B' : '#64748B', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
+                  >
+                    🔴 Debit (Deduct)
+                  </button>
+                </div>
+              </div>
+
+              {/* Wallet Type */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Target Wallet</label>
+                <select 
+                  value={walletType} 
+                  onChange={e => setWalletType(e.target.value)}
+                  style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px', background: '#FFF' }}
+                >
+                  <option value="main">💳 Main Wallet (Payouts & Transfers)</option>
+                  <option value="rebirth">🌱 Rebirth Wallet (ID Generation)</option>
+                </select>
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Amount (₹)</label>
+                <input 
+                  type="number" 
+                  value={amount} 
+                  onChange={e => setAmount(e.target.value)} 
+                  placeholder="e.g. 1000" 
+                  required
+                  min="1"
+                  style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px' }} 
+                />
+              </div>
+            </div>
+
+            {/* Remark */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Reason / Passbook Remark</label>
+              <input 
+                type="text" 
+                value={remark} 
+                onChange={e => setRemark(e.target.value)} 
+                placeholder="e.g. Cash deposit approved at head office / Special bonus" 
+                style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px' }} 
+              />
+            </div>
+
+            {message.text && (
+              <div style={{ marginBottom: '20px', padding: '14px', borderRadius: '10px', background: message.type === 'success' ? '#D1FAE5' : '#FEE2E2', color: message.type === 'success' ? '#065F46' : '#991B1B', fontSize: '14px', fontWeight: 'bold' }}>
+                {message.text}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={submitting}
+              style={{ padding: '14px 28px', background: actionType === 'credit' ? '#059669' : '#DC2626', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+            >
+              {submitting ? 'Executing Transaction...' : (actionType === 'credit' ? '➕ Credit Member Wallet' : '➖ Debit Member Wallet')}
+            </button>
+          </form>
+        </div>
+
+        {/* 3. Recent Admin Transactions Log */}
+        <div>
+          <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', marginBottom: '14px' }}>
+            📋 Recent Admin Manual Transactions Log
+          </h3>
+          <Table headers={['Date & Time', 'Member ID', 'Type', 'Amount', 'Remark']}>
+            {(!stats?.recentAdminTransactions || stats.recentAdminTransactions.length === 0) ? (
+              <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748B' }}>No manual admin transactions executed yet.</td></tr>
+            ) : (
+              stats.recentAdminTransactions.map(tx => (
+                <tr key={tx._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '14px', fontSize: '13px', color: '#64748B' }}>
+                    {new Date(tx.createdAt || tx.date).toLocaleString()}
+                  </td>
+                  <td style={{ padding: '14px', fontWeight: 'bold', color: '#0EA5E9' }}>
+                    {tx.memberId}
+                  </td>
+                  <td style={{ padding: '14px' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', background: tx.type === 'Credit' ? '#D1FAE5' : '#FEE2E2', color: tx.type === 'Credit' ? '#065F46' : '#991B1B' }}>
+                      {tx.type}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px', fontWeight: 'bold', color: tx.type === 'Credit' ? '#10B981' : '#EF4444' }}>
+                    {tx.type === 'Credit' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '14px', fontSize: '13px', color: '#334155' }}>
+                    {tx.remark || 'Manual Admin Action'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </Table>
+        </div>
+      </CardWrapper>
+    );
+  };
+
   const renderFundRequests = () => {
     const [requests, setRequests] = useState([]);
     
@@ -2785,6 +3086,7 @@ function App() {
        case 'Notifications': renderFn = renderNotifications; break;
        case 'Non-Working Cashback': renderFn = renderRoyaltyAndCashback; break;
        case 'Add Member': renderFn = renderAddMember; break;
+       case 'Fund Management': renderFn = renderFundManagement; break;
        case 'Fund Requests': renderFn = renderFundRequests; break;
        case 'AutoPool Settings':
        case 'Pool Distributions': renderFn = renderAutoPoolSettings; break;
