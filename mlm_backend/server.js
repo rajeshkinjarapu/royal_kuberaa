@@ -48,6 +48,20 @@ cron.schedule('1 0 * * *', async () => {
     }
 });
 
+// --- Auth Middleware ---
+const authMiddleware = (req, res, next) => {
+    const token = req.header('Authorization');
+    if (!token) return res.status(401).json({ success: false, message: 'No token, authorization denied' });
+
+    try {
+        const decoded = jwt.verify(token.replace('Bearer ', ''), JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        res.status(401).json({ success: false, message: 'Token is not valid' });
+    }
+};
+
 // Manual Cron Trigger for Testing
 app.post('/api/admin/trigger-cron', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
@@ -184,19 +198,6 @@ app.get('/api/sponsor/:id', async (req, res) => {
 });
 
 
-// --- Auth Middleware ---
-const authMiddleware = (req, res, next) => {
-    const token = req.header('Authorization');
-    if (!token) return res.status(401).json({ success: false, message: 'No token, authorization denied' });
-
-    try {
-        const decoded = jwt.verify(token.replace('Bearer ', ''), JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        res.status(401).json({ success: false, message: 'Token is not valid' });
-    }
-};
 
 // Dashboard Data Route (Protected & Real Data)
 app.get('/api/dashboard', authMiddleware, async (req, res) => {
