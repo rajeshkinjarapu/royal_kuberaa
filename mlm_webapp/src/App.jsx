@@ -2035,6 +2035,10 @@ function App() {
     const [rebirthData, setRebirthData] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const currentRebirthBal = dashboardData?.rebirthWallet || 0;
+    const progressToNext = Math.min(((currentRebirthBal % 1000) / 1000) * 100, 100);
+    const amountNeeded = 1000 - (currentRebirthBal % 1000);
+
     useEffect(() => {
         const fetchRebirths = async () => {
             setLoading(true);
@@ -2051,22 +2055,51 @@ function App() {
 
     return (
         <CardWrapper>
-          <PageHeader title="My Rebirth IDs" subtitle="List of all new IDs generated from your Rebirth Wallet" />
+          <PageHeader title="Rebirth ID System (Infinite Engine)" subtitle="Automatic rebirth IDs generated every time your Rebirth Wallet reaches ₹1,000" />
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '28px' }}>
+             <div style={{ padding: '24px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
+                <div style={{ fontSize: '13px', opacity: 0.9, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current Rebirth Wallet</div>
+                <h1 style={{ fontSize: '36px', margin: '8px 0 12px 0' }}>₹ {currentRebirthBal.toLocaleString()}</h1>
+                <div style={{ fontSize: '13px', opacity: 0.95 }}>Total Rebirth IDs Generated: <strong>{rebirthData.length} IDs</strong></div>
+             </div>
+
+             <div style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                   <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>Next Rebirth Progress</span>
+                   <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#8B5CF6' }}>{Math.round(progressToNext)}%</span>
+                </div>
+                <div style={{ width: '100%', height: '10px', background: '#F1F5F9', borderRadius: '6px', overflow: 'hidden', marginBottom: '10px' }}>
+                   <div style={{ width: `${progressToNext}%`, height: '100%', background: 'linear-gradient(90deg, #8B5CF6 0%, #A855F7 100%)', transition: 'width 0.5s' }}></div>
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748B' }}>
+                   ₹{amountNeeded.toLocaleString()} more needed to automatically generate your next Rebirth ID.
+                </div>
+             </div>
+          </div>
+
+          <div style={{ background: '#EFF6FF', padding: '16px 20px', borderRadius: '12px', borderLeft: '4px solid #3B82F6', marginBottom: '24px', fontSize: '13px', color: '#1E40AF', lineHeight: '1.5' }}>
+             💡 <strong>100% Distribution per Rebirth ID (₹1,000):</strong> ₹300 goes to your Direct Sponsor (Passive Sponsor Bonus), and ₹700 goes into Daily Royalty Pools (Gold-₹300, Platinum-₹200, Ruby-₹100, Diamond-₹100).
+          </div>
           
           {loading ? (
              <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Rebirths...</div>
           ) : rebirthData.length === 0 ? (
-             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>You haven't generated any Rebirth IDs yet.</div>
+             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B', background: '#F8FAFC', borderRadius: '16px' }}>You haven't generated any Rebirth IDs yet. As your income grows, Rebirth IDs will automatically be created here!</div>
           ) : (
-            <Table headers={['Rebirth ID', 'Name', 'Left Team', 'Right Team', 'Total Earnings', 'Created On']}>
+            <Table headers={['Rebirth ID', 'Generated For', 'Sponsor Bonus', 'Pool Contribution', 'Generated On', 'Status']}>
               {rebirthData.map(user => (
                 <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>{user.id}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>♾️ {user.id}</td>
                   <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
-                  <td style={{ padding: '15px', color: '#0EA5E9' }}>{user.leftTeam}</td>
-                  <td style={{ padding: '15px', color: '#F59E0B' }}>{user.rightTeam}</td>
-                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#10B981' }}>₹{user.earnings}</td>
-                  <td style={{ padding: '15px', color: '#64748B' }}>{user.joinDate}</td>
+                  <td style={{ padding: '15px', color: '#059669', fontWeight: 'bold' }}>₹{user.sponsorBonus} (Paid)</td>
+                  <td style={{ padding: '15px', color: '#2563EB', fontWeight: 'bold' }}>₹{user.poolContribution} (Distributed)</td>
+                  <td style={{ padding: '15px', color: '#64748B' }}>{user.createdDate}</td>
+                  <td style={{ padding: '15px' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: '#D1FAE5', color: '#065F46' }}>
+                      {user.status}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </Table>

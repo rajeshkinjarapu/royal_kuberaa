@@ -46,7 +46,7 @@ async function addIncome(user, amount, type, desc) {
     await checkAndTriggerRebirth(user);
 }
 
-// Trigger Rebirth
+// Trigger Rebirth (100% Distribution: ₹300 Sponsor Bonus, ₹700 Royalty Pools)
 async function checkAndTriggerRebirth(user) {
     if (user.rebirthWallet >= 1000) {
         const rebirthsToCreate = Math.floor(user.rebirthWallet / 1000);
@@ -67,12 +67,33 @@ async function checkAndTriggerRebirth(user) {
             });
             await rebirthUser.save();
 
-            // Rebirth distribution: 300 Direct, 700 Royalty Pools
-            const sponsor = await User.findOne({ memberId: user.sponsorId });
+            // Record Debit Transaction in User's Passbook
+            await Transaction.create({
+                userId: user._id,
+                memberId: user.memberId,
+                type: 'Debit',
+                category: 'REBIRTH_GENERATED',
+                remark: `₹1,000 deducted from Rebirth Wallet for generating Rebirth ID: ${rebirthMemberId}`,
+                amount: 1000,
+                status: 'COMPLETED',
+                date: new Date()
+            });
+
+            // Rebirth distribution: ₹300 to Sponsor (or Company Admin fallback)
+            let sponsor = null;
+            if (user.sponsorId) {
+                sponsor = await User.findOne({ memberId: user.sponsorId });
+            }
             if (sponsor) {
                 await addIncome(sponsor, 300, 'DIRECT', `Rebirth Sponsor Bonus from ${rebirthMemberId}`);
+            } else {
+                const admin = await User.findOne({ role: 'admin' });
+                if (admin) {
+                    await addIncome(admin, 300, 'DIRECT', `Company Rebirth Bonus from ${rebirthMemberId}`);
+                }
             }
 
+            // ₹700 to Daily Royalty Pools (Gold-300, Platinum-200, Ruby-100, Diamond-100)
             for (const [pool, amount] of Object.entries(REBIRTH_POOLS)) {
                 let globalPool = await GlobalPool.findOne({ poolName: pool });
                 if (!globalPool) globalPool = new GlobalPool({ poolName: pool });

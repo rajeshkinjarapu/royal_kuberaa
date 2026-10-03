@@ -588,16 +588,16 @@ app.get('/api/network/directs', authMiddleware, async (req, res) => {
 app.get('/api/network/rebirths', authMiddleware, async (req, res) => {
     try {
         const rebirths = await User.find({ mainUserId: req.user.id, isRebirth: true })
-                                   .select('memberId name joinDate leftTeamCount rightTeamCount totalEarnings')
-                                   .sort({ joinDate: -1 });
+                                   .select('memberId name createdAt joinDate')
+                                   .sort({ createdAt: -1 });
         
         const data = rebirths.map(user => ({
             id: user.memberId,
             name: user.name,
-            joinDate: new Date(user.joinDate).toLocaleDateString(),
-            leftTeam: user.leftTeamCount,
-            rightTeam: user.rightTeamCount,
-            earnings: user.totalEarnings
+            sponsorBonus: 300,
+            poolContribution: 700,
+            createdDate: new Date(user.createdAt || user.joinDate || Date.now()).toLocaleDateString(),
+            status: 'Active Rebirth Node'
         }));
 
         res.json({ success: true, data });
