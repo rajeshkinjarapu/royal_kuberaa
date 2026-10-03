@@ -235,7 +235,16 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 teamIncome: team, 
                 withdrawFund: withdraw, 
                 autopoolFund: autopool, 
-                allRanks: user.goldEarnings + user.platinumEarnings + user.rubyEarnings + user.crownDiamondEarnings,
+                allRanks: (user.goldEarnings || 0) + (user.platinumEarnings || 0) + (user.rubyEarnings || 0) + (user.diamondEarnings || 0),
+                royaltyStats: {
+                    rank: user.rank || (user.isDiamond ? 'DIAMOND' : user.isRuby ? 'RUBY' : user.isPlatinum ? 'PLATINUM' : user.isGold ? 'GOLD' : 'STARTER'),
+                    goldEarnings: user.goldEarnings || 0,
+                    platinumEarnings: user.platinumEarnings || 0,
+                    rubyEarnings: user.rubyEarnings || 0,
+                    diamondEarnings: user.diamondEarnings || 0,
+                    cashbackEarnings: user.cashbackEarnings || 0,
+                    caps: { GOLD: 20000, PLATINUM: 100000, RUBY: 500000, DIAMOND: 2500000, CASHBACK: 1000 }
+                },
                 networkStats: { 
                     directReferrals: user.directReferralsCount, 
                     totalTeamSize: totalTeamSize,

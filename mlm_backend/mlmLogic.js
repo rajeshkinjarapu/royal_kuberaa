@@ -208,12 +208,17 @@ async function activateUser(user, sponsor, placement) {
     await nwPool.save();
 }
 
-// Helper: Add user to Global Pool
+// Helper: Add user to Global Pool with duplicate check
 async function joinPool(memberId, poolName) {
     let globalPool = await GlobalPool.findOne({ poolName });
     if (!globalPool) globalPool = new GlobalPool({ poolName });
-    globalPool.activeQueue.push({ memberId, addedAt: new Date() });
-    await globalPool.save();
+    if (!globalPool.activeQueue) globalPool.activeQueue = [];
+    
+    const alreadyInQueue = globalPool.activeQueue.some(item => item.memberId === memberId);
+    if (!alreadyInQueue) {
+        globalPool.activeQueue.push({ memberId, addedAt: new Date() });
+        await globalPool.save();
+    }
 }
 
 // Check and Update Rank (Gold, Platinum, Ruby, Diamond) recursively up the sponsor tree
@@ -222,35 +227,40 @@ async function updateRankStatus(sponsor) {
     while (currentSponsor) {
         let promoted = false;
 
-        const directs = await User.find({ sponsorId: currentSponsor.memberId });
+        // ONLY count activated members (who paid ₹1000) for rank advancement
+        const directs = await User.find({ sponsorId: currentSponsor.memberId, isActive: true });
         
-        // GOLD (ANY 2 Directs)
+        // GOLD (ANY 2 Active Directs)
         if (directs.length >= 2 && !currentSponsor.isGold) {
             currentSponsor.isGold = true;
+            currentSponsor.rank = 'GOLD';
             await joinPool(currentSponsor.memberId, 'GOLD');
             promoted = true;
         }
 
-        // PLATINUM (2 Gold Directs)
+        // PLATINUM (2 Gold Active Directs)
         const goldDirects = directs.filter(d => d.isGold);
         if (goldDirects.length >= 2 && !currentSponsor.isPlatinum) {
             currentSponsor.isPlatinum = true;
+            currentSponsor.rank = 'PLATINUM';
             await joinPool(currentSponsor.memberId, 'PLATINUM');
             promoted = true;
         }
 
-        // RUBY (5 Platinum Directs)
+        // RUBY (5 Platinum Active Directs)
         const platinumDirects = directs.filter(d => d.isPlatinum);
         if (platinumDirects.length >= 5 && !currentSponsor.isRuby) {
             currentSponsor.isRuby = true;
+            currentSponsor.rank = 'RUBY';
             await joinPool(currentSponsor.memberId, 'RUBY');
             promoted = true;
         }
 
-        // DIAMOND (5 Ruby Directs)
+        // DIAMOND (5 Ruby Active Directs)
         const rubyDirects = directs.filter(d => d.isRuby);
         if (rubyDirects.length >= 5 && !currentSponsor.isDiamond) {
             currentSponsor.isDiamond = true;
+            currentSponsor.rank = 'DIAMOND';
             await joinPool(currentSponsor.memberId, 'DIAMOND');
             promoted = true;
         }

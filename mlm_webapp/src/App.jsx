@@ -1947,12 +1947,64 @@ function App() {
              subtitle={isRoyalty ? "Your daily share from Global Royalty Pools" : "Your daily non-working cashback earnings"} 
           />
           
-          <div style={{ padding: '20px', background: isRoyalty ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)', borderRadius: '16px', color: '#FFF', marginBottom: '30px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
-             <h3 style={{ margin: 0, opacity: 0.9 }}>Total Earned</h3>
-             <h1 style={{ fontSize: '36px', margin: '10px 0 0' }}>
-                 ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
-             </h1>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+             <div style={{ padding: '20px', background: isRoyalty ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Total Earned ({isRoyalty ? 'Royalty' : 'Cashback'})</h3>
+                <h1 style={{ fontSize: '32px', margin: '8px 0 0' }}>
+                    ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
+                </h1>
+             </div>
+             
+             {!isRoyalty && (
+                <div style={{ padding: '20px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>₹1,000 Guarantee Recovery</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#10B981' }}>₹{dashboardData?.royaltyStats?.cashbackEarnings || 0} / ₹1,000</span>
+                   </div>
+                   <div style={{ width: '100%', height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', margin: '12px 0 8px 0' }}>
+                      <div style={{ width: `${Math.min(((dashboardData?.royaltyStats?.cashbackEarnings || 0) / 1000) * 100, 100)}%`, height: '100%', background: '#10B981', transition: 'width 0.5s' }}></div>
+                   </div>
+                   <span style={{ fontSize: '11px', color: '#94A3B8' }}>* Non-working members receive daily share until ₹1000 fee is recovered.</span>
+                </div>
+             )}
           </div>
+
+          {isRoyalty && (
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '30px' }}>
+                {[
+                   { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: '🥇', req: '2 Active Directs', color: '#F59E0B' },
+                   { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: '🥈', req: '2 Gold Directs', color: '#3B82F6' },
+                   { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: '🔴', req: '5 Platinum Directs', color: '#EF4444' },
+                   { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: '💎', req: '5 Ruby Directs', color: '#8B5CF6' }
+                ].map(pool => {
+                   const userRank = dashboardData?.royaltyStats?.rank || 'STARTER';
+                   const ranksOrder = ['STARTER', 'GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'OWNER'];
+                   const isQualified = ranksOrder.indexOf(userRank) >= ranksOrder.indexOf(pool.name);
+                   const progress = Math.min((pool.earned / pool.cap) * 100, 100);
+
+                   return (
+                      <div key={pool.name} style={{ background: '#FFF', padding: '18px', borderRadius: '16px', border: `1px solid ${isQualified ? pool.color : '#E2E8F0'}`, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)' }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: '800', fontSize: '15px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                               <span>{pool.icon}</span> {pool.name} POOL
+                            </span>
+                            <span style={{ padding: '3px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', background: isQualified ? '#D1FAE5' : '#F1F5F9', color: isQualified ? '#065F46' : '#94A3B8' }}>
+                               {isQualified ? 'Active' : 'Locked'}
+                            </span>
+                         </div>
+                         <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>Req: {pool.req}</div>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
+                            <span style={{ color: '#059669' }}>₹{pool.earned.toLocaleString()}</span>
+                            <span style={{ color: '#94A3B8' }}>Cap: ₹{pool.cap.toLocaleString()}</span>
+                         </div>
+                         <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '3px', overflow: 'hidden' }}>
+                            <div style={{ width: `${progress}%`, height: '100%', background: pool.color }}></div>
+                         </div>
+                      </div>
+                   );
+                })}
+             </div>
+          )}
 
           {loading ? (
              <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading History...</div>
