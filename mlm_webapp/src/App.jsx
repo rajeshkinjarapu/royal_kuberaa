@@ -2706,6 +2706,7 @@ function App() {
   const renderBinaryTree = () => {
     const [treeData, setTreeData] = useState(null);
     const [loadingTree, setLoadingTree] = useState(true);
+    const [searchId, setSearchId] = useState('');
     
     const fetchTree = async (memberId = '') => {
         setLoadingTree(true);
@@ -2783,6 +2784,22 @@ function App() {
     return (
         <CardWrapper>
             <PageHeader title="Binary Genealogy Tree" subtitle="Click on any member ID to view their downline tree" />
+            
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', maxWidth: '400px', margin: '0 auto 20px' }}>
+                <input 
+                    type="text" 
+                    value={searchId} 
+                    onChange={e => setSearchId(e.target.value)} 
+                    placeholder="Enter Member ID (e.g. RK...)" 
+                    style={{ flex: 1, padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px', textTransform: 'uppercase' }} 
+                />
+                <button 
+                    onClick={() => { if(searchId.trim()) fetchTree(searchId.trim().toUpperCase()); }}
+                    style={{ padding: '0 20px', background: '#3B82F6', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                    Search
+                </button>
+            </div>
             
             {loadingTree ? (
                 <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Tree...</div>
