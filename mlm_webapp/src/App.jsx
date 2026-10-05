@@ -491,10 +491,10 @@ function App() {
       ]
       : [
         { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
-        { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
-        { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
         { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: '🎯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
         { id: 11, title: 'Binary Income', amount: dashboardData?.binaryIncome || 0, icon: '⚖️', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
+        { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
+        { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
         { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
         { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: '➡️', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
         { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: '📦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
