@@ -216,12 +216,11 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         // Let's rely on User model fields and a quick aggregation where possible.
         // Actually, we can just look up all transactions for the member.
         const txs = await Transaction.find({ memberId: user.memberId });
-        let direct = 0, binary = 0, level = 0, royalty = 0, cashback = 0, withdraw = 0;
+        let direct = 0, binary = 0, royalty = 0, cashback = 0, withdraw = 0;
         
         txs.forEach(tx => {
             if (tx.category === 'DIRECT') direct += tx.amount;
             if (tx.category === 'BINARY') binary += tx.amount;
-            if (tx.category === 'LEVEL') level += tx.amount;
             if (tx.category === 'ROYALTY') royalty += tx.amount;
             if (tx.category === 'CASHBACK') cashback += tx.amount;
             if (tx.category === 'Withdrawal') withdraw += tx.amount;
@@ -235,7 +234,6 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 rebirthWallet: user.rebirthWallet,
                 directIncome: direct,
                 binaryIncome: binary,
-                levelIncome: level,
                 royaltyIncome: royalty,
                 cashbackIncome: cashback,
                 withdrawFund: withdraw, 
@@ -247,7 +245,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                     rubyEarnings: user.rubyEarnings || 0,
                     diamondEarnings: user.diamondEarnings || 0,
                     cashbackEarnings: user.cashbackEarnings || 0,
-                    caps: { GOLD: 20000, PLATINUM: 100000, RUBY: 500000, DIAMOND: 2500000, CASHBACK: 1000 }
+                    caps: { GOLD: 20000, PLATINUM: 100000, RUBY: 500000, DIAMOND: 2500000, CASHBACK: 1500 }
                 },
                 networkStats: { 
                     directReferrals: user.directReferralsCount, 
@@ -598,8 +596,8 @@ app.get('/api/network/rebirths', authMiddleware, async (req, res) => {
         const data = rebirths.map(user => ({
             id: user.memberId,
             name: user.name,
-            sponsorBonus: 300,
-            poolContribution: 700,
+            sponsorBonus: 400,
+            poolContribution: 1100,
             createdDate: new Date(user.createdAt || user.joinDate || Date.now()).toLocaleDateString(),
             status: 'Active Rebirth Node'
         }));
@@ -953,7 +951,7 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: 'ID is already activated' });
         }
         
-        let amountToDeduct = 1000;
+        let amountToDeduct = 1500;
         let productName = 'ID Activation Fee';
         
         if (productId) {
@@ -1094,15 +1092,16 @@ app.post('/api/admin/kyc/:memberId', authMiddleware, async (req, res) => {
     }
 });
 
-// Master list of rewards
+// Master list of rewards (Scaled proportionally for ₹1500 package and ₹300 binary matching)
 const REWARDS_PLAN = [
-    { pairs: 50, name: "Smartphone", cash: 5000 },
-    { pairs: 150, name: "Smart TV / Laptop", cash: 15000 },
-    { pairs: 500, name: "Bike Fund", cash: 50000 },
-    { pairs: 1500, name: "Royal Enfield / Gold", cash: 150000 },
-    { pairs: 5000, name: "Car Fund", cash: 500000 },
-    { pairs: 15000, name: "Luxury Car Fund", cash: 1500000 },
-    { pairs: 50000, name: "Dream Villa", cash: 5000000 }
+    { pairs: 25, name: "Smartwatch / Soundbar", cash: 3500 },
+    { pairs: 50, name: "5G Smartphone", cash: 8000 },
+    { pairs: 150, name: "43\" Smart LED TV / Laptop", cash: 25000 },
+    { pairs: 500, name: "Electric Scooter / Bike Fund", cash: 75000 },
+    { pairs: 1500, name: "Royal Enfield / Gold Fund", cash: 225000 },
+    { pairs: 5000, name: "Car Fund (Swift / Punch)", cash: 750000 },
+    { pairs: 15000, name: "Luxury SUV Fund (Creta / XUV)", cash: 2500000 },
+    { pairs: 50000, name: "Dream Luxury Villa", cash: 7500000 }
 ];
 
 // Get User Rewards Status
@@ -1511,7 +1510,7 @@ app.get('/api/admin/pools', authMiddleware, async (req, res) => {
                 membersCount = await User.countDocuments({
                     directReferralsCount: 0,
                     totalPairsMatched: 0,
-                    cashbackEarnings: { $lt: 1000 },
+                    cashbackEarnings: { $lt: 1500 },
                     isActive: true,
                     isRebirth: false
                 });
@@ -1909,7 +1908,7 @@ app.get('/api/admin/reports', authMiddleware, async (req, res) => {
         
         // Income stats from transactions
         const incomeTx = await Transaction.aggregate([
-            { $match: { type: 'Credit', category: { $in: ['DIRECT', 'BINARY', 'LEVEL', 'ROYALTY'] } } },
+            { $match: { type: 'Credit', category: { $in: ['DIRECT', 'BINARY', 'ROYALTY', 'CASHBACK'] } } },
             { $group: { _id: null, totalIncome: { $sum: '$amount' } } }
         ]);
         const totalIncomeGenerated = incomeTx[0]?.totalIncome || 0;
@@ -1942,6 +1941,137 @@ app.get('/api/admin/reports', authMiddleware, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: "Error fetching reports" });
+    }
+});
+
+// ============================================================
+// AWARDS & REWARDS API
+// ============================================================
+
+// Rewards Plan Configuration (matches Business Plan)
+const REWARDS_PLAN = [
+    { pairs: 50,    name: 'Smartphone',         cash: 5000,    gift: 'Smartphone or ₹5,000 Cash' },
+    { pairs: 150,   name: 'Smart TV / Laptop',  cash: 15000,   gift: 'Smart TV / Laptop or ₹15,000 Cash' },
+    { pairs: 500,   name: 'Bike Fund',           cash: 50000,   gift: 'Bike Fund or ₹50,000 Cash' },
+    { pairs: 1500,  name: 'Royal Enfield / Gold',cash: 150000,  gift: 'Royal Enfield / Gold or ₹1,50,000 Cash' },
+    { pairs: 5000,  name: 'Car Fund',            cash: 500000,  gift: 'Car Fund or ₹5,00,000 Cash' },
+    { pairs: 15000, name: 'Luxury Car Fund',     cash: 1500000, gift: 'Luxury Car Fund or ₹15,00,000 Cash' },
+    { pairs: 50000, name: 'Dream Villa',         cash: 5000000, gift: 'Dream Villa or ₹50,00,000 Cash' },
+];
+
+// GET /api/user/rewards - Fetch user's rewards status
+app.get('/api/user/rewards', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        res.json({
+            success: true,
+            totalPairsMatched: user.totalPairsMatched || 0,
+            claimedRewards: user.claimedRewards || [],
+            rewardsPlan: REWARDS_PLAN
+        });
+    } catch (err) {
+        console.error('Rewards Fetch Error:', err);
+        res.status(500).json({ success: false, message: 'Server error fetching rewards' });
+    }
+});
+
+// POST /api/user/rewards/claim - Claim a reward
+app.post('/api/user/rewards/claim', authMiddleware, async (req, res) => {
+    try {
+        const { pairs } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const reward = REWARDS_PLAN.find(r => r.pairs === pairs);
+        if (!reward) return res.status(400).json({ success: false, message: 'Invalid reward tier.' });
+
+        if ((user.totalPairsMatched || 0) < pairs) {
+            return res.status(400).json({ success: false, message: `You need ${pairs} pairs to claim this reward. You have ${user.totalPairsMatched || 0} pairs.` });
+        }
+
+        const alreadyClaimed = (user.claimedRewards || []).find(r => r.pairs === pairs);
+        if (alreadyClaimed) {
+            return res.status(400).json({ success: false, message: 'You have already claimed this reward.' });
+        }
+
+        user.claimedRewards.push({
+            pairs,
+            rewardName: reward.name,
+            amount: reward.cash,
+            status: 'Pending Dispatch',
+            claimedAt: new Date()
+        });
+        await user.save();
+
+        res.json({ success: true, message: `🎁 Congratulations! Your ${reward.name} reward has been claimed! The company will dispatch your gift soon.` });
+    } catch (err) {
+        console.error('Reward Claim Error:', err);
+        res.status(500).json({ success: false, message: 'Server error claiming reward' });
+    }
+});
+
+// GET /api/admin/rewards - List all reward claims (Admin only)
+app.get('/api/admin/rewards', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+
+        const users = await User.find({ 'claimedRewards.0': { $exists: true } }).select('memberId name mobile claimedRewards');
+
+        const allClaims = [];
+        for (const u of users) {
+            for (const claim of u.claimedRewards) {
+                allClaims.push({
+                    userId: u._id,
+                    memberId: u.memberId,
+                    name: u.name,
+                    mobile: u.mobile,
+                    pairs: claim.pairs,
+                    rewardName: claim.rewardName,
+                    amount: claim.amount,
+                    status: claim.status,
+                    claimedAt: claim.claimedAt,
+                    dispatchedAt: claim.dispatchedAt
+                });
+            }
+        }
+
+        // Sort by claimed date descending
+        allClaims.sort((a, b) => new Date(b.claimedAt) - new Date(a.claimedAt));
+
+        res.json({ success: true, data: allClaims });
+    } catch (err) {
+        console.error('Admin Rewards Error:', err);
+        res.status(500).json({ success: false, message: 'Server error fetching reward claims' });
+    }
+});
+
+// PUT /api/admin/rewards/:userId/:pairs - Update reward status (Dispatched/Delivered)
+app.put('/api/admin/rewards/:userId/:pairs', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+
+        const { status } = req.body; // 'Dispatched' or 'Delivered'
+        if (!['Dispatched', 'Delivered'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status. Use Dispatched or Delivered.' });
+        }
+
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const pairs = Number(req.params.pairs);
+        const claim = user.claimedRewards.find(r => r.pairs === pairs);
+        if (!claim) return res.status(404).json({ success: false, message: 'Reward claim not found for this user.' });
+
+        claim.status = status;
+        if (status === 'Dispatched') claim.dispatchedAt = new Date();
+        await user.save();
+
+        res.json({ success: true, message: `Reward status updated to ${status} for ${user.memberId}` });
+    } catch (err) {
+        console.error('Admin Reward Update Error:', err);
+        res.status(500).json({ success: false, message: 'Server error updating reward status' });
     }
 });
 

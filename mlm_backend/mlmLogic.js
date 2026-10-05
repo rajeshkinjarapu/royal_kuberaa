@@ -4,13 +4,12 @@ const GlobalPool = require('./models/GlobalPool');
 const Transaction = require('./models/Transaction');
 
 // Core config
-const DIRECT_INCOME = 250;
-const LEVEL_INCOMES = [60, 40, 30, 20, 10, 8, 8, 8, 8, 8];
-const BINARY_INCOME = 200;
+const DIRECT_INCOME = 400;
+const BINARY_INCOME = 300;
 const MAX_DAILY_PAIRS = 5;
 
-const NORMAL_POOLS = { GOLD: 100, PLATINUM: 50, RUBY: 50, DIAMOND: 50 };
-const REBIRTH_POOLS = { GOLD: 300, PLATINUM: 200, RUBY: 100, DIAMOND: 100 };
+const NORMAL_POOLS = { GOLD: 120, PLATINUM: 60, RUBY: 60, DIAMOND: 60 };
+const REBIRTH_POOLS = { GOLD: 440, PLATINUM: 220, RUBY: 220, DIAMOND: 220 };
 const NON_WORKING_FUND_AMOUNT = 100;
 
 // Caps
@@ -21,12 +20,12 @@ const MAX_CAPS = {
     DIAMOND: 2500000
 };
 
-// Helper: Add income with 80% / 20% Rebirth split
+// Helper: Add income with 90% / 10% Rebirth split
 async function addIncome(user, amount, type, desc) {
     if (amount <= 0) return;
     
-    const mainAmount = amount * 0.8;
-    const rebirthAmount = amount * 0.2;
+    const mainAmount = amount * 0.9;
+    const rebirthAmount = amount * 0.1;
 
     user.mainWallet += mainAmount;
     user.rebirthWallet += rebirthAmount;
@@ -47,11 +46,11 @@ async function addIncome(user, amount, type, desc) {
     await checkAndTriggerRebirth(user);
 }
 
-// Trigger Rebirth (100% Distribution: ₹300 Sponsor Bonus, ₹700 Royalty Pools)
+// Trigger Rebirth (100% Distribution: ₹400 Sponsor Bonus, ₹1100 Royalty Pools)
 async function checkAndTriggerRebirth(user) {
-    if (user.rebirthWallet >= 1000) {
-        const rebirthsToCreate = Math.floor(user.rebirthWallet / 1000);
-        user.rebirthWallet -= (rebirthsToCreate * 1000);
+    if (user.rebirthWallet >= 1500) {
+        const rebirthsToCreate = Math.floor(user.rebirthWallet / 1500);
+        user.rebirthWallet -= (rebirthsToCreate * 1500);
         user.rebirthCount += rebirthsToCreate;
         await user.save();
 
@@ -74,27 +73,27 @@ async function checkAndTriggerRebirth(user) {
                 memberId: user.memberId,
                 type: 'Debit',
                 category: 'REBIRTH_GENERATED',
-                remark: `₹1,000 deducted from Rebirth Wallet for generating Rebirth ID: ${rebirthMemberId}`,
-                amount: 1000,
+                remark: `₹1,500 deducted from Rebirth Wallet for generating Rebirth ID: ${rebirthMemberId}`,
+                amount: 1500,
                 status: 'COMPLETED',
                 date: new Date()
             });
 
-            // Rebirth distribution: ₹300 to Sponsor (or Company Admin fallback)
+            // Rebirth distribution: ₹400 to Sponsor (or Company Admin fallback)
             let sponsor = null;
             if (user.sponsorId) {
                 sponsor = await User.findOne({ memberId: user.sponsorId });
             }
             if (sponsor) {
-                await addIncome(sponsor, 300, 'DIRECT', `Rebirth Sponsor Bonus from ${rebirthMemberId}`);
+                await addIncome(sponsor, 400, 'DIRECT', `Rebirth Sponsor Bonus from ${rebirthMemberId}`);
             } else {
                 const admin = await User.findOne({ role: 'admin' });
                 if (admin) {
-                    await addIncome(admin, 300, 'DIRECT', `Company Rebirth Bonus from ${rebirthMemberId}`);
+                    await addIncome(admin, 400, 'DIRECT', `Company Rebirth Bonus from ${rebirthMemberId}`);
                 }
             }
 
-            // ₹700 to Daily Royalty Pools (Gold-300, Platinum-200, Ruby-100, Diamond-100)
+            // ₹1100 to Daily Royalty Pools (Gold-440, Platinum-220, Ruby-220, Diamond-220)
             for (const [pool, amount] of Object.entries(REBIRTH_POOLS)) {
                 let globalPool = await GlobalPool.findOne({ poolName: pool });
                 if (!globalPool) globalPool = new GlobalPool({ poolName: pool });
@@ -130,7 +129,7 @@ async function activateUser(user, sponsor, placement) {
         }
     }
 
-    // 2. Direct Income (250)
+    // 2. Direct Income (400)
     if (sponsor) {
         await addIncome(sponsor, DIRECT_INCOME, 'DIRECT', `Direct Referral Bonus from ${user.memberId}`);
         sponsor.directReferralsCount += 1;
@@ -138,19 +137,7 @@ async function activateUser(user, sponsor, placement) {
         await updateRankStatus(sponsor);
     }
 
-    // 3. Level Income (10 Levels in Sponsor Tree)
-    let currentSponsor = sponsor;
-    for (let i = 0; i < LEVEL_INCOMES.length; i++) {
-        if (!currentSponsor) break;
-        await addIncome(currentSponsor, LEVEL_INCOMES[i], 'LEVEL', `Level ${i+1} Income from ${user.memberId}`);
-        if (currentSponsor.sponsorId) {
-            currentSponsor = await User.findOne({ memberId: currentSponsor.sponsorId });
-        } else {
-            break;
-        }
-    }
-
-    // 4. Binary Matching Income (Traverse up Binary Tree)
+    // 3. Binary Matching Income (Traverse up Binary Tree)
     let currentNode = user;
     let childMemberId = user.memberId;
     while (currentNode && currentNode.uplineId) {
@@ -215,7 +202,7 @@ async function activateUser(user, sponsor, placement) {
         currentNode = upline;
     }
 
-    // 5. Daily Royalty Pools Fund Contribution
+    // 4. Daily Royalty Pools Fund Contribution (₹300)
     for (const [pool, amount] of Object.entries(NORMAL_POOLS)) {
         let globalPool = await GlobalPool.findOne({ poolName: pool });
         if (!globalPool) globalPool = new GlobalPool({ poolName: pool });
@@ -223,11 +210,13 @@ async function activateUser(user, sponsor, placement) {
         await globalPool.save();
     }
 
-    // 6. Global Non-Working Cashback Fund
+    // 5. Global Non-Working Cashback Fund (₹100)
     let nwPool = await GlobalPool.findOne({ poolName: 'NON_WORKING' });
     if (!nwPool) nwPool = new GlobalPool({ poolName: 'NON_WORKING' });
     nwPool.totalFund += NON_WORKING_FUND_AMOUNT;
     await nwPool.save();
+
+    // 6. Remaining ₹400 = ₹250 Product Cost + ₹150 Company Net Profit per ₹1500 Joining
 }
 
 // Helper: Add user to Global Pool with duplicate check
@@ -341,11 +330,11 @@ async function processDailyPools() {
     const nwPool = await GlobalPool.findOne({ poolName: 'NON_WORKING' });
     if (nwPool && nwPool.totalFund > 0) {
         // Business Plan Rule: Equal distribution ONLY among active non-working members (0 Directs & 0 Binary Pairs)
-        // until ₹1000 joining fee is recovered. If a user makes even 1 direct referral, they stop receiving cashback permanently!
+        // until ₹1500 joining fee is recovered. If a user makes even 1 direct referral, they stop receiving cashback permanently!
         const eligibleCashbackUsers = await User.find({ 
             directReferralsCount: 0,
             totalPairsMatched: 0,
-            cashbackEarnings: { $lt: 1000 },
+            cashbackEarnings: { $lt: 1500 },
             isActive: true, 
             isRebirth: false 
         });
@@ -361,18 +350,18 @@ async function processDailyPools() {
                 }
 
                 const currentEarnings = user.cashbackEarnings || 0;
-                const maxAllowed = 1000 - currentEarnings;
+                const maxAllowed = 1500 - currentEarnings;
                 const amountToGive = Math.min(rawShare, maxAllowed);
                 
                 if (amountToGive > 0) {
                     user.cashbackEarnings = currentEarnings + amountToGive;
                     await user.save();
-                    await addIncome(user, amountToGive, 'CASHBACK', `Daily Non-Working Cashback (Recovered: ₹${user.cashbackEarnings}/1000)`);
+                    await addIncome(user, amountToGive, 'CASHBACK', `Daily Non-Working Cashback (Recovered: ₹${user.cashbackEarnings}/1500)`);
                     totalDistributed += amountToGive;
                 }
             }
             
-            // Retain any leftover funds in the pool (e.g., from users capped at ₹1000) for tomorrow's distribution
+            // Retain any leftover funds in the pool (e.g., from users capped at ₹1500) for tomorrow's distribution
             nwPool.totalFund = Math.max(0, nwPool.totalFund - totalDistributed);
             await nwPool.save();
         }

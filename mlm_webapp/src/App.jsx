@@ -495,7 +495,6 @@ function App() {
         { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
         { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: '🎯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
         { id: 11, title: 'Binary Income', amount: dashboardData?.binaryIncome || 0, icon: '⚖️', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
-        { id: 12, title: 'Level Income', amount: dashboardData?.levelIncome || 0, icon: '📶', bg: '#fefce8', iconBg: '#fef08a', color: '#a16207' },
         { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
         { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: '➡️', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
         { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: '📦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
@@ -531,7 +530,7 @@ function App() {
             <button 
                onClick={async () => {
                   const balance = dashboardData?.mainWallet || 0;
-                  if (balance < 1000) {
+                  if (balance < 1500) {
                       setActiveMenu('Deposit Funds');
                       if(window.innerWidth <= 768) setIsMobileMenuOpen(false);
                       return;
@@ -550,7 +549,7 @@ function App() {
                }}
                style={{ padding: '14px 32px', background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)', color: '#FFF', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', border: 'none', transition: 'all 0.2s', fontSize: '16px', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}
             >
-               {(dashboardData?.mainWallet || 0) < 1000 ? 'Deposit Funds to Activate' : 'Activate ID (₹1000)'}
+               {(dashboardData?.mainWallet || 0) < 1500 ? 'Deposit Funds to Activate' : 'Activate ID (₹1,500)'}
             </button>
           </div>
         )}
@@ -1655,6 +1654,8 @@ function App() {
           }
        } catch(err) { setMessage({ text: 'Error connecting to server', type: 'error' }); }
        setLoading(false);
+    };
+
     const handleRazorpaySubmit = async () => {
         if (!amount || Number(amount) < 100) return alert('Minimum deposit is ₹100');
         
@@ -1857,49 +1858,6 @@ function App() {
            </div>
         )}
       </CardWrapper>
-    );
-  };
-
-  const renderFundManagement = () => {
-    const [memberId, setMemberId] = useState('');
-    const [amount, setAmount] = useState('');
-    const [msg, setMsg] = useState('');
-
-    const handleAddFund = async (e) => {
-       e.preventDefault();
-       try {
-           const token = localStorage.getItem('token');
-           const res = await fetch('/api/admin/add-funds', {
-               method: 'POST',
-               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-               body: JSON.stringify({ memberId, amount: Number(amount) })
-           });
-           const result = await res.json();
-           setMsg(result.message);
-           if(result.success) {
-               setMemberId(''); setAmount('');
-           }
-       } catch(err) { setMsg('Error adding funds'); }
-    };
-
-    return (
-        <CardWrapper>
-          <PageHeader title="Fund Management" subtitle="Add funds directly to a member's Main Wallet" />
-          <div style={{ maxWidth: '500px', background: '#FFF', padding: '30px', borderRadius: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-            <form onSubmit={handleAddFund} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-               <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Member ID</label>
-                  <input type="text" value={memberId} onChange={e=>setMemberId(e.target.value.toUpperCase())} required placeholder="Enter Member ID (e.g., RK001)" style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '12px', fontSize: '15px' }} />
-               </div>
-               <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Amount to Add (₹)</label>
-                  <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required min="1" placeholder="Enter amount" style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '12px', fontSize: '15px' }} />
-               </div>
-               {msg && <div style={{ padding: '12px', borderRadius: '12px', background: '#F1F5F9', color: '#0F172A', fontWeight: 'bold', textAlign: 'center' }}>{msg}</div>}
-               <button type="submit" style={{ padding: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', fontSize: '15px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}>Generate Fund</button>
-            </form>
-          </div>
-        </CardWrapper>
     );
   };
 
@@ -2244,7 +2202,7 @@ function App() {
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Income Generated</h4>
                     </div>
                     <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>₹{reports.totalIncomeGenerated.toLocaleString()}</div>
-                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Binary, Level & Royalty</div>
+                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Binary & Royalty</div>
                 </div>
 
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
@@ -2287,7 +2245,7 @@ function App() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1000, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
+    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
     
     useEffect(() => {
         if (activeMenu === 'Products') {
@@ -2391,7 +2349,7 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <PageHeader title="Welcome Product Packages" subtitle="Select your preferred high-value product kit" />
           {userRole === 'admin' && (
-             <button onClick={() => { setEditForm({ name: '', description: '', price: 1000, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
+             <button onClick={() => { setEditForm({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
           )}
         </div>
         
@@ -2893,13 +2851,13 @@ function App() {
              {!isRoyalty && (
                 <div style={{ padding: '20px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>₹1,000 Guarantee Recovery</span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#10B981' }}>₹{dashboardData?.royaltyStats?.cashbackEarnings || 0} / ₹1,000</span>
+                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>₹1,500 Guarantee Recovery</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#10B981' }}>₹{dashboardData?.royaltyStats?.cashbackEarnings || 0} / ₹1,500</span>
                    </div>
                    <div style={{ width: '100%', height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', margin: '12px 0 8px 0' }}>
-                      <div style={{ width: `${Math.min(((dashboardData?.royaltyStats?.cashbackEarnings || 0) / 1000) * 100, 100)}%`, height: '100%', background: '#10B981', transition: 'width 0.5s' }}></div>
+                      <div style={{ width: `${Math.min(((dashboardData?.royaltyStats?.cashbackEarnings || 0) / 1500) * 100, 100)}%`, height: '100%', background: '#10B981', transition: 'width 0.5s' }}></div>
                    </div>
-                   <span style={{ fontSize: '11px', color: '#94A3B8' }}>* Non-working members receive daily share until ₹1000 fee is recovered.</span>
+                   <span style={{ fontSize: '11px', color: '#94A3B8' }}>* Non-working members receive daily share until ₹1500 fee is recovered.</span>
                 </div>
              )}
           </div>
@@ -2970,8 +2928,8 @@ function App() {
     const [loading, setLoading] = useState(true);
 
     const currentRebirthBal = dashboardData?.rebirthWallet || 0;
-    const progressToNext = Math.min(((currentRebirthBal % 1000) / 1000) * 100, 100);
-    const amountNeeded = 1000 - (currentRebirthBal % 1000);
+    const progressToNext = Math.min(((currentRebirthBal % 1500) / 1500) * 100, 100);
+    const amountNeeded = 1500 - (currentRebirthBal % 1500);
 
     useEffect(() => {
         const fetchRebirths = async () => {
@@ -2989,7 +2947,7 @@ function App() {
 
     return (
         <CardWrapper>
-          <PageHeader title="Rebirth ID System (Infinite Engine)" subtitle="Automatic rebirth IDs generated every time your Rebirth Wallet reaches ₹1,000" />
+          <PageHeader title="Rebirth ID System (Infinite Engine)" subtitle="Automatic rebirth IDs generated every time your Rebirth Wallet reaches ₹1,500" />
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '28px' }}>
              <div style={{ padding: '24px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
@@ -3013,7 +2971,7 @@ function App() {
           </div>
 
           <div style={{ background: '#EFF6FF', padding: '16px 20px', borderRadius: '12px', borderLeft: '4px solid #3B82F6', marginBottom: '24px', fontSize: '13px', color: '#1E40AF', lineHeight: '1.5' }}>
-             💡 <strong>100% Distribution per Rebirth ID (₹1,000):</strong> ₹300 goes to your Direct Sponsor (Passive Sponsor Bonus), and ₹700 goes into Daily Royalty Pools (Gold-₹300, Platinum-₹200, Ruby-₹100, Diamond-₹100).
+             💡 <strong>100% Distribution per Rebirth ID (₹1,500):</strong> ₹400 goes to your Direct Sponsor (Passive Sponsor Bonus), and ₹1,100 goes into Daily Royalty Pools (Gold-₹440, Platinum-₹220, Ruby-₹220, Diamond-₹220).
           </div>
           
           {loading ? (
@@ -3157,7 +3115,7 @@ function App() {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`/api/admin/rewards/${userId}/${pairs}`, {
-          method: 'POST',
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ status })
         });
