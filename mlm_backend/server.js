@@ -372,8 +372,8 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
         const withdrawAmount = Number(amount);
         const Withdrawal = require('./models/Withdrawal');
 
-        if (!withdrawAmount || withdrawAmount < 200) {
-            return res.status(400).json({ success: false, message: 'Minimum withdrawal amount is ₹200.' });
+        if (!withdrawAmount || withdrawAmount < 500) {
+            return res.status(400).json({ success: false, message: 'Minimum withdrawal amount is ₹500.' });
         }
 
         const user = await User.findById(req.user.id);

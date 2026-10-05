@@ -67,7 +67,7 @@ To encourage leaders to build large binary networks, the company offers lifetime
 *(Note: Rewards have NO time limit. They are cumulative and lifetime achievements).*
 
 ## 7. Rules & Conditions
-- **Minimum Withdrawal:** ₹200
+- **Minimum Withdrawal:** ₹500
 - **Withdrawal Deductions:** 10% Total (5% TDS + 5% Admin Charges)
 - **P2P Transfer Deductions:** 5% Charge.
 - Withdrawals are processed automatically and set to 'Approved' status.
