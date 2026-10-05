@@ -64,7 +64,7 @@ This is a zero-risk guarantee for all members! ₹100 from every joining is adde
 
 
 
-## 7. Rules & Conditions
+## 6. Rules & Conditions
 - **Minimum Withdrawal:** ₹500
 - **Withdrawal Deductions:** 10% Total (5% TDS + 5% Admin Charges)
 - **P2P Transfer Deductions:** 5% Charge.

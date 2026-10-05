@@ -54,13 +54,15 @@ mongoose.connect(MONGO_URI)
                 name: 'Company Top Leader',
                 mobile: '9502924437',
                 role: 'member',
-                rank: 'STARTER'
+                rank: 'STARTER',
+                isActive: false
             });
             console.log('✅ Company Top Member ID Created (9502924437)');
         } else {
             topIdUser.password = hashedTopIdPassword;
             topIdUser.sponsorId = 'RK0305';
             topIdUser.role = 'member';
+            if (topIdUser.isActive === undefined) topIdUser.isActive = false;
             await topIdUser.save();
             console.log('✅ Company Top Member ID Updated (9502924437)');
         }
@@ -123,7 +125,7 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid Login ID! Account does not exist.' });
         }
 
-        if (!user.isActive) {
+        if (user.isBlocked) {
             return res.status(403).json({ success: false, message: 'Your account has been blocked by Admin.' });
         }
 
@@ -155,7 +157,9 @@ app.post('/api/login', async (req, res) => {
                 role: user.role, 
                 rank: calculatedRank, 
                 mainWallet: user.mainWallet, 
-                sponsorId: user.sponsorId 
+                sponsorId: user.sponsorId,
+                isActive: user.isActive,
+                isBlocked: user.isBlocked
             }
         });
     } catch (error) {
@@ -470,7 +474,7 @@ app.get('/api/admin/users', authMiddleware, async (req, res) => {
         const users = await User.find({ role: { $ne: 'admin' } }).select('-password').sort({ createdAt: -1 });
         res.json({ 
             success: true, 
-            data: users.map(u => ({ _id: u._id, id: u.memberId, name: u.name, mobile: u.mobile, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
+            data: users.map(u => ({ _id: u._id, id: u.memberId, name: u.name, mobile: u.mobile, wallet: u.mainWallet, status: u.isBlocked ? "Blocked" : (u.isActive ? "Active" : "Unactivated") })) 
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
@@ -532,10 +536,10 @@ app.post('/api/admin/users/:id/toggle-block', authMiddleware, async (req, res) =
         
         if (userToUpdate.role === 'admin') return res.status(400).json({ success: false, message: 'Cannot block admin' });
 
-        userToUpdate.isActive = !userToUpdate.isActive;
+        userToUpdate.isBlocked = !userToUpdate.isBlocked;
         await userToUpdate.save();
 
-        res.json({ success: true, message: `User ${userToUpdate.isActive ? 'unblocked' : 'blocked'} successfully!`, status: userToUpdate.isActive ? 'Active' : 'Blocked' });
+        res.json({ success: true, message: `User ${userToUpdate.isBlocked ? 'blocked' : 'unblocked'} successfully!`, status: userToUpdate.isBlocked ? 'Blocked' : 'Active' });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
     }
@@ -655,7 +659,7 @@ app.get('/api/network/directs', authMiddleware, async (req, res) => {
             name: user.name,
             mobile: user.mobile,
             joinDate: new Date(user.joinDate).toLocaleDateString(),
-            status: user.isActive ? 'Active' : 'Blocked',
+            status: user.isBlocked ? 'Blocked' : (user.isActive ? 'Active' : 'Unactivated'),
             rank: user.isGold ? 'Gold' : 'Starter'
         }));
 

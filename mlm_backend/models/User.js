@@ -75,6 +75,10 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
 
     // KYC & Bank Details
     panNumber: { type: String, default: '' },
