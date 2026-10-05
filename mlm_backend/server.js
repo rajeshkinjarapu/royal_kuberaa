@@ -493,6 +493,28 @@ app.put('/api/admin/users/:memberId', authMiddleware, async (req, res) => {
     }
 });
 
+// Admin Delete User Route
+app.delete('/api/admin/users/:memberId', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        
+        const { memberId } = req.params;
+        
+        const userToDelete = await User.findOne({ memberId });
+        if (!userToDelete) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        // Prevent deleting the admin itself
+        if (userToDelete.role === 'admin') {
+            return res.status(400).json({ success: false, message: 'Cannot delete the admin user' });
+        }
+        
+        await User.deleteOne({ memberId });
+        res.json({ success: true, message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error deleting user" });
+    }
+});
+
 // Admin: Toggle User Block/Unblock
 app.post('/api/admin/users/:id/toggle-block', authMiddleware, async (req, res) => {
     try {

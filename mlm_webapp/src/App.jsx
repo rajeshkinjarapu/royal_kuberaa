@@ -1104,6 +1104,25 @@ function App() {
             } else {
                 alert(result.message);
             }
+                } catch(err) { console.error(err); }
+    };
+
+    const handleDeleteUser = async (memberId) => {
+        if (!window.confirm(`Are you sure you want to permanently delete user ${memberId}? This action cannot be undone.`)) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/admin/users/${memberId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+            if(result.success) {
+                alert('User deleted successfully');
+                fetchUsers();
+            } else {
+                alert(result.message);
+            }
         } catch(err) { console.error(err); }
     };
 
@@ -1140,9 +1159,10 @@ function App() {
               </td>
               <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
                  <button onClick={() => { setEditingUser(user); setEditForm({ name: user.name, mobile: user.mobile || '', password: '' }); }} style={{ padding: '6px 12px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Edit</button>
-                 <button onClick={() => handleToggleBlock(user.id)} style={{ padding: '6px 12px', background: user.status === 'Active' ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                 <button onClick={() => handleToggleBlock(user.id)} style={{ padding: '6px 12px', background: user.status === 'Active' ? '#F59E0B' : '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
                     {user.status === 'Active' ? 'Block' : 'Unblock'}
                  </button>
+                 <button onClick={() => handleDeleteUser(user.id)} style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
               </td>
             </tr>
           ))}
