@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
@@ -133,49 +133,49 @@ function App() {
 
   const menuItems = [
     { header: 'MAIN MENU' },
-    { name: 'Dashboard', icon: 'ðŸ“Š' },
-    { name: 'Wallets', icon: 'ðŸ’¼' },
-    { name: 'Non-Working Cashback', icon: 'ðŸ’¸' },
-    { name: 'Royalty Pools', icon: 'ðŸ‘‘' },
-    { name: 'Rebirth ID', icon: 'â™¾ï¸' },
-    { name: 'Products', icon: 'ðŸ›ï¸' },
-    { name: 'Awards & Rewards', icon: 'ðŸ†' },
+    { name: 'Dashboard', icon: '📊' },
+    { name: 'Wallets', icon: '💼' },
+    { name: 'Non-Working Cashback', icon: '💸' },
+    { name: 'Royalty Pools', icon: '👑' },
+    { name: 'Rebirth ID', icon: '♾️' },
+    { name: 'Products', icon: '🛍️' },
+    { name: 'Awards & Rewards', icon: '🏆' },
     { header: 'FINANCE' },
-    { name: 'Deposit Funds', icon: 'ðŸ’³' },
-    { name: 'Passbook', icon: 'ðŸ“’' },
-    { name: 'Bank Withdrawal', icon: 'ðŸ¦' },
-    { name: 'P2P Transfer', icon: 'ðŸ’¸' },
+    { name: 'Deposit Funds', icon: '💳' },
+    { name: 'Passbook', icon: '📒' },
+    { name: 'Bank Withdrawal', icon: '🏦' },
+    { name: 'P2P Transfer', icon: '💸' },
     { header: 'ACCOUNT' },
-    { name: 'My Network', icon: 'ðŸ‘¥' },
-    { name: 'Add Member', icon: 'âž•' },
-    { name: 'Binary Genealogy', icon: 'ðŸ•¸ï¸' },
-    { name: 'Profile', icon: 'ðŸ‘¤' },
-    { name: 'KYC', icon: 'ðŸ›¡ï¸' },
-    { name: 'Bank Settings', icon: 'ðŸ¦' },
-    { name: 'Transaction PIN', icon: 'ðŸ”’' },
-    { name: 'Change Password', icon: 'ðŸ”‘' },
-    { name: 'Support', icon: 'ðŸŽ§' },
+    { name: 'My Network', icon: '👥' },
+    { name: 'Add Member', icon: '➕' },
+    { name: 'Binary Genealogy', icon: '🕸️' },
+    { name: 'Profile', icon: '👤' },
+    { name: 'KYC', icon: '🛡️' },
+    { name: 'Bank Settings', icon: '🏦' },
+    { name: 'Transaction PIN', icon: '🔒' },
+    { name: 'Change Password', icon: '🔑' },
+    { name: 'Support', icon: '🎧' },
     { header: 'INFORMATION' },
-    { name: 'About Us', icon: 'â„¹ï¸' },
-    { name: 'Terms & Conditions', icon: 'ðŸ“„' },
-    { name: 'Privacy Policy', icon: 'ðŸ›¡ï¸' },
-    { name: 'Return & Refund', icon: 'â†©ï¸' },
-    { name: 'Disclaimer', icon: 'âš ï¸' },
+    { name: 'About Us', icon: 'ℹ️' },
+    { name: 'Terms & Conditions', icon: '📄' },
+    { name: 'Privacy Policy', icon: '🛡️' },
+    { name: 'Return & Refund', icon: '↩️' },
+    { name: 'Disclaimer', icon: '⚠️' },
   ];
 
   const adminMenu = [
     { header: 'ADMIN PANEL' },
-    { name: 'Dashboard', icon: 'ðŸ‘‘' },
-    { name: 'Member Management', icon: 'ðŸ‘¥' },
-    { name: 'Fund Management', icon: 'ðŸ’°' },
-    { name: 'Fund Requests', icon: 'ðŸ’³' },
-    { name: 'Payouts & TDS', icon: 'ðŸ’¸' },
-    { name: 'Pool Distributions', icon: 'ðŸ”„' },
-    { name: 'Rewards Achievers', icon: 'ðŸ†' },
-    { name: 'KYC Approvals', icon: 'ðŸ“„' },
-    { name: 'Support Tickets', icon: 'ðŸŽ§' },
-    { name: 'System Settings', icon: 'âš™ï¸' },
-    { name: 'System Reports', icon: 'ðŸ“Š' },
+    { name: 'Dashboard', icon: '👑' },
+    { name: 'Member Management', icon: '👥' },
+    { name: 'Fund Management', icon: '💰' },
+    { name: 'Fund Requests', icon: '💳' },
+    { name: 'Payouts & TDS', icon: '💸' },
+    { name: 'Pool Distributions', icon: '🔄' },
+    { name: 'Rewards Achievers', icon: '🏆' },
+    { name: 'KYC Approvals', icon: '📄' },
+    { name: 'Support Tickets', icon: '🎧' },
+    { name: 'System Settings', icon: '⚙️' },
+    { name: 'System Reports', icon: '📊' },
   ];
 
   const handleLogin = async (e) => {
@@ -289,7 +289,7 @@ function App() {
               <img src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg" alt="Login" />
             </div>
             <div className="login-content" style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '56px', marginBottom: '16px', animation: 'floatUp 1s ease-out' }}>ðŸŽ‰</div>
+              <div style={{ fontSize: '56px', marginBottom: '16px', animation: 'floatUp 1s ease-out' }}>🎉</div>
               <h2 className="login-title">Registration Successful!</h2>
               <p className="login-subtitle" style={{ marginBottom: '24px' }}>Welcome to Royal Kuberaa. Your account has been created.</p>
               
@@ -313,7 +313,7 @@ function App() {
                    </div>
                 </div>
 
-                <p style={{ color: '#f43f5e', fontSize: '12px', marginTop: '16px', fontWeight: '600' }}>âš ï¸ Please save these details safely!</p>
+                <p style={{ color: '#f43f5e', fontSize: '12px', marginTop: '16px', fontWeight: '600' }}>⚠️ Please save these details safely!</p>
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -322,7 +322,7 @@ function App() {
                   className="login-submit-btn" 
                   style={{ flex: 1, background: '#10b981', boxShadow: '0 4px 14px 0 rgba(16, 185, 129, 0.39)', marginTop: 0 }}
                 >
-                  ðŸ“¥ Save Image
+                  📥 Save Image
                 </button>
                 <button 
                   onClick={() => { setRegisteredDetails(null); setAuthView('login'); }}
@@ -390,7 +390,7 @@ function App() {
                   <input type="text" name="sponsorId" className="form-input" placeholder="Enter Sponsor ID" required onBlur={handleSponsorCheck} />
                   {sponsorName && (
                     <div style={{ marginTop: '6px', fontSize: '13px', fontWeight: '600', color: sponsorName === 'Invalid Sponsor ID' || sponsorName === 'Network Error' ? '#e11d48' : '#10b981' }}>
-                      {checkingSponsor ? 'Checking...' : (sponsorName !== 'Invalid Sponsor ID' && sponsorName !== 'Network Error' ? `âœ“ Sponsor: ${sponsorName}` : `âœ• ${sponsorName}`)}
+                      {checkingSponsor ? 'Checking...' : (sponsorName !== 'Invalid Sponsor ID' && sponsorName !== 'Network Error' ? `✓ Sponsor: ${sponsorName}` : `✕ ${sponsorName}`)}
                     </div>
                   )}
                 </div>
@@ -485,29 +485,29 @@ function App() {
       const cards = userRole === 'admin' 
       ? [
         { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: 'A', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
-        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: 'ðŸ’°', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
-        { id: 3, title: 'Pending Payouts', amount: 45000, icon: 'â³', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
-        { id: 4, title: 'Today Joinings', amount: 125, icon: 'ðŸ“ˆ', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
+        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
+        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
+        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
       ]
       : [
-        { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: 'ðŸ’³', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
-        { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: 'ðŸŒ±', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
-        { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: 'ðŸš€', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
-        { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: 'ðŸŽ¯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
-        { id: 11, title: 'Binary Income', amount: dashboardData?.binaryIncome || 0, icon: 'âš–ï¸', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
-        { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: 'â¬…ï¸', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
-        { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: 'âž¡ï¸', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
-        { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: 'ðŸ“¦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
-        { id: 7, title: 'Right Carry Fwd', amount: dashboardData?.networkStats?.rightCarryForward || 0, icon: 'ðŸ“¦', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8', isCount: true },
-        { id: 8, title: 'Pairs Matched (Today)', amount: dashboardData?.networkStats?.todayPairsCount || 0, icon: 'ðŸ”¥', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309', isCount: true },
-        { id: 9, title: 'Flushed Pairs (Today)', amount: dashboardData?.networkStats?.todayPairsFlushedCount || 0, icon: 'ðŸ—‘ï¸', bg: '#fef2f2', iconBg: '#fecaca', color: '#991b1b', isCount: true },
+        { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
+        { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
+        { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
+        { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: '🎯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
+        { id: 11, title: 'Binary Income', amount: dashboardData?.binaryIncome || 0, icon: '⚖️', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
+        { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
+        { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: '➡️', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
+        { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: '📦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
+        { id: 7, title: 'Right Carry Fwd', amount: dashboardData?.networkStats?.rightCarryForward || 0, icon: '📦', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8', isCount: true },
+        { id: 8, title: 'Pairs Matched (Today)', amount: dashboardData?.networkStats?.todayPairsCount || 0, icon: '🔥', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309', isCount: true },
+        { id: 9, title: 'Flushed Pairs (Today)', amount: dashboardData?.networkStats?.todayPairsFlushedCount || 0, icon: '🗑️', bg: '#fef2f2', iconBg: '#fecaca', color: '#991b1b', isCount: true },
       ];
 
     return (
       <>
         <div className="user-banner" style={{ background: userRole === 'admin' ? 'linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%)' : 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', border: '1px solid #bae6fd' }}>
           <div className="user-avatar" style={{ width: '60px', height: '60px', background: '#0284C7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: '#fff', flexShrink: 0, boxShadow: '0 4px 10px rgba(2,132,199,0.3)' }}>
-             {userRole === 'admin' ? 'ðŸ‘‘' : userData?.name?.charAt(0)}
+             {userRole === 'admin' ? '👑' : userData?.name?.charAt(0)}
           </div>
           <div className="user-info-text">
             <span className="welcome-text" style={{ fontSize: '11px', fontWeight: '700', color: '#0284C7', letterSpacing: '0.5px' }}>{userRole === 'admin' ? 'ADMINISTRATOR' : 'WELCOME'}</span>
@@ -521,10 +521,10 @@ function App() {
         {!userData?.isActive && userRole === 'member' && (
           <div style={{ background: '#FEF2F2', padding: '24px', borderRadius: '16px', border: '1px solid #FCA5A5', marginBottom: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.1)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-                <span style={{ fontSize: '32px' }}>âš ï¸</span>
+                <span style={{ fontSize: '32px' }}>⚠️</span>
                 <div>
                    <h3 style={{ margin: '0 0 8px 0', color: '#EF4444', fontSize: '20px', fontWeight: '800' }}>Account Not Activated</h3>
-                   <span style={{ fontSize: '15px', color: '#991B1B', fontWeight: '700', background: '#FEE2E2', padding: '4px 12px', borderRadius: '12px' }}>Wallet Balance: â‚¹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
+                   <span style={{ fontSize: '15px', color: '#991B1B', fontWeight: '700', background: '#FEE2E2', padding: '4px 12px', borderRadius: '12px' }}>Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
                 </div>
             </div>
             <button 
@@ -549,7 +549,7 @@ function App() {
                }}
                style={{ padding: '14px 32px', background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)', color: '#FFF', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', border: 'none', transition: 'all 0.2s', fontSize: '16px', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}
             >
-               {(dashboardData?.mainWallet || 0) < 1500 ? 'Deposit Funds to Activate' : 'Activate ID (â‚¹1,500)'}
+               {(dashboardData?.mainWallet || 0) < 1500 ? 'Deposit Funds to Activate' : 'Activate ID (₹1,500)'}
             </button>
           </div>
         )}
@@ -561,7 +561,7 @@ function App() {
               </div>
               <div className="card-content">
                 <div className="card-title" style={{ color: '#64748B', fontWeight: '700', fontSize: '11px', letterSpacing: '0.5px', marginBottom: '4px' }}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{ color: '#0F172A', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : 'â‚¹ ')} {card.amount.toLocaleString()}</div>
+                <div className="card-amount" style={{ color: '#0F172A', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : '₹ ')} {card.amount.toLocaleString()}</div>
               </div>
             </div>
           ))}
@@ -580,7 +580,7 @@ function App() {
                }}
                style={{ padding: '12px 20px', background: '#0F172A', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
             >
-               ðŸš€ Trigger Daily Midnight Cron Job Now
+               🚀 Trigger Daily Midnight Cron Job Now
             </button>
             <p style={{ fontSize: '13px', color: '#64748B', marginTop: '10px' }}>This will immediately run the daily pool distribution and flush logic as if it were 12:00 AM.</p>
           </div>
@@ -654,7 +654,7 @@ function App() {
               <h3 style={{ marginBottom: '16px' }}>KYC Status</h3>
               <div style={{ padding: '16px', background: profileData.kycStatus === 'Approved' ? 'rgba(16, 185, 129, 0.1)' : profileData.kycStatus === 'Submitted' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: `1px solid ${profileData.kycStatus === 'Approved' ? 'rgba(16, 185, 129, 0.3)' : profileData.kycStatus === 'Submitted' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}` }}>
                  <p style={{ color: profileData.kycStatus === 'Approved' ? '#10B981' : profileData.kycStatus === 'Submitted' ? '#F59E0B' : '#EF4444', fontWeight: 'bold' }}>
-                    {profileData.kycStatus === 'Approved' ? 'âœ… KYC Verified' : profileData.kycStatus === 'Submitted' ? 'â³ KYC Submitted (Pending Review)' : 'âŒ KYC Pending'}
+                    {profileData.kycStatus === 'Approved' ? '✅ KYC Verified' : profileData.kycStatus === 'Submitted' ? '⏳ KYC Submitted (Pending Review)' : '❌ KYC Pending'}
                  </p>
                  <p style={{ fontSize: '13px', marginTop: '8px', color: '#64748B' }}>
                     {profileData.kycStatus === 'Approved' ? 'Your PAN and Bank Account details have been approved.' : 'Please update your details below to receive payouts.'}
@@ -766,24 +766,24 @@ function App() {
         <div className="wallet-cards-grid">
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)' }}>
               <h3 className="wallet-card-title">Main Wallet</h3>
-              <h1 className="wallet-card-amount">â‚¹ {(dashboardData?.mainWallet || 0).toLocaleString()}</h1>
-              <div className="wallet-card-icon">ðŸ’³</div>
+              <h1 className="wallet-card-amount">₹ {(dashboardData?.mainWallet || 0).toLocaleString()}</h1>
+              <div className="wallet-card-icon">💳</div>
               <div className="wallet-card-action">
                  <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('P2P Transfer')}>Transfer (P2P)</button>
               </div>
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)' }}>
               <h3 className="wallet-card-title">Earnings Wallet</h3>
-              <h1 className="wallet-card-amount">â‚¹ {(dashboardData?.totalEarnings || 0).toLocaleString()}</h1>
-              <div className="wallet-card-icon">ðŸ’°</div>
+              <h1 className="wallet-card-amount">₹ {(dashboardData?.totalEarnings || 0).toLocaleString()}</h1>
+              <div className="wallet-card-icon">💰</div>
               <div className="wallet-card-action">
                  <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Bank Withdrawal')}>Withdraw</button>
               </div>
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
               <h3 className="wallet-card-title">Royalty & Cashback</h3>
-              <h1 className="wallet-card-amount">â‚¹ {((dashboardData?.royaltyIncome || 0) + (dashboardData?.cashbackIncome || 0)).toLocaleString()}</h1>
-              <div className="wallet-card-icon">ðŸ‘‘</div>
+              <h1 className="wallet-card-amount">₹ {((dashboardData?.royaltyIncome || 0) + (dashboardData?.cashbackIncome || 0)).toLocaleString()}</h1>
+              <div className="wallet-card-icon">👑</div>
               <div className="wallet-card-action">
                  <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Non-Working Cashback')}>View Details</button>
               </div>
@@ -800,7 +800,7 @@ function App() {
               <td style={{ padding: '16px', color: '#334155', fontWeight: '500' }}>{txn.remark}</td>
               <td style={{ padding: '16px', color: '#64748B', fontWeight: '500', fontSize: '13px' }}>{txn.category}</td>
               <td style={{ padding: '16px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: '800', fontSize: '16px' }}>
-                {txn.type==='Credit'?'+':'-'} â‚¹{Math.abs(txn.amount).toLocaleString()}
+                {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount).toLocaleString()}
               </td>
             </tr>
           ))}
@@ -847,10 +847,10 @@ function App() {
       <CardWrapper>
         <PageHeader title="Bank Withdrawal" subtitle="Withdraw your available funds to your bank account" />
         <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px' }}>
-           <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>â‚¹ {dashboardData?.mainWallet || 0}</strong></p>
+           <p style={{ color: '#64748B', marginBottom: '16px' }}>Available for withdrawal: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong></p>
            
            <form onSubmit={handleWithdrawSubmit}>
-              <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min â‚¹200)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
+              <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} required placeholder="Enter Amount (Min ₹500)" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
               <input type="password" value={withdrawTpin} onChange={(e) => setWithdrawTpin(e.target.value)} required placeholder="Enter Transaction PIN" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', marginBottom: '16px', fontSize: '16px' }} />
               <p style={{ fontSize: '13px', color: '#EF4444', marginBottom: '16px' }}>Note: 5% TDS and 5% Admin Charge will be deducted.</p>
               {withdrawMessage.text && (
@@ -907,7 +907,7 @@ function App() {
       <CardWrapper>
         <PageHeader title="P2P Transfer" subtitle="Transfer funds to another member instantly" />
         <div style={{ padding: '24px', border: '1px solid #E2E8F0', borderRadius: '16px', background: '#F8FAFC' }}>
-           <p style={{ color: '#64748B', marginBottom: '16px' }}>Available Balance: <strong style={{color: '#0F172A'}}>â‚¹ {dashboardData?.mainWallet || 0}</strong> <br/> Note: <span style={{ color: '#EF4444' }}>5% Admin Charge</span> will be deducted.</p>
+           <p style={{ color: '#64748B', marginBottom: '16px' }}>Available Balance: <strong style={{color: '#0F172A'}}>₹ {dashboardData?.mainWallet || 0}</strong> <br/> Note: <span style={{ color: '#EF4444' }}>5% Admin Charge</span> will be deducted.</p>
            
            <form onSubmit={handleP2pSubmit}>
               <div style={{ marginBottom: '12px' }}>
@@ -916,7 +916,7 @@ function App() {
               </div>
               <div style={{ marginBottom: '16px' }}>
                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transfer Amount</label>
-                 <input type="number" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} required placeholder="Amount in â‚¹" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
+                 <input type="number" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} required placeholder="Amount in ₹" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '16px' }} />
               </div>
               <div style={{ marginBottom: '16px' }}>
                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>Transaction PIN</label>
@@ -1063,7 +1063,7 @@ function App() {
                 <div style={{ fontWeight: 'bold' }}>{user.name}</div>
                 <div style={{ fontSize: '12px', color: '#64748B' }}>User</div>
               </td>
-              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>â‚¹{user.wallet.toLocaleString()}</td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{user.wallet.toLocaleString()}</td>
               <td style={{ padding: '15px' }}>
                 <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>{user.status}</span>
               </td>
@@ -1120,9 +1120,9 @@ function App() {
             <tr key={req._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
               <td style={{ padding: '15px', fontWeight: 'bold' }}>{req._id.slice(-6).toUpperCase()}</td>
               <td style={{ padding: '15px', color: '#0EA5E9' }}>{req.memberId}</td>
-              <td style={{ padding: '15px' }}>â‚¹{req.grossAmount}</td>
-              <td style={{ padding: '15px', color: '#EF4444' }}>â‚¹{req.tdsAmount + req.adminChargeAmount}</td>
-              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>â‚¹{req.netAmount}</td>
+              <td style={{ padding: '15px' }}>₹{req.grossAmount}</td>
+              <td style={{ padding: '15px', color: '#EF4444' }}>₹{req.tdsAmount + req.adminChargeAmount}</td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{req.netAmount}</td>
               <td style={{ padding: '15px', color: req.status === 'Pending' ? '#F59E0B' : (req.status === 'Approved' ? '#10B981' : '#EF4444') }}>{req.status}</td>
               <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
                  {req.status === 'Pending' && (
@@ -1184,18 +1184,18 @@ function App() {
             disabled={loading}
             style={{ padding: '8px 16px', background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', color: '#334155' }}
           >
-            {loading ? 'Refreshing...' : ' Refresh'}
+            {loading ? 'Refreshing...' : '🔄 Refresh'}
           </button>
         </div>
 
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', color: '#64748B' }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>â³</div>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>⏳</div>
             Loading your live notifications...
           </div>
         ) : notifications.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', background: '#F8FAFC', borderRadius: '16px', border: '2px dashed #CBD5E1' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>ðŸ“­</div>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
             <h3 style={{ color: '#0F172A', marginBottom: '8px' }}>No Notifications Yet</h3>
             <p style={{ color: '#64748B', margin: 0 }}>You're all caught up! New transaction and account alerts will appear here in real time.</p>
           </div>
@@ -1347,7 +1347,7 @@ function App() {
           <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: '#FFF', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(15,23,42,0.15)' }}>
             <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total System Liability</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#38BDF8' }}>
-              â‚¹ {(stats?.totalSystemLiability || 0).toLocaleString()}
+              ₹ {(stats?.totalSystemLiability || 0).toLocaleString()}
             </div>
             <span style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '4px', display: 'block' }}>Main + Rebirth Wallets combined</span>
           </div>
@@ -1355,7 +1355,7 @@ function App() {
           <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#166534', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Main Wallets</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#15803D' }}>
-              â‚¹ {(stats?.totalMainWallet || 0).toLocaleString()}
+              ₹ {(stats?.totalMainWallet || 0).toLocaleString()}
             </div>
             <span style={{ fontSize: '11px', color: '#16A34A', marginTop: '4px', display: 'block' }}>Available for Payouts / P2P</span>
           </div>
@@ -1363,7 +1363,7 @@ function App() {
           <div style={{ background: '#FDF4FF', border: '1px solid #F5D0FE', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#86198F', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rebirth Engine Wallet</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#A21CAF' }}>
-              â‚¹ {(stats?.totalRebirthWallet || 0).toLocaleString()}
+              ₹ {(stats?.totalRebirthWallet || 0).toLocaleString()}
             </div>
             <span style={{ fontSize: '11px', color: '#C026D3', marginTop: '4px', display: 'block' }}>Locked for auto ID generation</span>
           </div>
@@ -1371,7 +1371,7 @@ function App() {
           <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#9F1239', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending Payouts Queue</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#BE123C' }}>
-              â‚¹ {(stats?.pendingWithdrawalsAmount || 0).toLocaleString()}
+              ₹ {(stats?.pendingWithdrawalsAmount || 0).toLocaleString()}
             </div>
             <span style={{ fontSize: '11px', color: '#E11D48', marginTop: '4px', display: 'block' }}>{stats?.pendingWithdrawalsCount || 0} requests awaiting transfer</span>
           </div>
@@ -1379,7 +1379,7 @@ function App() {
           <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#1E40AF', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending UPI Deposits</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#2563EB' }}>
-              â‚¹ {(stats?.pendingFundRequestsAmount || 0).toLocaleString()}
+              ₹ {(stats?.pendingFundRequestsAmount || 0).toLocaleString()}
             </div>
             <span style={{ fontSize: '11px', color: '#3B82F6', marginTop: '4px', display: 'block' }}>{stats?.pendingFundRequestsCount || 0} UTR verification requests</span>
           </div>
@@ -1388,7 +1388,7 @@ function App() {
         {/* 2. Manual Action Form */}
         <div style={{ background: '#FFFFFF', padding: '28px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '32px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>âš¡</span> Manual Member Wallet Credit / Debit
+            <span>⚡</span> Manual Member Wallet Credit / Debit
           </h3>
           <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '24px' }}>
             Directly adjust any member's wallet balance. System automatically logs passbook records and prevents negative balance debits.
@@ -1414,11 +1414,11 @@ function App() {
                   <span style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', display: 'block' }}>Verifying ID...</span>
                 ) : verifiedMember ? (
                   <span style={{ fontSize: '12px', color: '#16A34A', fontWeight: 'bold', marginTop: '4px', display: 'block' }}>
-                    âœ“ Member Found: {verifiedMember.name}
+                    ✓ Member Found: {verifiedMember.name}
                   </span>
                 ) : memberId.length >= 3 ? (
                   <span style={{ fontSize: '12px', color: '#DC2626', fontWeight: 'bold', marginTop: '4px', display: 'block' }}>
-                    âœ• Member not found in system
+                    ✕ Member not found in system
                   </span>
                 ) : null}
               </div>
@@ -1432,14 +1432,14 @@ function App() {
                     onClick={() => setActionType('credit')}
                     style={{ padding: '11px', borderRadius: '8px', border: actionType === 'credit' ? '2px solid #10B981' : '1px solid #CBD5E1', background: actionType === 'credit' ? '#ECFDF5' : '#FFF', color: actionType === 'credit' ? '#065F46' : '#64748B', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
                   >
-                    ðŸŸ¢ Credit (Add)
+                    🟢 Credit (Add)
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setActionType('debit')}
                     style={{ padding: '11px', borderRadius: '8px', border: actionType === 'debit' ? '2px solid #EF4444' : '1px solid #CBD5E1', background: actionType === 'debit' ? '#FEF2F2' : '#FFF', color: actionType === 'debit' ? '#991B1B' : '#64748B', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
                   >
-                    ðŸ”´ Debit (Deduct)
+                    🔴 Debit (Deduct)
                   </button>
                 </div>
               </div>
@@ -1452,14 +1452,14 @@ function App() {
                   onChange={e => setWalletType(e.target.value)}
                   style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px', background: '#FFF' }}
                 >
-                  <option value="main">ðŸ’³ Main Wallet (Payouts & Transfers)</option>
-                  <option value="rebirth">ðŸŒ± Rebirth Wallet (ID Generation)</option>
+                  <option value="main">💳 Main Wallet (Payouts & Transfers)</option>
+                  <option value="rebirth">🌱 Rebirth Wallet (ID Generation)</option>
                 </select>
               </div>
 
               {/* Amount */}
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Amount (â‚¹)</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Amount (₹)</label>
                 <input 
                   type="number" 
                   value={amount} 
@@ -1495,7 +1495,7 @@ function App() {
               disabled={submitting}
               style={{ padding: '14px 28px', background: actionType === 'credit' ? '#059669' : '#DC2626', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
             >
-              {submitting ? 'Executing Transaction...' : (actionType === 'credit' ? 'âž• Credit Member Wallet' : 'âž– Debit Member Wallet')}
+              {submitting ? 'Executing Transaction...' : (actionType === 'credit' ? '➕ Credit Member Wallet' : '➖ Debit Member Wallet')}
             </button>
           </form>
         </div>
@@ -1503,7 +1503,7 @@ function App() {
         {/* 3. Recent Admin Transactions Log */}
         <div>
           <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', marginBottom: '14px' }}>
-            ðŸ“‹ Recent Admin Manual Transactions Log
+            📋 Recent Admin Manual Transactions Log
           </h3>
           <Table headers={['Date & Time', 'Member ID', 'Type', 'Amount', 'Remark']}>
             {(!stats?.recentAdminTransactions || stats.recentAdminTransactions.length === 0) ? (
@@ -1523,7 +1523,7 @@ function App() {
                     </span>
                   </td>
                   <td style={{ padding: '14px', fontWeight: 'bold', color: tx.type === 'Credit' ? '#10B981' : '#EF4444' }}>
-                    {tx.type === 'Credit' ? '+' : '-'} â‚¹{tx.amount.toLocaleString()}
+                    {tx.type === 'Credit' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
                   </td>
                   <td style={{ padding: '14px', fontSize: '13px', color: '#334155' }}>
                     {tx.remark || 'Manual Admin Action'}
@@ -1577,7 +1577,7 @@ function App() {
             <tr key={req._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
               <td style={{ padding: '15px', fontWeight: 'bold' }}>{req._id.slice(-6).toUpperCase()}</td>
               <td style={{ padding: '15px', color: '#0EA5E9', fontWeight: 'bold' }}>{req.memberId}</td>
-              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>â‚¹{req.amount}</td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{req.amount}</td>
               <td style={{ padding: '15px' }}>{req.utrNumber}</td>
               <td style={{ padding: '15px', color: '#64748B' }}>{new Date(req.requestDate).toLocaleDateString()}</td>
               <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
@@ -1653,7 +1653,7 @@ function App() {
     };
 
     const handleRazorpaySubmit = async () => {
-        if (!amount || Number(amount) < 100) return alert('Minimum deposit is â‚¹100');
+        if (!amount || Number(amount) < 100) return alert('Minimum deposit is ₹100');
         
         setLoading(true);
         const script = document.createElement('script');
@@ -1721,7 +1721,7 @@ function App() {
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
             <div style={{ padding: '24px', background: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
                <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>ðŸ¦</span> Company Bank Details
+                  <span>🏦</span> Company Bank Details
                </h3>
                <div style={{ background: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
                  <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>Bank Name:</strong> {companyInfo.companyBankName}</p>
@@ -1731,7 +1731,7 @@ function App() {
                </div>
                
                <h4 style={{ marginBottom: '12px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>ðŸ“±</span> UPI QR Code Payment
+                  <span>📱</span> UPI QR Code Payment
                </h4>
                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#FFF', padding: '16px', borderRadius: '12px', border: '1px solid #CBD5E1', marginBottom: '12px' }}>
                   <img src={qrSrc} alt="UPI QR Code" style={{ width: '180px', height: '180px', objectFit: 'contain', borderRadius: '8px' }} />
@@ -1744,7 +1744,7 @@ function App() {
                     <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#1E40AF' }}>{companyInfo.companyUpiId}</span>
                   </div>
                   <button onClick={copyUpi} type="button" style={{ padding: '6px 12px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
-                     {copied ? 'âœ… Copied!' : 'ðŸ“‹ Copy'}
+                     {copied ? '✅ Copied!' : '📋 Copy'}
                   </button>
                </div>
 
@@ -1753,7 +1753,7 @@ function App() {
                     href={`upi://pay?pa=${companyInfo.companyUpiId}&pn=${encodeURIComponent(companyInfo.companyAccountName)}&cu=INR`}
                     style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#059669', color: '#FFF', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', fontSize: '13px' }}
                   >
-                     âš¡ Pay Directly via UPI App (Mobile Only)
+                     ⚡ Pay Directly via UPI App (Mobile Only)
                   </a>
                </div>
             </div>
@@ -1761,12 +1761,12 @@ function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                    <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>âš¡</span> Instant Payment (Razorpay)
+                      <span>⚡</span> Instant Payment (Razorpay)
                    </h3>
                    <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>Deposit funds instantly using Cards, UPI, or Netbanking. No manual approval required!</p>
                    
                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Deposit Amount (â‚¹)</label>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Deposit Amount (₹)</label>
                       <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' }} />
                    </div>
                    
@@ -1777,13 +1777,13 @@ function App() {
 
                 <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
                    <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>ðŸ“</span> Submit UTR Reference (Manual)
+                      <span>📝</span> Submit UTR Reference (Manual)
                    </h3>
                    <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>If you paid manually using the QR code or Bank Account details, enter the UTR below.</p>
                    
                    <form onSubmit={handleSubmit}>
                       <div style={{ marginBottom: '16px' }}>
-                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Amount Paid (â‚¹)</label>
+                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Amount Paid (₹)</label>
                          <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
                       </div>
                       <div style={{ marginBottom: '20px' }}>
@@ -1835,12 +1835,12 @@ function App() {
              {pools.length === 0 ? <p style={{ color: '#64748B' }}>No pools active yet.</p> : pools.map(pool => (
                <div key={pool._id} style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                   <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                     <span style={{ fontSize: '24px' }}>{pool.poolName === 'GOLD' ? 'ðŸ¥‡' : pool.poolName === 'PLATINUM' ? 'ðŸ¥ˆ' : pool.poolName === 'RUBY' ? 'ðŸ”´' : 'ðŸ’Ž'}</span>
+                     <span style={{ fontSize: '24px' }}>{pool.poolName === 'GOLD' ? '🥇' : pool.poolName === 'PLATINUM' ? '🥈' : pool.poolName === 'RUBY' ? '🔴' : '💎'}</span>
                      {pool.poolName} POOL
                   </h3>
                   <div style={{ marginBottom: '12px' }}>
                      <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Total Fund Collected</span>
-                     <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>â‚¹ {pool.totalFund.toLocaleString()}</span>
+                     <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>₹ {pool.totalFund.toLocaleString()}</span>
                   </div>
                   <div>
                      <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Active Qualifiers</span>
@@ -2088,7 +2088,7 @@ function App() {
         <PageHeader title="System Settings" subtitle="Configure core platform rules, deductions, and company banking" />
         <div style={{ maxWidth: '700px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
           <form onSubmit={handleSave}>
-             <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0F172A', marginBottom: '16px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>âš™ï¸ General Platform Rules</h3>
+             <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0F172A', marginBottom: '16px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>⚙️ General Platform Rules</h3>
              <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Site Name</label>
                 <input type="text" value={settings.siteName} onChange={e=>setSettings({...settings, siteName: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
@@ -2106,7 +2106,7 @@ function App() {
              </div>
              
              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Minimum Withdrawal (â‚¹)</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Minimum Withdrawal (₹)</label>
                 <input type="number" value={settings.minimumWithdrawal} onChange={e=>setSettings({...settings, minimumWithdrawal: Number(e.target.value)})} style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
              </div>
 
@@ -2115,7 +2115,7 @@ function App() {
                 <label style={{ fontSize: '14px', fontWeight: 'bold', color: '#EF4444' }}>Enable Maintenance Mode (Blocks new logins)</label>
              </div>
 
-             <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0F172A', marginBottom: '16px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>ðŸ¦ Company Banking & UPI (Deposit Funds Screen)</h3>
+             <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0F172A', marginBottom: '16px', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>🏦 Company Banking & UPI (Deposit Funds Screen)</h3>
              
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                  <div>
@@ -2151,7 +2151,7 @@ function App() {
              </div>
 
              <button type="submit" style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
-                ðŸ’¾ Save Settings & Company Bank Details
+                💾 Save Settings & Company Bank Details
              </button>
           </form>
         </div>
@@ -2185,7 +2185,7 @@ function App() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '24px' }}>
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <span style={{ fontSize: '24px' }}>ðŸ‘¥</span>
+                        <span style={{ fontSize: '24px' }}>👥</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Members</h4>
                     </div>
                     <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>{reports.totalUsers}</div>
@@ -2194,28 +2194,28 @@ function App() {
 
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <span style={{ fontSize: '24px' }}>ðŸ’°</span>
+                        <span style={{ fontSize: '24px' }}>💰</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Income Generated</h4>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>â‚¹{reports.totalIncomeGenerated.toLocaleString()}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>₹{reports.totalIncomeGenerated.toLocaleString()}</div>
                     <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Binary & Royalty</div>
                 </div>
 
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <span style={{ fontSize: '24px' }}>ðŸ¦</span>
+                        <span style={{ fontSize: '24px' }}>🏦</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Approved Payouts</h4>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0EA5E9' }}>â‚¹{reports.approvedWithdrawals.netPaid.toLocaleString()}</div>
-                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Gross: â‚¹{reports.approvedWithdrawals.gross.toLocaleString()}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0EA5E9' }}>₹{reports.approvedWithdrawals.netPaid.toLocaleString()}</div>
+                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Gross: ₹{reports.approvedWithdrawals.gross.toLocaleString()}</div>
                 </div>
                 
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <span style={{ fontSize: '24px' }}>â³</span>
+                        <span style={{ fontSize: '24px' }}>⏳</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Pending Payouts</h4>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#F59E0B' }}>â‚¹{reports.pendingWithdrawals.netPaid.toLocaleString()}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#F59E0B' }}>₹{reports.pendingWithdrawals.netPaid.toLocaleString()}</div>
                     <div style={{ fontSize: '13px', color: '#EF4444', marginTop: '8px', fontWeight: 'bold' }}>{reports.pendingWithdrawals.count} Requests</div>
                 </div>
             </div>
@@ -2225,11 +2225,11 @@ function App() {
                 <div style={{ display: 'flex', gap: '40px' }}>
                    <div>
                        <span style={{ color: '#64748B', fontSize: '13px', display: 'block', marginBottom: '4px' }}>Total TDS Collected (5%)</span>
-                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>â‚¹{reports.approvedWithdrawals.tds.toLocaleString()}</span>
+                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{reports.approvedWithdrawals.tds.toLocaleString()}</span>
                    </div>
                    <div>
                        <span style={{ color: '#64748B', fontSize: '13px', display: 'block', marginBottom: '4px' }}>Admin Charges Collected (5%)</span>
-                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>â‚¹{reports.approvedWithdrawals.adminCharge.toLocaleString()}</span>
+                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{reports.approvedWithdrawals.adminCharge.toLocaleString()}</span>
                    </div>
                 </div>
             </div>
@@ -2241,7 +2241,7 @@ function App() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1500, bv: 100, image: 'ðŸ“¦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
+    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
     
     useEffect(() => {
         if (activeMenu === 'Products') {
@@ -2297,7 +2297,7 @@ function App() {
             alert('Your ID is already activated!');
             return;
         }
-        if(!window.confirm(`Are you sure you want to buy ${product.name} and activate your ID for â‚¹${product.price}? (Requires wallet balance)`)) return;
+        if(!window.confirm(`Are you sure you want to buy ${product.name} and activate your ID for ₹${product.price}? (Requires wallet balance)`)) return;
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/user/activate', {
@@ -2345,7 +2345,7 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <PageHeader title="Welcome Product Packages" subtitle="Select your preferred high-value product kit" />
           {userRole === 'admin' && (
-             <button onClick={() => { setEditForm({ name: '', description: '', price: 1500, bv: 100, image: 'ðŸ“¦', badge: '', deliveryInfo: 'Free Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
+             <button onClick={() => { setEditForm({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
           )}
         </div>
         
@@ -2363,7 +2363,7 @@ function App() {
                      </div>
                   )}
                   <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
-                    {product.image || 'ðŸ“¦'}
+                    {product.image || '📦'}
                   </div>
                   <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>{product.name}</h3>
                   <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px', whiteSpace: 'pre-wrap' }}>
@@ -2381,7 +2381,7 @@ function App() {
                   </div>
                   <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>â‚¹{product.price.toLocaleString()}</div>
+                      <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹{product.price.toLocaleString()}</div>
                     </div>
                     {userRole === 'admin' ? (
                        <div style={{ display: 'flex', gap: '8px' }}>
@@ -2414,35 +2414,35 @@ function App() {
           </div>
         </div>
 
-        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>ðŸŽ¯ Our Vision & Mission</h3>
+        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>🎯 Our Vision & Mission</h3>
         <p style={{ marginBottom: '20px' }}>
           At Royal Kuberaa, our mission is to build a sustainable, transparent, and technology-driven networking ecosystem that enables every motivated individual across India to achieve genuine financial independence. We combine tangible, high-value consumer products with an automated, mathematically disciplined profit-sharing plan.
         </p>
 
-        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>â­ Why Royal Kuberaa Stands Apart</h3>
+        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>⭐ Why Royal Kuberaa Stands Apart</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>ðŸ‘‘ 100% Binary Fairness</strong>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>👑 100% Binary Fairness</strong>
             <span style={{ fontSize: '13px', color: '#64748B' }}>1:1 pair matching with a solid 5 pairs daily cap to guarantee long-term company stability.</span>
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>ðŸ”„ Daily Midnight Pools</strong>
-            <span style={{ fontSize: '13px', color: '#64748B' }}>â‚¹250 from every active ID is pooled and split evenly every single night at 12:01 AM among achievers.</span>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🔄 Daily Midnight Pools</strong>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>₹250 from every active ID is pooled and split evenly every single night at 12:01 AM among achievers.</span>
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>ðŸŒ± Perpetual Rebirth IDs</strong>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🌱 Perpetual Rebirth IDs</strong>
             <span style={{ fontSize: '13px', color: '#64748B' }}>Automatic 20% re-investment cycle creating fresh IDs, fresh sponsor bonuses, and new pool fuel.</span>
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>ðŸ›¡ï¸ 100% Legal & Compliant</strong>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🛡️ 100% Legal & Compliant</strong>
             <span style={{ fontSize: '13px', color: '#64748B' }}>Strict compliance with Direct Selling Guidelines 2021, statutory 5% TDS with PAN, and 7-day cooling policy.</span>
           </div>
         </div>
 
-        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>ðŸ“ž Official Support & Office</h3>
+        <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>📞 Official Support & Office</h3>
         <p style={{ margin: 0, fontSize: '14px', color: '#64748B' }}>
           <strong>Corporate Email:</strong> support@royalkuberaa.com<br />
-          <strong>Working Hours:</strong> Monday â€“ Saturday, 10:00 AM â€“ 6:00 PM IST<br />
+          <strong>Working Hours:</strong> Monday – Saturday, 10:00 AM – 6:00 PM IST<br />
           <strong>Headquarters:</strong> Andhra Pradesh & Telangana, India
         </p>
       </div>
@@ -2460,32 +2460,32 @@ function App() {
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. One-Time Membership & Product Package</h4>
         <p style={{ marginBottom: '16px' }}>
-          Membership activation requires a one-time fee of â‚¹1,000 (inclusive of taxes and selected product kit). Activation grants access to the member portal, educational resources, and binary network placement.
+          Membership activation requires a one-time fee of ₹1,000 (inclusive of taxes and selected product kit). Activation grants access to the member portal, educational resources, and binary network placement.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Binary Matching Compensation & Capping</h4>
         <p style={{ marginBottom: '16px' }}>
-          The first binary pair payout requires a 2:1 or 1:2 ratio with at least 1 personally sponsored direct active member on the Left and 1 on the Right. Subsequent pairs are matched on a 1:1 basis at â‚¹100 per matched pair. A maximum daily capping limit of 5 pairs (â‚¹500 per day) applies to every active ID. Unmatched volume beyond the daily cap is flushed out to preserve network integrity.
+          The first binary pair payout requires a 2:1 or 1:2 ratio with at least 1 personally sponsored direct active member on the Left and 1 on the Right. Subsequent pairs are matched on a 1:1 basis at ₹100 per matched pair. A maximum daily capping limit of 5 pairs (₹500 per day) applies to every active ID. Unmatched volume beyond the daily cap is flushed out to preserve network integrity.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Daily Royalty Pools & Lifetime Limits</h4>
         <p style={{ marginBottom: '16px' }}>
-          Royalty pools (Gold, Platinum, Ruby, Diamond) require active direct referrals and carry defined lifetime payout caps: Gold (â‚¹20,000), Platinum (â‚¹1,00,000), Ruby (â‚¹5,00,000), and Diamond (â‚¹25,00,000). Once the lifetime cap is reached, pool distributions for that tier cease.
+          Royalty pools (Gold, Platinum, Ruby, Diamond) require active direct referrals and carry defined lifetime payout caps: Gold (₹20,000), Platinum (₹1,00,000), Ruby (₹5,00,000), and Diamond (₹25,00,000). Once the lifetime cap is reached, pool distributions for that tier cease.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. Non-Working Cashback Policy</h4>
         <p style={{ marginBottom: '16px' }}>
-          The daily non-working cashback fund is distributed strictly among active members who have zero (0) direct referrals until their â‚¹1,000 joining fee is recovered. If a user sponsors even 1 direct member, cashback eligibility stops permanently as they transition to the active earning plan.
+          The daily non-working cashback fund is distributed strictly among active members who have zero (0) direct referrals until their ₹1,000 joining fee is recovered. If a user sponsors even 1 direct member, cashback eligibility stops permanently as they transition to the active earning plan.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>6. Rebirth ID System</h4>
         <p style={{ marginBottom: '16px' }}>
-          Twenty percent (20%) of all earnings are systematically directed to the member's Rebirth Wallet. When this wallet accumulates â‚¹1,000, an automated new position is generated in the binary tree under the sponsor, distributing â‚¹300 sponsor bonus and â‚¹700 into community pools.
+          Twenty percent (20%) of all earnings are systematically directed to the member's Rebirth Wallet. When this wallet accumulates ₹1,000, an automated new position is generated in the binary tree under the sponsor, distributing ₹300 sponsor bonus and ₹700 into community pools.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>7. Statutory Deductions & Payouts</h4>
         <p style={{ marginBottom: '16px' }}>
-          All wallet withdrawals are subject to a mandatory 5% TDS (Section 194H) and a 5% platform administrative charge. Minimum withdrawal limit is â‚¹500. Payouts require verified KYC and valid bank account details.
+          All wallet withdrawals are subject to a mandatory 5% TDS (Section 194H) and a 5% platform administrative charge. Minimum withdrawal limit is ₹500. Payouts require verified KYC and valid bank account details.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>8. Code of Conduct & Termination</h4>
@@ -2533,7 +2533,7 @@ function App() {
       <PageHeader title="Return & Refund Policy" subtitle="Transparent 7-day cooling-off period and product return guidelines" />
       <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155', fontSize: '14px' }}>
         <div style={{ background: '#EFF6FF', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #3B82F6', marginBottom: '20px' }}>
-          <strong style={{ color: '#1D4ED8', display: 'block', marginBottom: '4px' }}>ðŸ›¡ï¸ Mandatory 7-Day Cooling-Off Period</strong>
+          <strong style={{ color: '#1D4ED8', display: 'block', marginBottom: '4px' }}>🛡️ Mandatory 7-Day Cooling-Off Period</strong>
           <span style={{ fontSize: '13px', color: '#1E293B' }}>
             In accordance with the Consumer Protection (Direct Selling) Rules 2021, newly registered members have 7 calendar days from their activation date to cancel membership and request a full refund.
           </span>
@@ -2567,7 +2567,7 @@ function App() {
       <PageHeader title="Legal Disclaimer" subtitle="Affiliate disclosure, earnings disclaimer, and regulatory compliance" />
       <div style={{ maxWidth: '850px', background: '#FFF', padding: '32px', borderRadius: '16px', border: '1px solid #E2E8F0', lineHeight: '1.7', color: '#334155', fontSize: '14px' }}>
         <div style={{ background: '#FEF2F2', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #EF4444', marginBottom: '20px' }}>
-          <strong style={{ color: '#991B1B', display: 'block', marginBottom: '4px' }}>âš ï¸ Not an Investment or Fixed Yield Scheme</strong>
+          <strong style={{ color: '#991B1B', display: 'block', marginBottom: '4px' }}>⚠️ Not an Investment or Fixed Yield Scheme</strong>
           <span style={{ fontSize: '13px', color: '#7F1D1D' }}>
             Royal Kuberaa is an affiliate marketing and direct selling business platform. It does NOT offer financial investment services, daily interest on deposits, or guaranteed passive income.
           </span>
@@ -2795,7 +2795,7 @@ function App() {
             {treeData && treeData.id !== userData?.memberId && (
                 <div style={{ textAlign: 'center', marginTop: '20px' }}>
                     <button onClick={() => fetchTree()} style={{ padding: '10px 20px', background: '#0F172A', color: '#FFF', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-                        â¬†ï¸ Back to My Top Node
+                        ⬆️ Back to My Top Node
                     </button>
                 </div>
             )}
@@ -2840,20 +2840,20 @@ function App() {
              <div style={{ padding: '20px', background: isRoyalty ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
                 <h3 style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Total Earned ({isRoyalty ? 'Royalty' : 'Cashback'})</h3>
                 <h1 style={{ fontSize: '32px', margin: '8px 0 0' }}>
-                    â‚¹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
+                    ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
                 </h1>
              </div>
              
              {!isRoyalty && (
                 <div style={{ padding: '20px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>â‚¹1,500 Guarantee Recovery</span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#10B981' }}>â‚¹{dashboardData?.royaltyStats?.cashbackEarnings || 0} / â‚¹1,500</span>
+                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>₹1,500 Guarantee Recovery</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#10B981' }}>₹{dashboardData?.royaltyStats?.cashbackEarnings || 0} / ₹1,500</span>
                    </div>
                    <div style={{ width: '100%', height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', margin: '12px 0 8px 0' }}>
                       <div style={{ width: `${Math.min(((dashboardData?.royaltyStats?.cashbackEarnings || 0) / 1500) * 100, 100)}%`, height: '100%', background: '#10B981', transition: 'width 0.5s' }}></div>
                    </div>
-                   <span style={{ fontSize: '11px', color: '#94A3B8' }}>* Non-working members receive daily share until â‚¹1500 fee is recovered.</span>
+                   <span style={{ fontSize: '11px', color: '#94A3B8' }}>* Non-working members receive daily share until ₹1500 fee is recovered.</span>
                 </div>
              )}
           </div>
@@ -2861,10 +2861,10 @@ function App() {
           {isRoyalty && (
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '30px' }}>
                 {[
-                   { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: 'ðŸ¥‡', req: '2 Active Directs', color: '#F59E0B' },
-                   { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: 'ðŸ¥ˆ', req: '2 Gold Directs', color: '#3B82F6' },
-                   { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: 'ðŸ”´', req: '5 Platinum Directs', color: '#EF4444' },
-                   { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: 'ðŸ’Ž', req: '5 Ruby Directs', color: '#8B5CF6' }
+                   { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: '🥇', req: '2 Active Directs', color: '#F59E0B' },
+                   { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: '🥈', req: '2 Gold Directs', color: '#3B82F6' },
+                   { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: '🔴', req: '5 Platinum Directs', color: '#EF4444' },
+                   { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: '💎', req: '5 Ruby Directs', color: '#8B5CF6' }
                 ].map(pool => {
                    const userRank = dashboardData?.royaltyStats?.rank || 'STARTER';
                    const ranksOrder = ['STARTER', 'GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'OWNER'];
@@ -2883,8 +2883,8 @@ function App() {
                          </div>
                          <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>Req: {pool.req}</div>
                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
-                            <span style={{ color: '#059669' }}>â‚¹{pool.earned.toLocaleString()}</span>
-                            <span style={{ color: '#94A3B8' }}>Cap: â‚¹{pool.cap.toLocaleString()}</span>
+                            <span style={{ color: '#059669' }}>₹{pool.earned.toLocaleString()}</span>
+                            <span style={{ color: '#94A3B8' }}>Cap: ₹{pool.cap.toLocaleString()}</span>
                          </div>
                          <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '3px', overflow: 'hidden' }}>
                             <div style={{ width: `${progress}%`, height: '100%', background: pool.color }}></div>
@@ -2904,7 +2904,7 @@ function App() {
               {history.map((tx, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>
                   <td style={{ padding: '15px', color: '#64748B' }}>{new Date(tx.createdAt).toLocaleString()}</td>
-                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#10B981' }}>+ â‚¹{tx.amount}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#10B981' }}>+ ₹{tx.amount}</td>
                   <td style={{ padding: '15px' }}>
                      <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
                        {tx.category}
@@ -2943,12 +2943,12 @@ function App() {
 
     return (
         <CardWrapper>
-          <PageHeader title="Rebirth ID System (Infinite Engine)" subtitle="Automatic rebirth IDs generated every time your Rebirth Wallet reaches â‚¹1,500" />
+          <PageHeader title="Rebirth ID System (Infinite Engine)" subtitle="Automatic rebirth IDs generated every time your Rebirth Wallet reaches ₹1,500" />
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '28px' }}>
              <div style={{ padding: '24px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
                 <div style={{ fontSize: '13px', opacity: 0.9, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current Rebirth Wallet</div>
-                <h1 style={{ fontSize: '36px', margin: '8px 0 12px 0' }}>â‚¹ {currentRebirthBal.toLocaleString()}</h1>
+                <h1 style={{ fontSize: '36px', margin: '8px 0 12px 0' }}>₹ {currentRebirthBal.toLocaleString()}</h1>
                 <div style={{ fontSize: '13px', opacity: 0.95 }}>Total Rebirth IDs Generated: <strong>{rebirthData.length} IDs</strong></div>
              </div>
 
@@ -2961,13 +2961,13 @@ function App() {
                    <div style={{ width: `${progressToNext}%`, height: '100%', background: 'linear-gradient(90deg, #8B5CF6 0%, #A855F7 100%)', transition: 'width 0.5s' }}></div>
                 </div>
                 <div style={{ fontSize: '12px', color: '#64748B' }}>
-                   â‚¹{amountNeeded.toLocaleString()} more needed to automatically generate your next Rebirth ID.
+                   ₹{amountNeeded.toLocaleString()} more needed to automatically generate your next Rebirth ID.
                 </div>
              </div>
           </div>
 
           <div style={{ background: '#EFF6FF', padding: '16px 20px', borderRadius: '12px', borderLeft: '4px solid #3B82F6', marginBottom: '24px', fontSize: '13px', color: '#1E40AF', lineHeight: '1.5' }}>
-             ðŸ’¡ <strong>100% Distribution per Rebirth ID (â‚¹1,500):</strong> â‚¹400 goes to your Direct Sponsor (Passive Sponsor Bonus), and â‚¹1,100 goes into Daily Royalty Pools (Gold-â‚¹440, Platinum-â‚¹220, Ruby-â‚¹220, Diamond-â‚¹220).
+             💡 <strong>100% Distribution per Rebirth ID (₹1,500):</strong> ₹400 goes to your Direct Sponsor (Passive Sponsor Bonus), and ₹1,100 goes into Daily Royalty Pools (Gold-₹440, Platinum-₹220, Ruby-₹220, Diamond-₹220).
           </div>
           
           {loading ? (
@@ -2978,10 +2978,10 @@ function App() {
             <Table headers={['Rebirth ID', 'Generated For', 'Sponsor Bonus', 'Pool Contribution', 'Generated On', 'Status']}>
               {rebirthData.map(user => (
                 <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>â™¾ï¸ {user.id}</td>
+                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>♾️ {user.id}</td>
                   <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
-                  <td style={{ padding: '15px', color: '#059669', fontWeight: 'bold' }}>â‚¹{user.sponsorBonus} (Paid)</td>
-                  <td style={{ padding: '15px', color: '#2563EB', fontWeight: 'bold' }}>â‚¹{user.poolContribution} (Distributed)</td>
+                  <td style={{ padding: '15px', color: '#059669', fontWeight: 'bold' }}>₹{user.sponsorBonus} (Paid)</td>
+                  <td style={{ padding: '15px', color: '#2563EB', fontWeight: 'bold' }}>₹{user.poolContribution} (Distributed)</td>
                   <td style={{ padding: '15px', color: '#64748B' }}>{user.createdDate}</td>
                   <td style={{ padding: '15px' }}>
                     <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: '#D1FAE5', color: '#065F46' }}>
@@ -3045,7 +3045,7 @@ function App() {
                     <h3 style={{ margin: 0, color: '#94A3B8' }}>Your Lifetime Matching Pairs</h3>
                     <h1 style={{ fontSize: '40px', margin: '8px 0 0', color: '#38BDF8' }}>{totalPairsMatched} <span style={{ fontSize: '18px', color: '#64748B' }}>Pairs</span></h1>
                 </div>
-                <div style={{ fontSize: '48px' }}>ðŸ†</div>
+                <div style={{ fontSize: '48px' }}>🏆</div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
@@ -3059,8 +3059,8 @@ function App() {
                         <div key={reward.pairs} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: `1px solid ${isClaimed ? '#10B981' : isEligible ? '#F59E0B' : '#E2E8F0'}` }}>
                             <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                    <h3 style={{ margin: 0, color: '#0F172A' }}>ðŸŽ {reward.name}</h3>
-                                    <span style={{ background: '#FEF3C7', color: '#D97706', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>Gift Value: â‚¹{reward.cash.toLocaleString()}</span>
+                                    <h3 style={{ margin: 0, color: '#0F172A' }}>🎁 {reward.name}</h3>
+                                    <span style={{ background: '#FEF3C7', color: '#D97706', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>Gift Value: ₹{reward.cash.toLocaleString()}</span>
                                 </div>
                                 <div style={{ color: '#64748B', fontSize: '13px', marginBottom: '12px' }}>Target: {reward.pairs} Pairs (Physical Gift delivered by Company)</div>
                                 
@@ -3071,11 +3071,11 @@ function App() {
                             <div>
                                 {isClaimed ? (
                                     <span style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', background: claimedObj?.status === 'Delivered' ? '#D1FAE5' : claimedObj?.status === 'Dispatched' ? '#E0F2FE' : '#FEF3C7', color: claimedObj?.status === 'Delivered' ? '#065F46' : claimedObj?.status === 'Dispatched' ? '#0369A1' : '#D97706', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        {claimedObj?.status === 'Delivered' ? 'âœ… Gift Delivered' : claimedObj?.status === 'Dispatched' ? 'ðŸšš Dispatched' : 'â³ Claimed (Dispatch Pending)'}
+                                        {claimedObj?.status === 'Delivered' ? '✅ Gift Delivered' : claimedObj?.status === 'Dispatched' ? '🚚 Dispatched' : '⏳ Claimed (Dispatch Pending)'}
                                     </span>
                                 ) : isEligible ? (
                                     <button onClick={() => handleClaim(reward.pairs)} style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(245, 158, 11, 0.3)' }}>
-                                        ðŸŽ Claim Gift
+                                        🎁 Claim Gift
                                     </button>
                                 ) : (
                                     <span style={{ color: '#94A3B8', fontWeight: 'bold', fontSize: '14px' }}>{reward.pairs - totalPairsMatched} Pairs Left</span>
@@ -3135,7 +3135,7 @@ function App() {
                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#0EA5E9' }}>{a.memberId}</td>
                  <td style={{ padding: '15px', fontWeight: '600' }}>{a.name}</td>
                  <td style={{ padding: '15px', color: '#64748B' }}>{a.mobile}</td>
-                 <td style={{ padding: '15px', fontWeight: 'bold', color: '#0F172A' }}>ðŸŽ {a.rewardName}</td>
+                 <td style={{ padding: '15px', fontWeight: 'bold', color: '#0F172A' }}>🎁 {a.rewardName}</td>
                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#8B5CF6' }}>{a.pairs} Pairs</td>
                  <td style={{ padding: '15px' }}>
                    <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: a.status==='Delivered'?'#D1FAE5':a.status==='Dispatched'?'#E0F2FE':'#FEF3C7', color: a.status==='Delivered'?'#065F46':a.status==='Dispatched'?'#0369A1':'#D97706' }}>
@@ -3336,7 +3336,7 @@ function App() {
             onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); localStorage.clear(); }}
             style={{ width: '100%', padding: '12px', background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48', border: '1px solid rgba(225, 29, 72, 0.2)', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
           >
-            <span>ðŸšª</span> Logout
+            <span>🚪</span> Logout
           </button>
         </div>
       </aside>
@@ -3344,12 +3344,12 @@ function App() {
       <main className="main-content">
         <header className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: '#ffffff', fontSize: '24px', cursor: 'pointer', display: 'none' }}>â˜°</button>
+            <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: '#ffffff', fontSize: '24px', cursor: 'pointer', display: 'none' }}>☰</button>
             <div className="page-title">{activeMenu}</div>
           </div>
           <div className="topbar-actions">
             <button className="notification-btn" onClick={() => { setActiveMenu('Notifications'); setSidebarOpen(false); }} style={{ position: 'relative' }}>
-              ðŸ””
+              🔔
               <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', background: '#EF4444', borderRadius: '50%' }}></span>
             </button>
           </div>
@@ -3364,4 +3364,3 @@ function App() {
 }
 
 export default App;
-
