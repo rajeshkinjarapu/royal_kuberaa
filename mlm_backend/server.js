@@ -1785,6 +1785,26 @@ app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
     }
 });
 
+app.delete('/api/admin/transactions/:id', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const txId = req.params.id;
+        
+        const tx = await Transaction.findById(txId);
+        if (!tx) return res.status(404).json({ success: false, message: 'Transaction not found' });
+        
+        // We only allow deleting ADMIN_CREDIT or ADMIN_DEBIT to prevent breaking core logic
+        if (tx.category !== 'ADMIN_CREDIT' && tx.category !== 'ADMIN_DEBIT') {
+            return res.status(400).json({ success: false, message: 'Can only delete manual admin transactions' });
+        }
+        
+        await Transaction.findByIdAndDelete(txId);
+        res.json({ success: true, message: 'Transaction record deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error deleting transaction' });
+    }
+});
+
 // Backward compatibility alias for add-funds
 app.post('/api/admin/add-funds', authMiddleware, async (req, res) => {
     req.body.actionType = 'credit';

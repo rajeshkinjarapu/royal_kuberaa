@@ -1623,9 +1623,9 @@ function App() {
           <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', marginBottom: '14px' }}>
             📋 Recent Admin Manual Transactions Log
           </h3>
-          <Table headers={['Date & Time', 'Member ID', 'Type', 'Amount', 'Remark']}>
+          <Table headers={['Date & Time', 'Member ID', 'Type', 'Amount', 'Remark', 'Action']}>
             {(!stats?.recentAdminTransactions || stats.recentAdminTransactions.length === 0) ? (
-              <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748B' }}>No manual admin transactions executed yet.</td></tr>
+              <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748B' }}>No manual admin transactions executed yet.</td></tr>
             ) : (
               stats.recentAdminTransactions.map(tx => (
                 <tr key={tx._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
@@ -1645,6 +1645,25 @@ function App() {
                   </td>
                   <td style={{ padding: '14px', fontSize: '13px', color: '#334155' }}>
                     {tx.remark || 'Manual Admin Action'}
+                  </td>
+                  <td style={{ padding: '14px' }}>
+                    <button 
+                       onClick={async () => {
+                           if(!window.confirm('Are you sure you want to delete this log entry? (Note: This does NOT reverse the wallet balance, it only removes the record).')) return;
+                           try {
+                               const token = localStorage.getItem('token');
+                               const res = await fetch(`/api/admin/transactions/${tx._id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+                               const result = await res.json();
+                               if(result.success) {
+                                   alert('Log deleted successfully');
+                                   fetchStats(); // Refresh the stats to update the table
+                               } else {
+                                   alert(result.message);
+                               }
+                           } catch(err) { console.error(err); }
+                       }}
+                       style={{ padding: '6px 12px', background: '#EF4444', color: '#FFF', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >Delete</button>
                   </td>
                 </tr>
               ))
