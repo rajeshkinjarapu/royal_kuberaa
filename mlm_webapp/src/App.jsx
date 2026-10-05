@@ -1178,17 +1178,13 @@ function App() {
 
     return (
       <div style={{ maxWidth: '850px', margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <div>
-            <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', margin: '0 0 4px 0' }}>ðŸ”” Live Notifications</h2>
-            <p style={{ color: '#64748B', fontSize: '14px', margin: 0 }}>Real-time updates, commission credits, payouts & account alerts</p>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
           <button 
             onClick={fetchNotifications} 
             disabled={loading}
             style={{ padding: '8px 16px', background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', color: '#334155' }}
           >
-            {loading ? 'Refreshing...' : 'ðŸ”„ Refresh'}
+            {loading ? 'Refreshing...' : ' Refresh'}
           </button>
         </div>
 
