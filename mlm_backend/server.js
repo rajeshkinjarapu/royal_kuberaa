@@ -271,6 +271,11 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
             // For admin, total team is total members in the system minus the admin
             const totalSystemMembers = await User.countDocuments({ role: 'member' });
             adminStats.totalSystemMembers = totalSystemMembers;
+            
+            // Calculate today's joinings
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            adminStats.todayJoinings = await User.countDocuments({ role: 'member', createdAt: { $gte: startOfDay } });
         }
 
         res.json({
