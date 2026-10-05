@@ -134,7 +134,6 @@ function App() {
   const menuItems = [
     { header: 'MAIN MENU' },
     { name: 'Dashboard', icon: '📊' },
-    { name: 'Wallets', icon: '💼' },
     { name: 'Non-Working Cashback', icon: '💸' },
     { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
@@ -764,29 +763,22 @@ function App() {
 
     return (
       <CardWrapper>
-        <div className="wallet-cards-grid">
+        <div className="wallet-cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)' }}>
               <h3 className="wallet-card-title">Main Wallet</h3>
               <h1 className="wallet-card-amount">₹ {(dashboardData?.mainWallet || 0).toLocaleString()}</h1>
               <div className="wallet-card-icon">💳</div>
               <div className="wallet-card-action">
-                 <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('P2P Transfer')}>Transfer (P2P)</button>
-              </div>
-           </div>
-           <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', boxShadow: '0 10px 25px -5px rgba(16,185,129,0.4)' }}>
-              <h3 className="wallet-card-title">Earnings Wallet</h3>
-              <h1 className="wallet-card-amount">₹ {(dashboardData?.totalEarnings || 0).toLocaleString()}</h1>
-              <div className="wallet-card-icon">💰</div>
-              <div className="wallet-card-action">
+                 <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('P2P Transfer')} style={{ marginRight: '8px' }}>Transfer (P2P)</button>
                  <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Bank Withdrawal')}>Withdraw</button>
               </div>
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
-              <h3 className="wallet-card-title">Royalty & Cashback</h3>
-              <h1 className="wallet-card-amount">₹ {((dashboardData?.royaltyIncome || 0) + (dashboardData?.cashbackIncome || 0)).toLocaleString()}</h1>
-              <div className="wallet-card-icon">👑</div>
-              <div className="wallet-card-action">
-                 <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Non-Working Cashback')}>View Details</button>
+              <h3 className="wallet-card-title">Rebirth Wallet</h3>
+              <h1 className="wallet-card-amount">₹ {(dashboardData?.rebirthWallet || 0).toLocaleString()}</h1>
+              <div className="wallet-card-icon">🌱</div>
+              <div className="wallet-card-action" style={{ opacity: 0.8, fontSize: '12px', color: '#FFF', fontWeight: '500' }}>
+                 Auto-creates ID at ₹1,000
               </div>
            </div>
         </div>
