@@ -943,12 +943,18 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
 // Activate ID
 app.post('/api/user/activate', authMiddleware, async (req, res) => {
     try {
-        const { productId } = req.body;
-        const user = await User.findById(req.user.id);
-        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        const { productId, targetMemberId } = req.body;
+        const payer = await User.findById(req.user.id);
+        if (!payer) return res.status(404).json({ success: false, message: 'Payer not found' });
         
-        if (user.isActive) {
-            return res.status(400).json({ success: false, message: 'ID is already activated' });
+        let targetUser = payer;
+        if (targetMemberId && targetMemberId.trim() !== '') {
+            targetUser = await User.findOne({ memberId: targetMemberId.trim().toUpperCase() });
+            if (!targetUser) return res.status(404).json({ success: false, message: 'Target Member ID not found' });
+        }
+        
+        if (targetUser.isActive) {
+            return res.status(400).json({ success: false, message: `${targetUser.memberId} is already activated` });
         }
         
         let amountToDeduct = 1500;
@@ -962,31 +968,37 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
             productName = `Activated via ${product.name}`;
         }
         
-        if (user.mainWallet < amountToDeduct) {
-            return res.status(400).json({ success: false, message: `Insufficient balance to activate ID. You need ₹${amountToDeduct}.` });
+        if (payer.mainWallet < amountToDeduct) {
+            return res.status(400).json({ success: false, message: `Insufficient balance in your wallet. You need ₹${amountToDeduct}.` });
         }
         
-        user.mainWallet -= amountToDeduct;
-        user.isActive = true;
-        await user.save();
+        payer.mainWallet -= amountToDeduct;
+        await payer.save();
+        
+        targetUser.isActive = true;
+        if (targetUser._id.toString() !== payer._id.toString()) {
+            await targetUser.save();
+        }
         
         const Transaction = require('./models/Transaction');
+        
+        // Debit transaction for the payer
         await Transaction.create({
-            userId: user._id,
-            memberId: user.memberId,
+            userId: payer._id,
+            memberId: payer.memberId,
             type: 'Debit',
             category: 'ACTIVATION',
             amount: amountToDeduct,
-            remark: productName
+            remark: `Activated ID: ${targetUser.memberId}`
         });
         
         let sponsor = null;
-        if (user.sponsorId) {
-            sponsor = await User.findOne({ memberId: user.sponsorId });
+        if (targetUser.sponsorId) {
+            sponsor = await User.findOne({ memberId: targetUser.sponsorId });
         }
         
-        // Trigger MLM Distribution
-        await mlmLogic.activateUser(user, sponsor, user.placement);
+        // Trigger MLM Distribution for the activated user
+        await mlmLogic.activateUser(targetUser, sponsor, targetUser.placement);
         
         res.json({ success: true, message: 'ID Activated Successfully!' });
     } catch (error) {

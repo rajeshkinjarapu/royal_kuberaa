@@ -585,6 +585,51 @@ function App() {
             <p style={{ fontSize: '13px', color: '#64748B', marginTop: '10px' }}>This will immediately run the daily pool distribution and flush logic as if it were 12:00 AM.</p>
           </div>
         )}
+        
+        {userRole === 'member' && userData?.isActive && (
+          <div style={{ background: '#F8FAFC', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', marginTop: '24px' }}>
+             <h3 style={{ margin: '0 0 16px 0', color: '#0F172A', fontSize: '18px', fontWeight: '800' }}>⚡ Quick ID Activation (Using Wallet)</h3>
+             <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '16px' }}>Activate any new member ID instantly using your Main Wallet balance (Cost: ₹1500).</p>
+             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <input 
+                   type="text" 
+                   id="quickActivateId"
+                   placeholder="Enter Member ID (e.g. RK...)" 
+                   style={{ flex: 1, minWidth: '200px', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', textTransform: 'uppercase', fontSize: '15px' }}
+                />
+                <button 
+                   onClick={async (e) => {
+                       const btn = e.target;
+                       const targetId = document.getElementById('quickActivateId').value;
+                       if (!targetId.trim()) return alert('Please enter a Member ID');
+                       if (!window.confirm(`Are you sure you want to deduct ₹1500 from your wallet to activate ID: ${targetId.toUpperCase()}?`)) return;
+                       
+                       btn.disabled = true;
+                       btn.innerText = 'Activating...';
+                       try {
+                           const token = localStorage.getItem('token');
+                           const res = await fetch('/api/user/activate', { 
+                               method: 'POST', 
+                               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                               body: JSON.stringify({ targetMemberId: targetId })
+                           });
+                           const result = await res.json();
+                           alert(result.message);
+                           if(result.success) window.location.reload();
+                       } catch(err) {
+                           alert('Activation failed');
+                       } finally {
+                           btn.disabled = false;
+                           btn.innerText = 'Activate Member (₹1500)';
+                       }
+                   }}
+                   style={{ padding: '12px 24px', background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)', color: '#FFF', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 10px rgba(79,70,229,0.3)' }}
+                >
+                   Activate Member (₹1500)
+                </button>
+             </div>
+          </div>
+        )}
       </>
     );
   };
