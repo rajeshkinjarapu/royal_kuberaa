@@ -2437,21 +2437,47 @@ function App() {
         return (
             <CardWrapper>
                 <PageHeader title={editForm._id ? "Edit Product" : "Add New Product"} />
-                <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '500px', background: '#FFF', padding: '24px', borderRadius: '12px' }}>
-                    <input placeholder="Name" value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
-                    <textarea placeholder="Description" value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', minHeight: '100px' }} />
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                       <input type="number" placeholder="Price" value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
-                       <input type="number" placeholder="BV" value={editForm.bv} onChange={e=>setEditForm({...editForm, bv: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
+                <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '650px', background: '#FFF', padding: '30px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Product Name</label>
+                        <input placeholder="Enter product name" value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} required style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', transition: 'all 0.2s', outline: 'none' }} />
                     </div>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                       <input placeholder="Emoji/Image URL" value={editForm.image} onChange={e=>setEditForm({...editForm, image: e.target.value})} style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
-                       <input placeholder="Badge (e.g., BEST SELLER)" value={editForm.badge} onChange={e=>setEditForm({...editForm, badge: e.target.value})} style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Product Description</label>
+                        <textarea placeholder="Describe the product benefits..." value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} required style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', minHeight: '120px', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical', outline: 'none' }} />
                     </div>
-                    <input placeholder="Delivery Info" value={editForm.deliveryInfo} onChange={e=>setEditForm({...editForm, deliveryInfo: e.target.value})} style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                       <div>
+                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Price (₹)</label>
+                           <input type="number" placeholder="1500" value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} required style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                       </div>
+                       <div>
+                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Business Volume (BV)</label>
+                           <input type="number" placeholder="100" value={editForm.bv} onChange={e=>setEditForm({...editForm, bv: e.target.value})} required style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                       </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                       <div>
+                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Icon / Emoji (URL or Emoji)</label>
+                           <input placeholder="📦" value={editForm.image} onChange={e=>setEditForm({...editForm, image: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                       </div>
+                       <div>
+                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Badge (Optional)</label>
+                           <input placeholder="e.g. BEST SELLER" value={editForm.badge} onChange={e=>setEditForm({...editForm, badge: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                       </div>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Delivery Information</label>
+                        <input placeholder="e.g. Free Delivery" value={editForm.deliveryInfo} onChange={e=>setEditForm({...editForm, deliveryInfo: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                    </div>
+
                     <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
-                       <button type="submit" style={{ flex: 1, padding: '12px', background: '#0F172A', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Save Product</button>
-                       <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '12px', background: '#E2E8F0', color: '#334155', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                       <button type="submit" style={{ flex: 1, padding: '14px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}>Save Product</button>
+                       <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '14px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}>Cancel</button>
                     </div>
                 </form>
             </CardWrapper>
