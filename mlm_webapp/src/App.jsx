@@ -2619,6 +2619,7 @@ function App() {
     const name = e.target.name.value;
     const mobile = e.target.mobile.value;
     const password = e.target.password.value;
+    const placement = e.target.placement.value;
     const btn = e.target.submitBtn;
     
     btn.disabled = true;
@@ -2633,7 +2634,8 @@ function App() {
           name,
           mobile,
           password,
-          sponsorId: userData?.memberId
+          sponsorId: userData?.memberId,
+          placement
         })
       });
       const data = await response.json();
