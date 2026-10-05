@@ -463,7 +463,7 @@ app.get('/api/admin/withdrawals', authMiddleware, async (req, res) => {
 app.get('/api/admin/users', authMiddleware, async (req, res) => {
     try {
         if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
-        const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+        const users = await User.find({ role: { $ne: 'admin' } }).select('-password').sort({ createdAt: -1 });
         res.json({ 
             success: true, 
             data: users.map(u => ({ _id: u._id, id: u.memberId, name: u.name, mobile: u.mobile, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
