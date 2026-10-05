@@ -22,23 +22,45 @@ mongoose.connect(MONGO_URI)
         
         // Initialize or Update Default Admin
         let adminUser = await User.findOne({ role: 'admin' });
-        const hashedAdminPassword = await bcrypt.hash('474532', 10);
+        const hashedAdminPassword = await bcrypt.hash('admin', 10);
 
         if (!adminUser) {
             await User.create({
-                memberId: 'RAJESHKINJARAPU',
+                memberId: 'ADMIN',
                 password: hashedAdminPassword,
-                name: 'Rajesh Kinjarapu',
-                mobile: '9999999999',
+                name: 'System Admin',
+                mobile: '0000000000',
                 role: 'admin',
                 rank: 'OWNER'
             });
-            console.log('✅ Default Admin User Created (RAJESHKINJARAPU)');
+            console.log('✅ Default Admin User Created (ADMIN)');
         } else {
-            adminUser.memberId = 'RAJESHKINJARAPU';
+            adminUser.memberId = 'ADMIN';
             adminUser.password = hashedAdminPassword;
             await adminUser.save();
-            console.log('✅ Default Admin User Updated (RAJESHKINJARAPU)');
+            console.log('✅ Default Admin User Updated (ADMIN)');
+        }
+
+        // Initialize Company Top ID (Member)
+        let topIdUser = await User.findOne({ memberId: 'RAJESHKINJARAPU' });
+        const hashedTopIdPassword = await bcrypt.hash('474532', 10);
+
+        if (!topIdUser) {
+            await User.create({
+                memberId: 'RAJESHKINJARAPU',
+                sponsorId: 'ADMIN',
+                password: hashedTopIdPassword,
+                name: 'Rajesh Kinjarapu',
+                mobile: '9999999999',
+                role: 'user',
+                rank: 'STARTER'
+            });
+            console.log('✅ Company Top Member ID Created (RAJESHKINJARAPU)');
+        } else {
+            topIdUser.password = hashedTopIdPassword;
+            topIdUser.role = 'user';
+            await topIdUser.save();
+            console.log('✅ Company Top Member ID Updated (RAJESHKINJARAPU)');
         }
     })
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
