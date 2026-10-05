@@ -519,12 +519,12 @@ function App() {
           </div>
         </div>
         {!userData?.isActive && userRole === 'member' && (
-          <div style={{ background: '#FEF2F2', padding: '24px', borderRadius: '16px', border: '1px solid #FCA5A5', marginBottom: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.1)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-                <span style={{ fontSize: '32px' }}>⚠️</span>
+          <div style={{ background: '#FEF2F2', padding: '12px 16px', borderRadius: '12px', border: '1px solid #FCA5A5', marginBottom: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', boxShadow: '0 2px 4px rgba(239, 68, 68, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '24px' }}>⚠️</span>
                 <div>
-                   <h3 style={{ margin: '0 0 8px 0', color: '#EF4444', fontSize: '20px', fontWeight: '800' }}>Account Not Activated</h3>
-                   <span style={{ fontSize: '15px', color: '#991B1B', fontWeight: '700', background: '#FEE2E2', padding: '4px 12px', borderRadius: '12px' }}>Wallet Balance: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
+                   <h3 style={{ margin: '0 0 2px 0', color: '#B91C1C', fontSize: '15px', fontWeight: '700' }}>Account Not Activated</h3>
+                   <span style={{ fontSize: '13px', color: '#991B1B', fontWeight: '600' }}>Wallet: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
                 </div>
             </div>
             <button 
@@ -547,9 +547,9 @@ function App() {
                      }
                   } catch(e) { alert('Activation failed'); }
                }}
-               style={{ padding: '14px 32px', background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)', color: '#FFF', borderRadius: '12px', cursor: 'pointer', fontWeight: '800', border: 'none', transition: 'all 0.2s', fontSize: '16px', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)' }}
+               style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', border: 'none', transition: 'all 0.2s', fontSize: '13px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)', whiteSpace: 'nowrap' }}
             >
-               {(dashboardData?.mainWallet || 0) < 1500 ? 'Deposit Funds to Activate' : 'Activate ID (₹1,500)'}
+               {(dashboardData?.mainWallet || 0) < 1500 ? 'Deposit to Activate' : 'Activate (₹1500)'}
             </button>
           </div>
         )}
