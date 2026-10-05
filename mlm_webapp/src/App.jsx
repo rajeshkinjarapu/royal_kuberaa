@@ -242,13 +242,12 @@ function App() {
     const mobile = e.target.mobile.value;
     const sponsorId = e.target.sponsorId.value;
     const password = e.target.password.value;
-    const placement = e.target.placement.value;
     
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, mobile, sponsorId, password, placement })
+        body: JSON.stringify({ name, mobile, sponsorId, password })
       });
       const result = await response.json();
       
@@ -392,19 +391,7 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', marginBottom: '8px', display: 'block' }}>Position (Placement)</label>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                        <input type="radio" name="placement" value="Left" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#0B1437' }} />
-                        Left Team
-                     </label>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#334155' }}>
-                        <input type="radio" name="placement" value="Right" style={{ width: '18px', height: '18px', accentColor: '#0B1437' }} />
-                        Right Team
-                     </label>
-                  </div>
-                </div>
+
                 <div className="form-group">
                   <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password (6 Digits)</label>
                   <PinInput name="password" />
@@ -2782,7 +2769,6 @@ function App() {
     const name = e.target.name.value;
     const mobile = e.target.mobile.value;
     const password = e.target.password.value;
-    const placement = e.target.placement.value;
     const btn = e.target.submitBtn;
     
     btn.disabled = true;
@@ -2797,8 +2783,7 @@ function App() {
           name,
           mobile,
           password,
-          sponsorId: userData?.memberId,
-          placement
+          sponsorId: userData?.memberId
         })
       });
       const data = await response.json();
@@ -2838,19 +2823,7 @@ function App() {
                   <input type="tel" name="mobile" className="form-input" placeholder="10-digit mobile number" required pattern="[0-9]{10}" maxLength="10" />
                 </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Position (Placement)</label>
-                  <div style={{ display: 'flex', gap: '24px', padding: '12px', background: '#FFF', borderRadius: '12px', border: '1px solid #CBD5E1' }}>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', color: '#334155' }}>
-                        <input type="radio" name="placement" value="Left" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#4F46E5' }} />
-                        Left Team
-                     </label>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', color: '#334155' }}>
-                        <input type="radio" name="placement" value="Right" style={{ width: '20px', height: '20px', accentColor: '#4F46E5' }} />
-                        Right Team
-                     </label>
-                  </div>
-                </div>
+
 
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Password (6 Digits)</label>

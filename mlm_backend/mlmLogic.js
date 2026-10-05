@@ -108,7 +108,7 @@ async function checkAndTriggerRebirth(user) {
 
 
 // Main Activation Logic
-async function activateUser(user, sponsor, placement) {
+async function activateUser(user, sponsor) {
     // 1. Direct Income (400)
     if (sponsor) {
         await addIncome(sponsor, DIRECT_INCOME, 'DIRECT', `Direct Referral Bonus from ${user.memberId}`);

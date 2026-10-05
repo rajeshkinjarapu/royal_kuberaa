@@ -167,11 +167,11 @@ app.post('/api/login', async (req, res) => {
 // --- Register / Activate Route ---
 app.post('/api/register', async (req, res) => {
     try {
-        const { name, mobile, password, sponsorId, placement } = req.body;
+        const { name, mobile, password, sponsorId } = req.body;
         
         // Validation
-        if (!name || !mobile || !password || !placement) {
-            return res.status(400).json({ success: false, message: 'All fields including Position are required.' });
+        if (!name || !mobile || !password) {
+            return res.status(400).json({ success: false, message: 'Name, Mobile, and Password are required.' });
         }
 
         const existingUser = await User.findOne({ mobile });
@@ -202,7 +202,6 @@ app.post('/api/register', async (req, res) => {
             mobile,
             password: hashedPassword,
             sponsorId: sponsor ? sponsor.memberId : null,
-            placement: placement, // 'Left' or 'Right'
             role: 'member',
             isActive: false // Must be activated later
         });
@@ -996,7 +995,7 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
                 notifications.push({
                     id: `direct_${d._id}`,
                     title: 'New Team Referral Joined 👤',
-                    desc: `${d.name} (${d.memberId}) registered under you on ${d.placement || 'Team'}. Status: ${d.isActive ? 'Active' : 'Unactivated'}`,
+                    desc: `${d.name} (${d.memberId}) registered under you. Status: ${d.isActive ? 'Active' : 'Unactivated'}`,
                     time: formatTimeAgo(d.createdAt),
                     timestamp: new Date(d.createdAt).getTime(),
                     icon: '👤',
@@ -1078,7 +1077,7 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
         }
         
         // Trigger MLM Distribution for the activated user
-        await mlmLogic.activateUser(targetUser, sponsor, targetUser.placement);
+        await mlmLogic.activateUser(targetUser, sponsor);
         
         res.json({ success: true, message: 'ID Activated Successfully!' });
     } catch (error) {
