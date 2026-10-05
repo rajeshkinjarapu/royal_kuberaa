@@ -53,14 +53,14 @@ mongoose.connect(MONGO_URI)
                 password: hashedTopIdPassword,
                 name: 'Company Top Leader',
                 mobile: '9502924437',
-                role: 'user',
+                role: 'member',
                 rank: 'STARTER'
             });
             console.log('✅ Company Top Member ID Created (9502924437)');
         } else {
             topIdUser.password = hashedTopIdPassword;
             topIdUser.sponsorId = 'RK0305';
-            topIdUser.role = 'user';
+            topIdUser.role = 'member';
             await topIdUser.save();
             console.log('✅ Company Top Member ID Updated (9502924437)');
         }
@@ -269,7 +269,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
             adminStats.totalRebirths = await User.countDocuments({ isRebirth: true });
             
             // For admin, total team is total members in the system minus the admin
-            const totalSystemMembers = await User.countDocuments({ role: 'user' });
+            const totalSystemMembers = await User.countDocuments({ role: 'member' });
             adminStats.totalSystemMembers = totalSystemMembers;
         }
 
@@ -1990,8 +1990,8 @@ app.get('/api/admin/reports', authMiddleware, async (req, res) => {
         const Transaction = require('./models/Transaction');
         const Withdrawal = require('./models/Withdrawal');
 
-        const totalUsers = await User.countDocuments({ role: 'user' });
-        const activeUsers = await User.countDocuments({ role: 'user', isActive: true });
+        const totalUsers = await User.countDocuments({ role: 'member' });
+        const activeUsers = await User.countDocuments({ role: 'member', isActive: true });
         
         // Income stats from transactions
         const incomeTx = await Transaction.aggregate([
