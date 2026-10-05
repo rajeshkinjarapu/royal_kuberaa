@@ -2,6 +2,26 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
+let dialogController = null;
+
+window.customAlert = (message) => {
+    if (dialogController) {
+        dialogController.show(message, 'alert');
+    } else {
+        window.alert(message);
+    }
+};
+
+window.customConfirm = (message) => {
+    return new Promise((resolve) => {
+        if (dialogController) {
+            dialogController.show(message, 'confirm', resolve);
+        } else {
+            resolve(window.confirm(message));
+        }
+    });
+};
+
 const PinInput = ({ name, length = 6 }) => {
   const [pin, setPin] = useState(Array(length).fill(''));
   const inputRefs = useRef([]);
@@ -59,6 +79,27 @@ const PinInput = ({ name, length = 6 }) => {
 };
 
 function App() {
+  const [dialogState, setDialogState] = useState({ isOpen: false, message: '', type: 'alert', resolvePromise: null });
+
+  useEffect(() => {
+      dialogController = {
+          show: (message, type, resolvePromise = null) => {
+              setDialogState({ isOpen: true, message, type, resolvePromise });
+          },
+          hide: () => setDialogState(prev => ({ ...prev, isOpen: false }))
+      };
+  }, []);
+
+  const handleDialogConfirm = () => {
+      if (dialogState.resolvePromise) dialogState.resolvePromise(true);
+      if (dialogController) dialogController.hide();
+  };
+
+  const handleDialogCancel = () => {
+      if (dialogState.resolvePromise) dialogState.resolvePromise(false);
+      if (dialogController) dialogController.hide();
+  };
+
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const loginTime = localStorage.getItem('loginTime');
     const isLogged = localStorage.getItem('isLoggedIn') === 'true';
@@ -520,13 +561,13 @@ function App() {
                      const token = localStorage.getItem('token');
                      const res = await fetch('/api/user/activate', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }});
                      const result = await res.json();
-                     alert(result.message);
+                     window.customAlert(result.message);
                      if (result.success) {
                          const ud = {...userData, isActive: true};
                          setUserData(ud);
                          window.location.reload();
                      }
-                  } catch(e) { alert('Activation failed'); }
+                  } catch(e) { window.customAlert('Activation failed'); }
                }}
                style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', border: 'none', transition: 'all 0.2s', fontSize: '13px', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)', whiteSpace: 'nowrap' }}
             >
@@ -556,8 +597,8 @@ function App() {
                      const token = localStorage.getItem('token');
                      const res = await fetch('/api/admin/trigger-cron', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }});
                      const result = await res.json();
-                     alert(result.message);
-                  } catch(e) { alert('Failed to trigger cron'); }
+                     window.customAlert(result.message);
+                  } catch(e) { window.customAlert('Failed to trigger cron'); }
                }}
                style={{ padding: '12px 20px', background: '#0F172A', color: '#FFF', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
             >
@@ -582,8 +623,8 @@ function App() {
                    onClick={async (e) => {
                        const btn = e.target;
                        const targetId = document.getElementById('quickActivateId').value;
-                       if (!targetId.trim()) return alert('Please enter a Member ID');
-                       if (!window.confirm(`Are you sure you want to deduct ₹1500 from your wallet to activate ID: ${targetId.toUpperCase()}?`)) return;
+                       if (!targetId.trim()) return window.customAlert('Please enter a Member ID');
+                       if (!await window.customConfirm(`Are you sure you want to deduct ₹1500 from your wallet to activate ID: ${targetId.toUpperCase()}?`)) return;
                        
                        btn.disabled = true;
                        btn.innerText = 'Activating...';
@@ -595,10 +636,10 @@ function App() {
                                body: JSON.stringify({ targetMemberId: targetId })
                            });
                            const result = await res.json();
-                           alert(result.message);
+                           window.customAlert(result.message);
                            if(result.success) window.location.reload();
                        } catch(err) {
-                           alert('Activation failed');
+                           window.customAlert('Activation failed');
                        } finally {
                            btn.disabled = false;
                            btn.innerText = 'Activate Member (₹1500)';
@@ -651,10 +692,10 @@ function App() {
                 body: JSON.stringify(kycForm)
             });
             const result = await res.json();
-            alert(result.message);
+            window.customAlert(result.message);
             if(result.success) setProfileData(result.user);
         } catch (err) {
-            alert('Failed to update KYC');
+            window.customAlert('Failed to update KYC');
         }
     };
 
@@ -1069,7 +1110,7 @@ function App() {
           if(result.success) {
              setUsersList(prev => prev.map(u => u.id === memberId ? { ...u, status: result.status } : u));
           } else {
-             alert(result.message);
+             window.customAlert(result.message);
           }
        } catch(err) { console.error(err); }
     };
@@ -1085,17 +1126,17 @@ function App() {
             });
             const result = await res.json();
             if(result.success) {
-                alert('User details updated successfully');
+                window.customAlert('User details updated successfully');
                 setEditingUser(null);
                 fetchUsers();
             } else {
-                alert(result.message);
+                window.customAlert(result.message);
             }
                 } catch(err) { console.error(err); }
     };
 
     const handleDeleteUser = async (memberId) => {
-        if (!window.confirm(`Are you sure you want to permanently delete user ${memberId}? This action cannot be undone.`)) return;
+        if (!await window.customConfirm(`Are you sure you want to permanently delete user ${memberId}? This action cannot be undone.`)) return;
         
         try {
             const token = localStorage.getItem('token');
@@ -1105,10 +1146,10 @@ function App() {
             });
             const result = await res.json();
             if(result.success) {
-                alert('User deleted successfully');
+                window.customAlert('User deleted successfully');
                 fetchUsers();
             } else {
-                alert(result.message);
+                window.customAlert(result.message);
             }
         } catch(err) { console.error(err); }
     };
@@ -1211,7 +1252,7 @@ function App() {
           if(result.success) {
              setWithdrawals(prev => prev.map(w => w._id === id ? { ...w, status: action === 'approve' ? 'Approved' : 'Rejected' } : w));
           } else {
-             alert(result.message);
+             window.customAlert(result.message);
           }
        } catch(err) { console.error(err); }
     };
@@ -1636,16 +1677,16 @@ function App() {
                   <td style={{ padding: '14px' }}>
                     <button 
                        onClick={async () => {
-                           if(!window.confirm('Are you sure you want to delete this log entry? (Note: This does NOT reverse the wallet balance, it only removes the record).')) return;
+                           if(!await window.customConfirm('Are you sure you want to delete this log entry? (Note: This does NOT reverse the wallet balance, it only removes the record).')) return;
                            try {
                                const token = localStorage.getItem('token');
                                const res = await fetch(`/api/admin/transactions/${tx._id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
                                const result = await res.json();
                                if(result.success) {
-                                   alert('Log deleted successfully');
+                                   window.customAlert('Log deleted successfully');
                                    fetchStats(); // Refresh the stats to update the table
                                } else {
-                                   alert(result.message);
+                                   window.customAlert(result.message);
                                }
                            } catch(err) { console.error(err); }
                        }}
@@ -1688,8 +1729,8 @@ function App() {
           if(result.success) {
              setRequests(prev => prev.filter(r => r._id !== id));
           }
-          alert(result.message);
-       } catch(err) { alert("Action failed"); }
+          window.customAlert(result.message);
+       } catch(err) { window.customAlert("Action failed"); }
     };
 
     return (
@@ -1777,13 +1818,13 @@ function App() {
     };
 
     const handleRazorpaySubmit = async () => {
-        if (!amount || Number(amount) < 100) return alert('Minimum deposit is ₹100');
+        if (!amount || Number(amount) < 100) return window.customAlert('Minimum deposit is ₹100');
         
         setLoading(true);
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.onerror = () => {
-            alert('Razorpay SDK failed to load. Are you offline?');
+            window.customAlert('Razorpay SDK failed to load. Are you offline?');
             setLoading(false);
         };
         script.onload = async () => {
@@ -1797,7 +1838,7 @@ function App() {
                 const data = await res.json();
                 if (!data.success) {
                     setLoading(false);
-                    return alert(data.message);
+                    return window.customAlert(data.message);
                 }
 
                 const options = {
@@ -1820,11 +1861,11 @@ function App() {
                                 })
                             });
                             const verifyData = await verifyRes.json();
-                            alert(verifyData.message);
+                            window.customAlert(verifyData.message);
                             if (verifyData.success) {
                                 window.location.reload();
                             }
-                        } catch (err) { alert('Payment verification failed'); }
+                        } catch (err) { window.customAlert('Payment verification failed'); }
                     },
                     theme: { color: '#0F172A' },
                     modal: { ondismiss: () => setLoading(false) }
@@ -1832,7 +1873,7 @@ function App() {
                 const rzp = new window.Razorpay(options);
                 rzp.open();
             } catch (err) { 
-                alert('Could not initiate payment'); 
+                window.customAlert('Could not initiate payment'); 
                 setLoading(false);
             }
         };
@@ -2005,7 +2046,7 @@ function App() {
                 body: JSON.stringify({ action })
             });
             const result = await res.json();
-            alert(result.message);
+            window.customAlert(result.message);
             if(result.success) {
                 setRequests(prev => prev.filter(req => req.memberId !== memberId));
             }
@@ -2071,7 +2112,7 @@ function App() {
              body: JSON.stringify({ subject, message })
           });
           const result = await res.json();
-          alert(result.message);
+          window.customAlert(result.message);
           if(result.success) {
              setSubject('');
              setMessage('');
@@ -2079,7 +2120,7 @@ function App() {
              const result2 = await res2.json();
              if(result2.success) setTickets(result2.data);
           }
-       } catch(err) { alert('Error creating ticket'); }
+       } catch(err) { window.customAlert('Error creating ticket'); }
     };
 
     const handleReply = async (id) => {
@@ -2091,11 +2132,11 @@ function App() {
              body: JSON.stringify({ reply: replyText[id] })
           });
           const result = await res.json();
-          alert(result.message);
+          window.customAlert(result.message);
           if(result.success) {
              setTickets(prev => prev.map(t => t._id === id ? { ...t, status: 'Resolved', reply: replyText[id] } : t));
           }
-       } catch(err) { alert('Error sending reply'); }
+       } catch(err) { window.customAlert('Error sending reply'); }
     };
 
     return (
@@ -2201,8 +2242,8 @@ function App() {
              body: JSON.stringify(settings)
           });
           const result = await res.json();
-          alert(result.message);
-       } catch(err) { alert('Failed to save settings'); }
+          window.customAlert(result.message);
+       } catch(err) { window.customAlert('Failed to save settings'); }
     };
 
     if(loading) return <div style={{ padding: '50px', textAlign: 'center', color: '#64748B' }}>Loading settings...</div>;
@@ -2397,31 +2438,31 @@ function App() {
                 body: JSON.stringify(editForm)
             });
             const result = await res.json();
-            alert(result.message);
+            window.customAlert(result.message);
             if(result.success) {
                 setIsEditing(false);
                 fetchProducts();
             }
-        } catch(err) { alert('Failed to save product'); }
+        } catch(err) { window.customAlert('Failed to save product'); }
     };
 
     const handleDeleteProduct = async (id) => {
-        if(!window.confirm('Are you sure you want to delete this product?')) return;
+        if(!await window.customConfirm('Are you sure you want to delete this product?')) return;
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
             const result = await res.json();
-            alert(result.message);
+            window.customAlert(result.message);
             if(result.success) fetchProducts();
-        } catch(err) { alert('Failed to delete product'); }
+        } catch(err) { window.customAlert('Failed to delete product'); }
     };
 
     const handleBuyAndActivate = async (product) => {
         if (userData?.isActive) {
-            alert('Your ID is already activated!');
+            window.customAlert('Your ID is already activated!');
             return;
         }
-        if(!window.confirm(`Are you sure you want to buy ${product.name} and activate your ID for ₹${product.price}? (Requires wallet balance)`)) return;
+        if(!await window.customConfirm(`Are you sure you want to buy ${product.name} and activate your ID for ₹${product.price}? (Requires wallet balance)`)) return;
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/user/activate', {
@@ -2430,13 +2471,13 @@ function App() {
                 body: JSON.stringify({ productId: product._id })
             });
             const result = await res.json();
-            alert(result.message);
+            window.customAlert(result.message);
             if(result.success) {
                 const ud = {...userData, isActive: true};
                 setUserData(ud);
                 window.location.reload();
             }
-        } catch(err) { alert('Activation failed'); }
+        } catch(err) { window.customAlert('Activation failed'); }
     };
 
     if (isEditing && userRole === 'admin') {
@@ -2788,13 +2829,13 @@ function App() {
       });
       const data = await response.json();
       if (data.success) {
-        alert('Member Registered Successfully! ID: ' + data.user.memberId);
+        window.customAlert('Member Registered Successfully! ID: ' + data.user.memberId);
         e.target.reset();
       } else {
-        alert('Error: ' + data.message);
+        window.customAlert('Error: ' + data.message);
       }
     } catch (err) {
-      alert('Network Error');
+      window.customAlert('Network Error');
     } finally {
       btn.disabled = false;
       btn.innerText = 'Register Member';
@@ -3177,14 +3218,14 @@ function App() {
                 body: JSON.stringify({ pairs })
             });
             const result = await res.json();
-            alert(result.message);
+            window.customAlert(result.message);
             if (result.success) {
                 // Refresh data
                 const res2 = await fetch('/api/user/rewards', { headers: { 'Authorization': `Bearer ${token}` }});
                 const result2 = await res2.json();
                 if(result2.success) setRewardData(result2);
             }
-        } catch(err) { alert('Failed to claim reward'); }
+        } catch(err) { window.customAlert('Failed to claim reward'); }
     };
 
     if (loading || !rewardData) return <div style={{ padding: '50px', textAlign: 'center', color: '#64748B' }}>Loading Rewards...</div>;
@@ -3271,9 +3312,9 @@ function App() {
           body: JSON.stringify({ status })
         });
         const result = await res.json();
-        alert(result.message);
+        window.customAlert(result.message);
         if(result.success) fetchAchievers();
-      } catch(err) { alert('Failed to update status'); }
+      } catch(err) { window.customAlert('Failed to update status'); }
     };
 
     return (
@@ -3475,6 +3516,31 @@ function App() {
               return <div key={'header'+index} className="menu-section">{item.header}</div>;
             }
             return (
+    <>      {dialogState.isOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
+            <div style={{ background: '#FFF', borderRadius: '24px', padding: '32px', maxWidth: '400px', width: '100%', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', textAlign: 'center', animation: 'scaleIn 0.2s ease-out' }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: dialogState.type === 'confirm' ? '#FEF3C7' : '#E0E7FF', color: dialogState.type === 'confirm' ? '#D97706' : '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', margin: '0 auto 20px' }}>
+                    {dialogState.type === 'confirm' ? '?' : '!'}
+                </div>
+                <h3 style={{ margin: '0 0 12px 0', color: '#0F172A', fontSize: '22px', fontWeight: '800' }}>{dialogState.type === 'confirm' ? 'Confirmation' : 'Notice'}</h3>
+                <p style={{ color: '#475569', fontSize: '16px', lineHeight: '1.5', marginBottom: '32px' }}>{dialogState.message}</p>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+                    {dialogState.type === 'confirm' && (
+                        <button onClick={handleDialogCancel} style={{ flex: 1, padding: '14px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px', transition: 'all 0.2s' }}>Cancel</button>
+                    )}
+                    <button onClick={handleDialogConfirm} style={{ flex: dialogState.type === 'confirm' ? 1 : 'none', minWidth: dialogState.type === 'alert' ? '140px' : 'auto', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(11, 20, 55, 0.2)' }}>OK</button>
+                </div>
+            </div>
+            <style>
+            {\
+                @keyframes scaleIn {
+                    from { transform: scale(0.95); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            \}
+            </style>
+        </div>
+      )}
               <div 
                 key={item.name} 
                 className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
@@ -3515,6 +3581,7 @@ function App() {
         </div>
       </main>
     </div>
+      </>
   );
 }
 
