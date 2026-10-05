@@ -216,12 +216,14 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         // Let's rely on User model fields and a quick aggregation where possible.
         // Actually, we can just look up all transactions for the member.
         const txs = await Transaction.find({ memberId: user.memberId });
-        let direct = 0, team = 0, autopool = 0, withdraw = 0;
+        let direct = 0, binary = 0, level = 0, royalty = 0, cashback = 0, withdraw = 0;
         
         txs.forEach(tx => {
             if (tx.category === 'DIRECT') direct += tx.amount;
-            if (tx.category === 'LEVEL') team += tx.amount;
-            if (tx.category === 'AUTOPOOL') autopool += tx.amount;
+            if (tx.category === 'BINARY') binary += tx.amount;
+            if (tx.category === 'LEVEL') level += tx.amount;
+            if (tx.category === 'ROYALTY') royalty += tx.amount;
+            if (tx.category === 'CASHBACK') cashback += tx.amount;
             if (tx.category === 'Withdrawal') withdraw += tx.amount;
         });
 
@@ -231,10 +233,12 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 totalEarnings: user.totalEarnings,
                 mainWallet: user.mainWallet,
                 rebirthWallet: user.rebirthWallet,
-                directReferral: direct,
-                teamIncome: team, 
+                directIncome: direct,
+                binaryIncome: binary,
+                levelIncome: level,
+                royaltyIncome: royalty,
+                cashbackIncome: cashback,
                 withdrawFund: withdraw, 
-                autopoolFund: autopool, 
                 allRanks: (user.goldEarnings || 0) + (user.platinumEarnings || 0) + (user.rubyEarnings || 0) + (user.diamondEarnings || 0),
                 royaltyStats: {
                     rank: user.rank || (user.isDiamond ? 'DIAMOND' : user.isRuby ? 'RUBY' : user.isPlatinum ? 'PLATINUM' : user.isGold ? 'GOLD' : 'STARTER'),
@@ -617,6 +621,64 @@ app.get('/api/user/profile', authMiddleware, async (req, res) => {
     }
 });
 
+// --- Products API ---
+const Product = require('./models/Product');
+
+// Get all active products (Public/Member)
+app.get('/api/products', authMiddleware, async (req, res) => {
+    try {
+        const products = await Product.find({ isActive: true });
+        res.json({ success: true, data: products });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error fetching products' });
+    }
+});
+
+// Admin: Get all products
+app.get('/api/admin/products', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const products = await Product.find({});
+        res.json({ success: true, data: products });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Admin: Add a new product
+app.post('/api/admin/products', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const product = new Product(req.body);
+        await product.save();
+        res.json({ success: true, message: 'Product added successfully!', data: product });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error adding product' });
+    }
+});
+
+// Admin: Edit a product
+app.put('/api/admin/products/:id', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json({ success: true, message: 'Product updated successfully!', data: product });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error updating product' });
+    }
+});
+
+// Admin: Delete a product
+app.delete('/api/admin/products/:id', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        await Product.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Product deleted successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error deleting product' });
+    }
+});
+
 // --- Dynamic Notifications API (Member & Admin) ---
 app.get('/api/user/notifications', authMiddleware, async (req, res) => {
     try {
@@ -883,6 +945,7 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
 // Activate ID
 app.post('/api/user/activate', authMiddleware, async (req, res) => {
     try {
+        const { productId } = req.body;
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
         
@@ -890,11 +953,22 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: 'ID is already activated' });
         }
         
-        if (user.mainWallet < 1000) {
-            return res.status(400).json({ success: false, message: 'Insufficient balance to activate ID. You need ₹1000.' });
+        let amountToDeduct = 1000;
+        let productName = 'ID Activation Fee';
+        
+        if (productId) {
+            const Product = require('./models/Product');
+            const product = await Product.findById(productId);
+            if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+            amountToDeduct = product.price;
+            productName = `Activated via ${product.name}`;
         }
         
-        user.mainWallet -= 1000;
+        if (user.mainWallet < amountToDeduct) {
+            return res.status(400).json({ success: false, message: `Insufficient balance to activate ID. You need ₹${amountToDeduct}.` });
+        }
+        
+        user.mainWallet -= amountToDeduct;
         user.isActive = true;
         await user.save();
         
@@ -903,8 +977,9 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
             userId: user._id,
             memberId: user.memberId,
             type: 'Debit',
-            amount: 1000,
-            description: 'ID Activation Fee'
+            category: 'ACTIVATION',
+            amount: amountToDeduct,
+            remark: productName
         });
         
         let sponsor = null;
@@ -1755,6 +1830,119 @@ app.post('/api/admin/fund-requests/:id', authMiddleware, async (req, res) => {
             return res.json({ success: true, message: "Fund request rejected." });
         }
     } catch (err) { console.error(err); res.status(500).json({ success: false, message: "Error processing request" }); }
+});
+
+// --- Razorpay Integration ---
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy_key',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'rzp_test_dummy_secret'
+});
+
+app.post('/api/payment/create-order', authMiddleware, async (req, res) => {
+    try {
+        const { amount } = req.body;
+        if (!amount || amount < 100) return res.status(400).json({ success: false, message: 'Minimum deposit is ₹100' });
+
+        const options = {
+            amount: amount * 100, // in paise
+            currency: "INR",
+            receipt: `rcptid_${req.user.id.slice(-6)}_${Date.now()}`
+        };
+
+        const order = await razorpay.orders.create(options);
+        res.json({ success: true, order });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Failed to create order' });
+    }
+});
+
+app.post('/api/payment/verify', authMiddleware, async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+
+        const generated_signature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'rzp_test_dummy_secret')
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest('hex');
+
+        if (generated_signature === razorpay_signature) {
+            const User = require('./models/User');
+            const Transaction = require('./models/Transaction');
+
+            const user = await User.findById(req.user.id);
+            user.mainWallet += Number(amount);
+            await user.save();
+
+            await Transaction.create({
+                userId: user._id,
+                memberId: user.memberId,
+                type: 'Credit',
+                category: 'FUND_ADD',
+                amount: Number(amount),
+                description: 'Razorpay Instant Deposit'
+            });
+
+            res.json({ success: true, message: 'Payment successful! Funds added to wallet.' });
+        } else {
+            res.status(400).json({ success: false, message: 'Payment verification failed' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Error verifying payment' });
+    }
+});
+
+// Admin Reports API
+app.get('/api/admin/reports', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+    try {
+        const User = require('./models/User');
+        const Transaction = require('./models/Transaction');
+        const Withdrawal = require('./models/Withdrawal');
+
+        const totalUsers = await User.countDocuments({ role: 'user' });
+        const activeUsers = await User.countDocuments({ role: 'user', isActive: true });
+        
+        // Income stats from transactions
+        const incomeTx = await Transaction.aggregate([
+            { $match: { type: 'Credit', category: { $in: ['DIRECT', 'BINARY', 'LEVEL', 'ROYALTY'] } } },
+            { $group: { _id: null, totalIncome: { $sum: '$amount' } } }
+        ]);
+        const totalIncomeGenerated = incomeTx[0]?.totalIncome || 0;
+
+        // Withdrawal stats
+        const withdrawals = await Withdrawal.aggregate([
+            { $group: {
+                _id: '$status',
+                count: { $sum: 1 },
+                gross: { $sum: '$grossAmount' },
+                tds: { $sum: '$tdsAmount' },
+                adminCharge: { $sum: '$adminChargeAmount' },
+                netPaid: { $sum: '$netAmount' }
+            }}
+        ]);
+        
+        let approvedWithdrawals = withdrawals.find(w => w._id === 'Approved') || { count: 0, gross: 0, tds: 0, adminCharge: 0, netPaid: 0 };
+        let pendingWithdrawals = withdrawals.find(w => w._id === 'Pending') || { count: 0, gross: 0, tds: 0, adminCharge: 0, netPaid: 0 };
+
+        res.json({
+            success: true,
+            data: {
+                totalUsers,
+                activeUsers,
+                totalIncomeGenerated,
+                approvedWithdrawals,
+                pendingWithdrawals
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Error fetching reports" });
+    }
 });
 
 const PORT = process.env.PORT || 5000;

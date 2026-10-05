@@ -33,6 +33,7 @@ async function addIncome(user, amount, type, desc) {
     user.totalEarnings += amount;
 
     await Transaction.create({
+        userId: user._id,
         memberId: user.memberId,
         type: 'Credit',
         category: type,

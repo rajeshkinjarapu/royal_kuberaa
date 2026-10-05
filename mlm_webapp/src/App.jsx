@@ -130,36 +130,6 @@ function App() {
     fetchDashboard();
   }, [isLoggedIn, activeMenu]);
 
-  // Fallback Dummy Data for UI Completeness
-  const dummyWallets = {
-    balance: 15000,
-    transactions: [
-      { id: "TXN1021", date: "2026-09-30", amount: 500, type: "Credit", remark: "Daily ROI" },
-      { id: "TXN1022", date: "2026-09-29", amount: 1200, type: "Credit", remark: "Direct Referral" },
-      { id: "TXN1023", date: "2026-09-28", amount: -200, type: "Debit", remark: "P2P Transfer" }
-    ]
-  };
-
-  const dummyNetwork = [
-    { id: "RK1001", name: "Ramesh Kumar", joinDate: "2026-09-15", status: "Active", package: "₹10,000", level: 1 },
-    { id: "RK1002", name: "Suresh Rao", joinDate: "2026-09-18", status: "Inactive", package: "₹0", level: 1 },
-    { id: "RK1003", name: "Mahesh Babu", joinDate: "2026-09-22", status: "Active", package: "₹25,000", level: 2 }
-  ];
-
-  const dummyUsers = [
-    { id: "RK1001", name: "Ramesh Kumar", email: "ramesh@test.com", wallet: 15000, status: "Active" },
-    { id: "RK1002", name: "Suresh Rao", email: "suresh@test.com", wallet: 200, status: "Blocked" },
-    { id: "RK1003", name: "Mahesh Babu", email: "mahesh@test.com", wallet: 35000, status: "Active" }
-  ];
-
-  const dummyPayouts = [
-    { id: "WD9901", user: "RK1001", amount: 5000, tds: 250, admin: 250, net: 4500, date: "2026-09-30", status: "Pending" },
-    { id: "WD9902", user: "RK1003", amount: 12000, tds: 600, admin: 600, net: 10800, date: "2026-09-30", status: "Pending" }
-  ];
-
-  const dummyKYC = [
-    { id: "RK1002", name: "Suresh Rao", doc: "PAN Card", date: "2026-09-30", status: "Pending Verification" }
-  ];
 
   const menuItems = [
     { header: 'MAIN MENU' },
@@ -205,6 +175,7 @@ function App() {
     { name: 'KYC Approvals', icon: '📄' },
     { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
+    { name: 'System Reports', icon: '📊' },
   ];
 
   const handleLogin = async (e) => {
@@ -214,14 +185,7 @@ function App() {
     const memberId = e.target.memberId.value;
     const password = e.target.password.value;
     
-    // Hardcoded Admin Bypass
-    if (memberId.toLowerCase() === 'rajeshkinjarapu' && password === '474532') {
-      setUserRole('admin');
-      setUserData({ name: "Rajesh Kinjarapu", memberId: "rajeshkinjarapu", rank: "OWNER" });
-      setIsLoggedIn(true);
-      setLoading(false);
-      return;
-    }
+    // Handled purely via backend authentication
 
     try {
       const response = await fetch('/api/login', {
@@ -244,22 +208,8 @@ function App() {
         setErrorMsg(result.message || 'Login failed');
       }
     } catch (error) {
-      // Fallback for demo
-      if (memberId.toLowerCase() === 'rajeshkinjarapu' && password === '474532') {
-        setUserRole('admin');
-        setUserData({ name: "Rajesh Kinjarapu", memberId: "rajeshkinjarapu", rank: "OWNER" });
-        setIsLoggedIn(true);
-      } else if (memberId.toUpperCase() === 'RK0305' || memberId.toUpperCase() === 'ADMIN') {
-        setUserRole('admin');
-        setUserData({ name: "Admin Demo", memberId: memberId, rank: "OWNER" });
-        setIsLoggedIn(true);
-      } else if (password.length === 6) {
-        setUserRole('member');
-        setUserData({ name: "Member", memberId: memberId, rank: "GOLD RANK" });
-        setIsLoggedIn(true);
-      } else {
-        setErrorMsg('Invalid password. Please enter your 6-digit PIN.');
-      }
+      // Removed demo bypass, using purely API authentication
+      setErrorMsg('Network error or server down. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -543,6 +493,9 @@ function App() {
         { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
         { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
         { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
+        { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: '🎯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
+        { id: 11, title: 'Binary Income', amount: dashboardData?.binaryIncome || 0, icon: '⚖️', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
+        { id: 12, title: 'Level Income', amount: dashboardData?.levelIncome || 0, icon: '📶', bg: '#fefce8', iconBg: '#fef08a', color: '#a16207' },
         { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
         { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: '➡️', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
         { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: '📦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
@@ -830,7 +783,7 @@ function App() {
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
               <h3 className="wallet-card-title">Royalty & Cashback</h3>
-              <h1 className="wallet-card-amount">₹ {(dashboardData?.autopoolFund || 0).toLocaleString()}</h1>
+              <h1 className="wallet-card-amount">₹ {((dashboardData?.royaltyIncome || 0) + (dashboardData?.cashbackIncome || 0)).toLocaleString()}</h1>
               <div className="wallet-card-icon">👑</div>
               <div className="wallet-card-action">
                  <button className="wallet-btn wallet-btn-secondary" onClick={() => setActiveMenu('Non-Working Cashback')}>View Details</button>
@@ -1702,6 +1655,67 @@ function App() {
           }
        } catch(err) { setMessage({ text: 'Error connecting to server', type: 'error' }); }
        setLoading(false);
+    const handleRazorpaySubmit = async () => {
+        if (!amount || Number(amount) < 100) return alert('Minimum deposit is ₹100');
+        
+        setLoading(true);
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onerror = () => {
+            alert('Razorpay SDK failed to load. Are you offline?');
+            setLoading(false);
+        };
+        script.onload = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/payment/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ amount: Number(amount) })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    setLoading(false);
+                    return alert(data.message);
+                }
+
+                const options = {
+                    key: 'rzp_test_dummy_key', // Mock API Key
+                    amount: data.order.amount,
+                    currency: data.order.currency,
+                    name: 'Royal Kuberaa',
+                    description: 'Wallet Deposit',
+                    order_id: data.order.id,
+                    handler: async function (response) {
+                        try {
+                            const verifyRes = await fetch('/api/payment/verify', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    amount: Number(amount)
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            alert(verifyData.message);
+                            if (verifyData.success) {
+                                window.location.reload();
+                            }
+                        } catch (err) { alert('Payment verification failed'); }
+                    },
+                    theme: { color: '#0F172A' },
+                    modal: { ondismiss: () => setLoading(false) }
+                };
+                const rzp = new window.Razorpay(options);
+                rzp.open();
+            } catch (err) { 
+                alert('Could not initiate payment'); 
+                setLoading(false);
+            }
+        };
+        document.body.appendChild(script);
     };
 
     return (
@@ -1747,32 +1761,50 @@ function App() {
                </div>
             </div>
             
-            <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-               <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>📝</span> Submit UTR Reference
-               </h3>
-               <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>After completing the payment on your UPI app or Net Banking, enter the 12-digit UTR/Reference number below. Admin will verify and activate your wallet balance.</p>
-               
-               <form onSubmit={handleSubmit}>
-                  <div style={{ marginBottom: '16px' }}>
-                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Amount Paid (₹)</label>
-                     <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
-                  </div>
-                  <div style={{ marginBottom: '20px' }}>
-                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>UTR / Reference Number</label>
-                     <input type="text" value={utrNumber} onChange={e=>setUtrNumber(e.target.value)} required placeholder="12-digit UPI UTR / Transaction No" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
-                  </div>
-                  
-                  {message.text && (
-                     <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: message.type==='success'?'#D1FAE5':'#FEE2E2', color: message.type==='success'?'#065F46':'#991B1B', fontSize: '14px', fontWeight: 'bold' }}>
-                        {message.text}
-                     </div>
-                  )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                   <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>⚡</span> Instant Payment (Razorpay)
+                   </h3>
+                   <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>Deposit funds instantly using Cards, UPI, or Netbanking. No manual approval required!</p>
+                   
+                   <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Deposit Amount (₹)</label>
+                      <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' }} />
+                   </div>
+                   
+                   <button onClick={handleRazorpaySubmit} disabled={loading} style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '15px' }}>
+                      {loading ? 'Processing...' : 'Pay Instantly'}
+                   </button>
+                </div>
 
-                  <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
-                     {loading ? 'Submitting...' : 'Submit Fund Request'}
-                  </button>
-               </form>
+                <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                   <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>📝</span> Submit UTR Reference (Manual)
+                   </h3>
+                   <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>If you paid manually using the QR code or Bank Account details, enter the UTR below.</p>
+                   
+                   <form onSubmit={handleSubmit}>
+                      <div style={{ marginBottom: '16px' }}>
+                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Amount Paid (₹)</label>
+                         <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                      </div>
+                      <div style={{ marginBottom: '20px' }}>
+                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>UTR / Reference Number</label>
+                         <input type="text" value={utrNumber} onChange={e=>setUtrNumber(e.target.value)} required placeholder="12-digit UPI UTR / Transaction No" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                      </div>
+                      
+                      {message.text && (
+                         <div style={{ marginBottom: '16px', padding: '10px', borderRadius: '8px', background: message.type==='success'?'#D1FAE5':'#FEE2E2', color: message.type==='success'?'#065F46':'#991B1B', fontSize: '14px', fontWeight: 'bold' }}>
+                            {message.text}
+                         </div>
+                      )}
+
+                      <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', background: '#0F172A', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer' }}>
+                         {loading ? 'Submitting...' : 'Submit Manual Request'}
+                      </button>
+                   </form>
+                </div>
             </div>
          </div>
       </CardWrapper>
@@ -2173,107 +2205,248 @@ function App() {
     );
   };
 
-  const renderProducts = () => (
-    <CardWrapper>
-      <PageHeader title="Welcome Product Packages" subtitle="Select your preferred high-value product kit included with your ₹1,000 ID activation" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginTop: '16px' }}>
+  const renderSystemReports = () => {
+    const [reports, setReports] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchReports = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/admin/reports', { headers: { 'Authorization': `Bearer ${token}` }});
+                const result = await res.json();
+                if(result.success) setReports(result.data);
+            } catch(err) { console.error(err); }
+            setLoading(false);
+        };
+        if(activeMenu === 'System Reports') fetchReports();
+    }, [activeMenu]);
+
+    if(loading || !reports) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Reports...</div>;
+
+    return (
+        <CardWrapper>
+            <PageHeader title="System Reports" subtitle="High-level overview of network and finances" />
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+                <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '24px' }}>👥</span>
+                        <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Members</h4>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>{reports.totalUsers}</div>
+                    <div style={{ fontSize: '13px', color: '#10B981', marginTop: '8px', fontWeight: 'bold' }}>{reports.activeUsers} Active IDs</div>
+                </div>
+
+                <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '24px' }}>💰</span>
+                        <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Income Generated</h4>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>₹{reports.totalIncomeGenerated.toLocaleString()}</div>
+                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Binary, Level & Royalty</div>
+                </div>
+
+                <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '24px' }}>🏦</span>
+                        <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Approved Payouts</h4>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0EA5E9' }}>₹{reports.approvedWithdrawals.netPaid.toLocaleString()}</div>
+                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Gross: ₹{reports.approvedWithdrawals.gross.toLocaleString()}</div>
+                </div>
+                
+                <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '24px' }}>⏳</span>
+                        <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Pending Payouts</h4>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#F59E0B' }}>₹{reports.pendingWithdrawals.netPaid.toLocaleString()}</div>
+                    <div style={{ fontSize: '13px', color: '#EF4444', marginTop: '8px', fontWeight: 'bold' }}>{reports.pendingWithdrawals.count} Requests</div>
+                </div>
+            </div>
+
+            <div style={{ background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                <h3 style={{ color: '#0F172A', marginBottom: '16px' }}>Tax & Admin Collections (From Approved Withdrawals)</h3>
+                <div style={{ display: 'flex', gap: '40px' }}>
+                   <div>
+                       <span style={{ color: '#64748B', fontSize: '13px', display: 'block', marginBottom: '4px' }}>Total TDS Collected (5%)</span>
+                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{reports.approvedWithdrawals.tds.toLocaleString()}</span>
+                   </div>
+                   <div>
+                       <span style={{ color: '#64748B', fontSize: '13px', display: 'block', marginBottom: '4px' }}>Admin Charges Collected (5%)</span>
+                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{reports.approvedWithdrawals.adminCharge.toLocaleString()}</span>
+                   </div>
+                </div>
+            </div>
+        </CardWrapper>
+    );
+  };
+
+  const renderProducts = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1000, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
+    
+    useEffect(() => {
+        if (activeMenu === 'Products') {
+           fetchProducts();
+        }
+    }, [activeMenu]);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const endpoint = userRole === 'admin' ? '/api/admin/products' : '/api/products';
+            const res = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${token}` }});
+            const result = await res.json();
+            if(result.success) setProducts(result.data);
+        } catch(err) { console.error(err); }
+        setLoading(false);
+    };
+
+    const handleSaveProduct = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const method = editForm._id ? 'PUT' : 'POST';
+            const url = editForm._id ? `/api/admin/products/${editForm._id}` : '/api/admin/products';
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(editForm)
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                setIsEditing(false);
+                fetchProducts();
+            }
+        } catch(err) { alert('Failed to save product'); }
+    };
+
+    const handleDeleteProduct = async (id) => {
+        if(!window.confirm('Are you sure you want to delete this product?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }});
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) fetchProducts();
+        } catch(err) { alert('Failed to delete product'); }
+    };
+
+    const handleBuyAndActivate = async (product) => {
+        if (userData?.isActive) {
+            alert('Your ID is already activated!');
+            return;
+        }
+        if(!window.confirm(`Are you sure you want to buy ${product.name} and activate your ID for ₹${product.price}? (Requires wallet balance)`)) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ productId: product._id })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                const ud = {...userData, isActive: true};
+                setUserData(ud);
+                window.location.reload();
+            }
+        } catch(err) { alert('Activation failed'); }
+    };
+
+    if (isEditing && userRole === 'admin') {
+        return (
+            <CardWrapper>
+                <PageHeader title={editForm._id ? "Edit Product" : "Add New Product"} />
+                <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '500px', background: '#FFF', padding: '24px', borderRadius: '12px' }}>
+                    <input placeholder="Name" value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                    <textarea placeholder="Description" value={editForm.description} onChange={e=>setEditForm({...editForm, description: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', minHeight: '100px' }} />
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                       <input type="number" placeholder="Price" value={editForm.price} onChange={e=>setEditForm({...editForm, price: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
+                       <input type="number" placeholder="BV" value={editForm.bv} onChange={e=>setEditForm({...editForm, bv: e.target.value})} required style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                       <input placeholder="Emoji/Image URL" value={editForm.image} onChange={e=>setEditForm({...editForm, image: e.target.value})} style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
+                       <input placeholder="Badge (e.g., BEST SELLER)" value={editForm.badge} onChange={e=>setEditForm({...editForm, badge: e.target.value})} style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', flex: 1 }} />
+                    </div>
+                    <input placeholder="Delivery Info" value={editForm.deliveryInfo} onChange={e=>setEditForm({...editForm, deliveryInfo: e.target.value})} style={{ padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px' }} />
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
+                       <button type="submit" style={{ flex: 1, padding: '12px', background: '#0F172A', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Save Product</button>
+                       <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '12px', background: '#E2E8F0', color: '#334155', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                    </div>
+                </form>
+            </CardWrapper>
+        );
+    }
+
+    return (
+      <CardWrapper>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <PageHeader title="Welcome Product Packages" subtitle="Select your preferred high-value product kit" />
+          {userRole === 'admin' && (
+             <button onClick={() => { setEditForm({ name: '', description: '', price: 1000, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
+          )}
+        </div>
         
-        {/* Product 1 */}
-        <div style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#DEF7EC', color: '#03543F', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
-            BEST SELLER
-          </div>
-          <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
-            🌿
-          </div>
-          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Royal Ayurvedic Health Vitality Kit</h3>
-          <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
-            Complete immunity & natural vitality pack with Organic Noni Extract, Tulsi Drops, and Himalayan Shilajit capsules for complete daily rejuvenation.
-          </p>
-          <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
-              <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
-              <strong style={{ color: '#0F172A' }}>100 BV (100% Volume)</strong>
+        {loading ? (
+            <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Products...</div>
+        ) : products.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No products available yet.</div>
+        ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginTop: '16px' }}>
+              {products.map((product, idx) => (
+                <div key={product._id} style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
+                  {product.badge && (
+                     <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#DEF7EC', color: '#03543F', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
+                       {product.badge.toUpperCase()}
+                     </div>
+                  )}
+                  <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
+                    {product.image || '📦'}
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>{product.name}</h3>
+                  <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px', whiteSpace: 'pre-wrap' }}>
+                    {product.description}
+                  </p>
+                  <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
+                      <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
+                      <strong style={{ color: '#0F172A' }}>{product.bv} BV</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                      <span style={{ color: '#64748B' }}>Delivery:</span>
+                      <strong style={{ color: '#10B981' }}>{product.deliveryInfo}</strong>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹{product.price.toLocaleString()}</div>
+                    </div>
+                    {userRole === 'admin' ? (
+                       <div style={{ display: 'flex', gap: '8px' }}>
+                           <button onClick={() => { setEditForm(product); setIsEditing(true); }} style={{ padding: '6px 12px', background: '#0EA5E9', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Edit</button>
+                           <button onClick={() => handleDeleteProduct(product._id)} style={{ padding: '6px 12px', background: '#EF4444', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
+                       </div>
+                    ) : (
+                       !userData?.isActive && (
+                           <button onClick={() => handleBuyAndActivate(product)} style={{ padding: '8px 16px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', border: 'none' }}>Buy & Activate</button>
+                       )
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-              <span style={{ color: '#64748B' }}>Delivery:</span>
-              <strong style={{ color: '#10B981' }}>Free All-India Home Delivery</strong>
-            </div>
-          </div>
-          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <span style={{ fontSize: '12px', color: '#94A3B8', textDecoration: 'line-through' }}>₹1,500</span>
-              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹1,000 <span style={{ fontSize: '12px', color: '#10B981', fontWeight: '600' }}>(Active with ID)</span></div>
-            </div>
-            <span style={{ padding: '8px 14px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>Kit Choice 1</span>
-          </div>
-        </div>
-
-        {/* Product 2 */}
-        <div style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#E0F2FE', color: '#0369A1', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
-            DIGITAL SKILL
-          </div>
-          <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
-            💻
-          </div>
-          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Royal Digital Marketing & Affiliate Academy</h3>
-          <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
-            Full Lifetime Access to practical affiliate marketing courses, social media promotional creatives, WhatsApp automation scripts, and digital business tools.
-          </p>
-          <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
-              <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
-              <strong style={{ color: '#0F172A' }}>100 BV (100% Volume)</strong>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-              <span style={{ color: '#64748B' }}>Access:</span>
-              <strong style={{ color: '#0284C7' }}>Instant Portal & Download Access</strong>
-            </div>
-          </div>
-          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <span style={{ fontSize: '12px', color: '#94A3B8', textDecoration: 'line-through' }}>₹2,499</span>
-              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹1,000 <span style={{ fontSize: '12px', color: '#0284C7', fontWeight: '600' }}>(Active with ID)</span></div>
-            </div>
-            <span style={{ padding: '8px 14px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>Kit Choice 2</span>
-          </div>
-        </div>
-
-        {/* Product 3 */}
-        <div style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#FEE2E2', color: '#991B1B', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
-            ORGANIC CARE
-          </div>
-          <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #F43F5E 0%, #E11D48 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
-            🧴
-          </div>
-          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Royal Organic Luxury Personal Care Kit</h3>
-          <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px' }}>
-            Handcrafted ayurvedic bath soap combo, natural almond-enriched hair spa therapy oil, and glowing herbal face scrub formulated with certified natural ingredients.
-          </p>
-          <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
-              <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
-              <strong style={{ color: '#0F172A' }}>100 BV (100% Volume)</strong>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-              <span style={{ color: '#64748B' }}>Delivery:</span>
-              <strong style={{ color: '#10B981' }}>Free All-India Home Delivery</strong>
-            </div>
-          </div>
-          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <span style={{ fontSize: '12px', color: '#94A3B8', textDecoration: 'line-through' }}>₹1,600</span>
-              <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹1,000 <span style={{ fontSize: '12px', color: '#E11D48', fontWeight: '600' }}>(Active with ID)</span></div>
-            </div>
-            <span style={{ padding: '8px 14px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>Kit Choice 3</span>
-          </div>
-        </div>
-
-      </div>
-    </CardWrapper>
-  );
+        )}
+      </CardWrapper>
+    );
+  };
 
   const renderAboutUs = () => (
     <CardWrapper>
@@ -3158,6 +3331,7 @@ function App() {
        case 'KYC Approvals': renderFn = renderKYCApprovals; break;
        case 'Support Tickets': renderFn = renderSupportTickets; break;
        case 'System Settings': renderFn = renderSystemSettings; break;
+       case 'System Reports': renderFn = renderSystemReports; break;
        case 'Royalty Pools': renderFn = renderRoyaltyAndCashback; break;
        case 'Rebirth ID': renderFn = renderRebirths; break;
        case 'Offers': 
