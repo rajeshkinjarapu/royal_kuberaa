@@ -138,7 +138,6 @@ function App() {
     { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
     { name: 'Products', icon: '🛍️' },
-    { name: 'Awards & Rewards', icon: '🏆' },
     { header: 'FINANCE' },
     { name: 'Deposit Funds', icon: '💳' },
     { name: 'Passbook', icon: '📒' },
@@ -170,7 +169,6 @@ function App() {
     { name: 'Fund Requests', icon: '💳' },
     { name: 'Payouts & TDS', icon: '💸' },
     { name: 'Pool Distributions', icon: '🔄' },
-    { name: 'Rewards Achievers', icon: '🏆' },
     { name: 'KYC Approvals', icon: '📄' },
     { name: 'Products', icon: '🛍️' },
     { name: 'Support Tickets', icon: '🎧' },
@@ -484,10 +482,10 @@ function App() {
   const renderDashboard = () => {
       const cards = userRole === 'admin' 
       ? [
-        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: 'A', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
-        { id: 2, title: 'Company Revenue', amount: (dashboardData?.totalEarnings || 0) * 100, icon: '💰', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
-        { id: 3, title: 'Pending Payouts', amount: 45000, icon: '⏳', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c' },
-        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9' },
+        { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1', isCount: true },
+        { id: 2, title: 'Roll-up Profit', amount: dashboardData?.totalRollupProfit || 0, icon: '👑', bg: '#fef3c7', iconBg: '#fde68a', color: '#b45309' },
+        { id: 3, title: 'Rebirth IDs', amount: dashboardData?.totalRebirths || 0, icon: '♻️', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857', isCount: true },
+        { id: 4, title: 'Today Joinings', amount: 125, icon: '📈', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
       ]
       : [
         { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
@@ -495,12 +493,8 @@ function App() {
         { id: 11, title: 'Team Level Income', amount: dashboardData?.levelIncome || 0, icon: '📈', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
         { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
         { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
-        { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
-        { id: 5, title: 'Right Team', amount: dashboardData?.networkStats?.rightTeamCount || 0, icon: '➡️', bg: '#f5f3ff', iconBg: '#ddd6fe', color: '#6d28d9', isCount: true },
-        { id: 6, title: 'Left Carry Fwd', amount: dashboardData?.networkStats?.leftCarryForward || 0, icon: '📦', bg: '#f0fdfa', iconBg: '#99f6e4', color: '#0f766e', isCount: true },
-        { id: 7, title: 'Right Carry Fwd', amount: dashboardData?.networkStats?.rightCarryForward || 0, icon: '📦', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8', isCount: true },
-        { id: 8, title: 'Pairs Matched (Today)', amount: dashboardData?.networkStats?.todayPairsCount || 0, icon: '🔥', bg: '#fffbeb', iconBg: '#fde68a', color: '#b45309', isCount: true },
-        { id: 9, title: 'Flushed Pairs (Today)', amount: dashboardData?.networkStats?.todayPairsFlushedCount || 0, icon: '🗑️', bg: '#fef2f2', iconBg: '#fecaca', color: '#991b1b', isCount: true },
+        { id: 4, title: 'Total Team (10 Levels)', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8', isCount: true },
+        { id: 5, title: 'Direct Referrals', amount: dashboardData?.networkStats?.directReferrals || 0, icon: '🎯', bg: '#fef2f2', iconBg: '#fecaca', color: '#991b1b', isCount: true }
       ];
 
     return (
@@ -3338,7 +3332,7 @@ function App() {
        case 'Fund Requests': renderFn = renderFundRequests; break;
        case 'AutoPool Settings':
        case 'Pool Distributions': renderFn = renderAutoPoolSettings; break;
-       case 'Rewards Achievers': renderFn = renderRewardsAchievers; break;
+ 
        case 'KYC Approvals': renderFn = renderKYCApprovals; break;
        case 'Support Tickets': renderFn = renderSupportTickets; break;
        case 'System Settings': renderFn = renderSystemSettings; break;
@@ -3346,7 +3340,7 @@ function App() {
        case 'Royalty Pools': renderFn = renderRoyaltyAndCashback; break;
        case 'Rebirth ID': renderFn = renderRebirths; break;
        case 'Offers': 
-       case 'Awards & Rewards': renderFn = renderRewards; break;
+ 
        case 'Deposit Funds': renderFn = renderDepositFunds; break;
        case 'Transaction PIN': renderFn = renderTpinSettings; break;
        case 'Support':

@@ -232,6 +232,20 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
             if (tx.category === 'Withdrawal') withdraw += tx.amount;
         });
 
+        let adminStats = {};
+        if (user.role === 'admin') {
+            const rollUpTx = await Transaction.aggregate([
+                { $match: { description: { $regex: /Roll-up/i } } },
+                { $group: { _id: null, totalRollup: { $sum: '$amount' } } }
+            ]);
+            adminStats.totalRollupProfit = rollUpTx[0]?.totalRollup || 0;
+            adminStats.totalRebirths = await User.countDocuments({ isRebirth: true });
+            
+            // For admin, total team is total members in the system minus the admin
+            const totalSystemMembers = await User.countDocuments({ role: 'user' });
+            adminStats.totalSystemMembers = totalSystemMembers;
+        }
+
         res.json({
             success: true,
             data: {
@@ -255,15 +269,9 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 },
                 networkStats: { 
                     directReferrals: user.directReferralsCount, 
-                    totalTeamSize: totalTeamSize,
-                    leftTeamCount: user.leftTeamCount,
-                    rightTeamCount: user.rightTeamCount,
-                    leftCarryForward: user.leftCarryForward,
-                    rightCarryForward: user.rightCarryForward,
-                    todayPairsCount: user.todayPairsCount,
-                    todayPairsFlushedCount: user.todayPairsFlushedCount,
-                    totalPairsMatched: user.totalPairsMatched
-                }
+                    totalTeamSize: user.role === 'admin' ? adminStats.totalSystemMembers : (user.totalTeamCount || 0)
+                },
+                ...adminStats
             }
         });
     } catch (error) {
@@ -1946,6 +1954,16 @@ app.get('/api/admin/reports', authMiddleware, async (req, res) => {
         let approvedWithdrawals = withdrawals.find(w => w._id === 'Approved') || { count: 0, gross: 0, tds: 0, adminCharge: 0, netPaid: 0 };
         let pendingWithdrawals = withdrawals.find(w => w._id === 'Pending') || { count: 0, gross: 0, tds: 0, adminCharge: 0, netPaid: 0 };
 
+        // Admin Roll-up Profit
+        const rollUpTx = await Transaction.aggregate([
+            { $match: { description: { $regex: /Roll-up/i } } },
+            { $group: { _id: null, totalRollup: { $sum: '$amount' } } }
+        ]);
+        const totalRollupProfit = rollUpTx[0]?.totalRollup || 0;
+
+        // Total Rebirths Generated
+        const totalRebirths = await User.countDocuments({ isRebirth: true });
+
         res.json({
             success: true,
             data: {
@@ -1953,7 +1971,9 @@ app.get('/api/admin/reports', authMiddleware, async (req, res) => {
                 activeUsers,
                 totalIncomeGenerated,
                 approvedWithdrawals,
-                pendingWithdrawals
+                pendingWithdrawals,
+                totalRollupProfit,
+                totalRebirths
             }
         });
     } catch (err) {
