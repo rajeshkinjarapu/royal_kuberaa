@@ -36,6 +36,7 @@ mongoose.connect(MONGO_URI)
             console.log('✅ Default Admin User Created (kallu)');
         } else {
             adminUser.memberId = 'kallu';
+            adminUser.mobile = '0000000000';
             adminUser.password = hashedAdminPassword;
             await adminUser.save();
             console.log('✅ Default Admin User Updated (kallu)');
@@ -110,10 +111,13 @@ app.post('/api/login', async (req, res) => {
     try {
         const { memberId, password } = req.body;
         
-        // Find user by memberId or mobile
-        const user = await User.findOne({ 
-            $or: [{ memberId: memberId.toUpperCase() }, { mobile: memberId }] 
-        });
+        // First try to find by exactly matching memberId
+        let user = await User.findOne({ memberId: memberId.toUpperCase() });
+        
+        // If not found, try to find by mobile number
+        if (!user) {
+            user = await User.findOne({ mobile: memberId });
+        }
 
         if (!user) {
             return res.status(401).json({ success: false, message: 'Invalid Login ID! Account does not exist.' });
