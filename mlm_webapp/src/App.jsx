@@ -113,7 +113,7 @@ function App() {
   useEffect(() => {
     const fetchDashboard = async () => {
       const token = localStorage.getItem('token');
-      if (isLoggedIn && token && activeMenu === 'Dashboard') {
+      if (isLoggedIn && token && (activeMenu === 'Dashboard' || activeMenu === 'Admin Dashboard')) {
         try {
           const res = await fetch('/api/dashboard', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -163,7 +163,7 @@ function App() {
 
   const adminMenu = [
     { header: 'ADMIN PANEL' },
-    { name: 'Dashboard', icon: '👑' },
+    { name: 'Admin Dashboard', icon: '👑' },
     { name: 'Member Management', icon: '👥' },
     { name: 'Fund Management', icon: '💰' },
     { name: 'Fund Requests', icon: '💳' },
@@ -443,7 +443,7 @@ function App() {
     );
   }
 
-  const activeMenuItems = userRole === 'admin' ? adminMenu : menuItems;
+  const activeMenuItems = userRole === 'admin' ? [...adminMenu, ...menuItems] : menuItems;
 
   const PageHeader = ({ title, subtitle }) => {
     if (!subtitle) return null;
@@ -480,7 +480,7 @@ function App() {
   // --- VIEWS ---
 
   const renderDashboard = () => {
-      const cards = userRole === 'admin' 
+      const cards = (userRole === 'admin' && activeMenu === 'Admin Dashboard')
       ? [
         { id: 1, title: 'Total Members', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1', isCount: true },
         { id: 2, title: 'Roll-up Profit', amount: dashboardData?.totalRollupProfit || 0, icon: '👑', bg: '#fef3c7', iconBg: '#fde68a', color: '#b45309' },
@@ -3311,7 +3311,8 @@ function App() {
   const renderContent = () => {
     let renderFn;
     switch(activeMenu) {
-       case 'Dashboard': renderFn = renderDashboard; break;
+       case 'Dashboard': 
+      case 'Admin Dashboard': renderFn = renderDashboard; break;
        case 'Profile':
        case 'Bank Settings':
        case 'KYC': renderFn = renderProfile; break;
