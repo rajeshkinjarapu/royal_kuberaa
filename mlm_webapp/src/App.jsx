@@ -173,6 +173,7 @@ function App() {
     { name: 'Pool Distributions', icon: '🔄' },
     { name: 'Rewards Achievers', icon: '🏆' },
     { name: 'KYC Approvals', icon: '📄' },
+    { name: 'Products', icon: '🛍️' },
     { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
     { name: 'System Reports', icon: '📊' },
