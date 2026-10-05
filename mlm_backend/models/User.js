@@ -51,21 +51,8 @@ const UserSchema = new mongoose.Schema({
     directReferralsCount: { type: Number, default: 0 },
     directs: [{ type: String }], // Array of memberIds sponsored directly
 
-    // Binary Tree System
-    placement: { type: String, enum: ['Left', 'Right'] }, // The leg they were placed on
-    uplineId: { type: String }, // The immediate node above them in the binary tree
-    leftUpline: { type: String }, // Who is on their left
-    rightUpline: { type: String }, // Who is on their right
-    
-    // Pair Matching Trackers
-    leftTeamCount: { type: Number, default: 0 },
-    rightTeamCount: { type: Number, default: 0 },
-    leftCarryForward: { type: Number, default: 0 },
-    rightCarryForward: { type: Number, default: 0 },
-    totalPairsMatched: { type: Number, default: 0 },
-    todayPairsCount: { type: Number, default: 0 },
-    todayPairsFlushedCount: { type: Number, default: 0 }, // Tracks flushed out pairs per day
-    hasCompletedFirstPair: { type: Boolean, default: false },
+    // Unilevel Network
+    totalTeamCount: { type: Number, default: 0 },
 
     // Ranks Eligibility
     isGold: { type: Boolean, default: false },
@@ -99,7 +86,7 @@ const UserSchema = new mongoose.Schema({
     
     // Awards & Rewards Tracking
     claimedRewards: [{
-        pairs: Number,
+        targetTeam: Number,
         rewardName: String,
         amount: Number,
         status: { type: String, default: 'Pending Dispatch' }, // 'Pending Dispatch', 'Dispatched', 'Delivered'

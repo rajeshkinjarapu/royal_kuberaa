@@ -5,8 +5,9 @@ const Transaction = require('./models/Transaction');
 
 // Core config
 const DIRECT_INCOME = 400;
-const BINARY_INCOME = 300;
-const MAX_DAILY_PAIRS = 5;
+const LEVEL_INCOMES = {
+    1: 100, 2: 50, 3: 40, 4: 30, 5: 20, 6: 15, 7: 15, 8: 10, 9: 10, 10: 10
+};
 
 const NORMAL_POOLS = { GOLD: 120, PLATINUM: 60, RUBY: 60, DIAMOND: 60 };
 const REBIRTH_POOLS = { GOLD: 440, PLATINUM: 220, RUBY: 220, DIAMOND: 220 };
@@ -104,102 +105,51 @@ async function checkAndTriggerRebirth(user) {
     }
 }
 
+
+
 // Main Activation Logic
 async function activateUser(user, sponsor, placement) {
-    // 1. Binary Placement (Extreme Left or Right Spillover)
-    if (sponsor) {
-        let currentUpline = sponsor;
-        while (true) {
-            let nextUplineId = placement === 'Left' ? currentUpline.leftUpline : currentUpline.rightUpline;
-            if (!nextUplineId) {
-                user.uplineId = currentUpline.memberId;
-                user.placement = placement;
-                
-                if (placement === 'Left') {
-                    currentUpline.leftUpline = user.memberId;
-                } else {
-                    currentUpline.rightUpline = user.memberId;
-                }
-                
-                await currentUpline.save();
-                await user.save();
-                break;
-            }
-            currentUpline = await User.findOne({ memberId: nextUplineId });
-        }
-    }
-
-    // 2. Direct Income (400)
+    // 1. Direct Income (400)
     if (sponsor) {
         await addIncome(sponsor, DIRECT_INCOME, 'DIRECT', `Direct Referral Bonus from ${user.memberId}`);
         sponsor.directReferralsCount += 1;
         sponsor.directs.push(user.memberId);
         await updateRankStatus(sponsor);
+        await sponsor.save();
     }
 
-    // 3. Binary Matching Income (Traverse up Binary Tree)
+    // 2. Team Level Income (10 Levels Traverse up Sponsor Tree)
     let currentNode = user;
-    let childMemberId = user.memberId;
-    while (currentNode && currentNode.uplineId) {
-        let upline = await User.findOne({ memberId: currentNode.uplineId });
+    let currentLevel = 1;
+    let totalLevelDistributed = 0;
+    
+    while (currentNode && currentNode.sponsorId && currentLevel <= 10) {
+        let upline = await User.findOne({ memberId: currentNode.sponsorId });
         if (!upline) break;
 
-        // Accurately determine if child arrived via left or right subtree
-        const isLeft = (upline.leftUpline === childMemberId);
-        if (isLeft) {
-            upline.leftTeamCount += 1;
-            upline.leftCarryForward += 1;
-        } else {
-            upline.rightTeamCount += 1;
-            upline.rightCarryForward += 1;
-        }
+        // Add Team Count
+        upline.totalTeamCount += 1;
 
-        // Qualification Check: User must have at least 1 Active Direct on Left and 1 Active Direct on Right to earn binary income
-        const activeDirects = await User.find({ sponsorId: upline.memberId, isActive: true });
-        const hasLeftDirect = activeDirects.some(d => d.placement === 'Left');
-        const hasRightDirect = activeDirects.some(d => d.placement === 'Right');
-        const isBinaryQualified = hasLeftDirect && hasRightDirect;
-
-        let matched = false;
-        if (isBinaryQualified) {
-            // First Pair Condition: 1:2 or 2:1
-            if (!upline.hasCompletedFirstPair) {
-                if (upline.leftCarryForward >= 2 && upline.rightCarryForward >= 1) {
-                    upline.leftCarryForward -= 2;
-                    upline.rightCarryForward -= 1;
-                    matched = true;
-                } else if (upline.leftCarryForward >= 1 && upline.rightCarryForward >= 2) {
-                    upline.leftCarryForward -= 1;
-                    upline.rightCarryForward -= 2;
-                    matched = true;
-                }
-                if (matched) upline.hasCompletedFirstPair = true;
-            } else {
-                // Subsequent Pairs: 1:1
-                if (upline.leftCarryForward >= 1 && upline.rightCarryForward >= 1) {
-                    upline.leftCarryForward -= 1;
-                    upline.rightCarryForward -= 1;
-                    matched = true;
-                }
-            }
-
-            if (matched) {
-                upline.totalPairsMatched += 1;
-                
-                if (upline.todayPairsCount < MAX_DAILY_PAIRS) {
-                    upline.todayPairsCount += 1;
-                    await addIncome(upline, BINARY_INCOME, 'BINARY', `Binary Matching Bonus (Pair #${upline.totalPairsMatched})`);
-                } else {
-                    // FLUSH OUT logic: Capping reached (5 pairs/day). Extra matched business is permanently flushed out.
-                    upline.todayPairsFlushedCount += 1;
-                    console.log(`Flush out recorded for user: ${upline.memberId}, today extra pair: ${upline.todayPairsFlushedCount}`);
-                }
-            }
+        // Add Level Income
+        const levelAmount = LEVEL_INCOMES[currentLevel];
+        if (levelAmount && upline.isActive) {
+            await addIncome(upline, levelAmount, 'LEVEL', `Level ${currentLevel} Team Income from ${user.memberId}`);
+            totalLevelDistributed += levelAmount;
         }
 
         await upline.save();
-        childMemberId = upline.memberId;
         currentNode = upline;
+        currentLevel++;
+    }
+
+    // 2.5 Admin Roll-up for undistributed level income
+    const TOTAL_LEVEL_INCOME = 300;
+    if (totalLevelDistributed < TOTAL_LEVEL_INCOME) {
+        const admin = await User.findOne({ role: 'admin' });
+        if (admin) {
+            const leftover = TOTAL_LEVEL_INCOME - totalLevelDistributed;
+            await addIncome(admin, leftover, 'LEVEL', `Level Income Roll-up from ${user.memberId}`);
+        }
     }
 
     // 4. Daily Royalty Pools Fund Contribution (₹300)
@@ -333,7 +283,6 @@ async function processDailyPools() {
         // until ₹1500 joining fee is recovered. If a user makes even 1 direct referral, they stop receiving cashback permanently!
         const eligibleCashbackUsers = await User.find({ 
             directReferralsCount: 0,
-            totalPairsMatched: 0,
             cashbackEarnings: { $lt: 1500 },
             isActive: true, 
             isRebirth: false 
@@ -366,9 +315,6 @@ async function processDailyPools() {
             await nwPool.save();
         }
     }
-
-    // 3. Reset Binary Daily Capping & Flushed Counts
-    await User.updateMany({}, { todayPairsCount: 0, todayPairsFlushedCount: 0 });
 }
 
 module.exports = { activateUser, addIncome, processDailyPools };

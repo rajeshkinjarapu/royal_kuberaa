@@ -147,7 +147,7 @@ function App() {
     { header: 'ACCOUNT' },
     { name: 'My Network', icon: '👥' },
     { name: 'Add Member', icon: '➕' },
-    { name: 'Binary Genealogy', icon: '🕸️' },
+    { name: 'Team Network', icon: '🕸️' },
     { name: 'Profile', icon: '👤' },
     { name: 'KYC', icon: '🛡️' },
     { name: 'Bank Settings', icon: '🏦' },
@@ -492,7 +492,7 @@ function App() {
       : [
         { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
         { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: '🎯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
-        { id: 11, title: 'Binary Income', amount: dashboardData?.binaryIncome || 0, icon: '⚖️', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
+        { id: 11, title: 'Team Level Income', amount: dashboardData?.levelIncome || 0, icon: '📈', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
         { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
         { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
         { id: 4, title: 'Left Team', amount: dashboardData?.networkStats?.leftTeamCount || 0, icon: '⬅️', bg: '#fff1f2', iconBg: '#fecdd3', color: '#be123c', isCount: true },
@@ -2236,7 +2236,7 @@ function App() {
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Income Generated</h4>
                     </div>
                     <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>₹{reports.totalIncomeGenerated.toLocaleString()}</div>
-                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Binary & Royalty</div>
+                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Level & Royalty</div>
                 </div>
 
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
@@ -2460,8 +2460,8 @@ function App() {
         <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>⭐ Why Royal Kuberaa Stands Apart</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>👑 100% Binary Fairness</strong>
-            <span style={{ fontSize: '13px', color: '#64748B' }}>1:1 pair matching with a solid 5 pairs daily cap to guarantee long-term company stability.</span>
+            <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>👑 100% Unilevel Fairness</strong>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>10-Level deep Team Income without any complicated matching legs or flush outs.</span>
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
             <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🔄 Daily Midnight Pools</strong>
@@ -3322,7 +3322,7 @@ function App() {
        case 'Bank Settings':
        case 'KYC': renderFn = renderProfile; break;
        case 'My Network': renderFn = renderNetwork; break;
-       case 'Binary Genealogy': renderFn = renderBinaryTree; break;
+       case 'Team Network': renderFn = renderBinaryTree; break;
        case 'Wallets': 
        case 'Passbook': renderFn = renderWallets; break;
        case 'Bank Withdrawal': renderFn = renderBankWithdrawal; break;

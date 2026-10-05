@@ -20,19 +20,25 @@ mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log('✅ Connected to MongoDB Database');
         
-        // Initialize Default Admin if not exists
-        const adminExists = await User.findOne({ role: 'admin' });
-        if (!adminExists) {
-            const hashedAdminPassword = await bcrypt.hash('kallu0305', 10);
+        // Initialize or Update Default Admin
+        let adminUser = await User.findOne({ role: 'admin' });
+        const hashedAdminPassword = await bcrypt.hash('474532', 10);
+
+        if (!adminUser) {
             await User.create({
-                memberId: 'RK0305',
+                memberId: 'RAJESHKINJARAPU',
                 password: hashedAdminPassword,
                 name: 'Rajesh Kinjarapu',
                 mobile: '9999999999',
                 role: 'admin',
                 rank: 'OWNER'
             });
-            console.log('✅ Default Admin User Created (RK0305)');
+            console.log('✅ Default Admin User Created (RAJESHKINJARAPU)');
+        } else {
+            adminUser.memberId = 'RAJESHKINJARAPU';
+            adminUser.password = hashedAdminPassword;
+            await adminUser.save();
+            console.log('✅ Default Admin User Updated (RAJESHKINJARAPU)');
         }
     })
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
@@ -216,11 +222,11 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         // Let's rely on User model fields and a quick aggregation where possible.
         // Actually, we can just look up all transactions for the member.
         const txs = await Transaction.find({ memberId: user.memberId });
-        let direct = 0, binary = 0, royalty = 0, cashback = 0, withdraw = 0;
+        let direct = 0, level = 0, royalty = 0, cashback = 0, withdraw = 0;
         
         txs.forEach(tx => {
             if (tx.category === 'DIRECT') direct += tx.amount;
-            if (tx.category === 'BINARY') binary += tx.amount;
+            if (tx.category === 'LEVEL') level += tx.amount;
             if (tx.category === 'ROYALTY') royalty += tx.amount;
             if (tx.category === 'CASHBACK') cashback += tx.amount;
             if (tx.category === 'Withdrawal') withdraw += tx.amount;
@@ -233,7 +239,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 mainWallet: user.mainWallet,
                 rebirthWallet: user.rebirthWallet,
                 directIncome: direct,
-                binaryIncome: binary,
+                levelIncome: level,
                 royaltyIncome: royalty,
                 cashbackIncome: cashback,
                 withdrawFund: withdraw, 

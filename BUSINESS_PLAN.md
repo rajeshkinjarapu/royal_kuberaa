@@ -4,7 +4,7 @@
 
 ## Fund Distribution (₹1500 Breakdown):
 1. **Direct Referral Income:** ₹400
-2. **Binary (Matching) Income:** ₹300
+2. **Team Level Income (10 Levels):** ₹300
 3. **Daily Royalty Pools:** ₹300
 4. **Global Non-Working Cashback:** ₹100
 5. **Product Cost (Kit + Courier/Delivery):** ₹250
@@ -16,13 +16,20 @@
 - Get ₹400 instantly for every direct referral.
 - Unlimited direct referrals are allowed.
 
-## 2. Binary (Matching) Income (₹300)
-- Every user has a Left and Right Team.
-- **First Pair Condition:** The very first pair requires a **1:2 or 2:1 Ratio** (1 Left & 2 Right OR 2 Left & 1 Right).
-- **Subsequent Pairs:** After the first pair, all matches are on a **1:1 Ratio**.
-- You get **₹300 per Pair**.
-- **Daily Capping & Flush Out:** రోజుకు గరిష్టంగా 5 పెయిర్స్ (₹1500) మాత్రమే పేఅవుట్ అవుతాయి. 5 పెయిర్స్ దాటిన తర్వాత, ఆ రోజు జరిగే ఎక్స్‌ట్రా మ్యాచింగ్ బిజినెస్ (Extra Pairs) పూర్తిగా ఫ్లష్ అవుట్ (Permanently Flushed) అవుతుంది. అవి నెక్స్ట్ డే కి క్యారీ ఫార్వర్డ్ అవ్వవు.
-- **Power Leg Carry Forward:** కేవలం మ్యాచింగ్ కాని (Unmatched) IDs మాత్రమే నెక్స్ట్ డే కి క్యారీ ఫార్వర్డ్ అవుతాయి.
+## 2. Team Level Income (₹300)
+Instead of binary matching, you earn income up to 10 levels deep from your entire team. No matching required! The ₹300 is distributed as follows, with the highest benefits in the first 5 levels:
+- **Level 1:** ₹100
+- **Level 2:** ₹50
+- **Level 3:** ₹40
+- **Level 4:** ₹30
+- **Level 5:** ₹20
+- **Level 6:** ₹15
+- **Level 7:** ₹15
+- **Level 8:** ₹10
+- **Level 9:** ₹10
+- **Level 10:** ₹10
+
+*(Note: For your direct referrals, you will receive both Direct Referral Income (₹400) + Level 1 Income (₹100) = ₹500 total!)*
 
 ## 3. Daily Royalty Pools (₹300 Fund)
 Instead of a slow matrix, we use **Daily Profit Sharing**. The ₹300 from every joining is split into 4 Global Pools:
@@ -55,16 +62,7 @@ This is a zero-risk guarantee for all members! ₹100 from every joining is adde
   - **₹1100** goes into the Daily Royalty Pools (Gold-₹440, Platinum-₹220, Ruby-₹220, Diamond-₹220).
   - *(Note: Rebirth IDs DO NOT generate Binary Matching, and there is no direct company profit from the rebirth allocation itself).*
 
-## 6. Awards & Rewards (Based on Matching Pairs)
-To encourage leaders to build large binary networks, the company offers lifetime rewards based on cumulative matching pairs. These rewards are funded through Binary Flush Outs and Admin Charges.
-- **50 Pairs:** Smartphone or ₹5,000 Cash
-- **150 Pairs:** Smart TV / Laptop or ₹15,000 Cash
-- **500 Pairs:** Bike Fund or ₹50,000 Cash
-- **1,500 Pairs:** Royal Enfield / Gold or ₹1,50,000 Cash
-- **5,000 Pairs:** Car Fund or ₹5,00,000 Cash
-- **15,000 Pairs:** Luxury Car Fund or ₹15,00,000 Cash
-- **50,000 Pairs:** Dream Villa or ₹50,00,000 Cash
-*(Note: Rewards have NO time limit. They are cumulative and lifetime achievements).*
+
 
 ## 7. Rules & Conditions
 - **Minimum Withdrawal:** ₹500
