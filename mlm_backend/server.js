@@ -302,18 +302,6 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
     }
 });
 
-// Admin Users List Route
-app.get('/api/admin/users', async (req, res) => {
-    try {
-        const users = await User.find({}).select('-password');
-        res.json({ 
-            success: true, 
-            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-});
 
 // P2P Transfer Route (Protected)
 app.post('/api/p2p-transfer', authMiddleware, async (req, res) => {
@@ -474,10 +462,34 @@ app.get('/api/admin/users', authMiddleware, async (req, res) => {
         const users = await User.find({}).select('-password').sort({ createdAt: -1 });
         res.json({ 
             success: true, 
-            data: users.map(u => ({ id: u.memberId, name: u.name, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
+            data: users.map(u => ({ _id: u._id, id: u.memberId, name: u.name, mobile: u.mobile, wallet: u.mainWallet, status: u.isActive ? "Active" : "Blocked" })) 
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+// Admin Edit User Details Route
+app.put('/api/admin/users/:memberId', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        
+        const { memberId } = req.params;
+        const { name, mobile, password } = req.body;
+        
+        const userToUpdate = await User.findOne({ memberId });
+        if (!userToUpdate) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        if (name) userToUpdate.name = name;
+        if (mobile) userToUpdate.mobile = mobile;
+        if (password && password.trim() !== '') {
+            userToUpdate.password = await bcrypt.hash(password, 10);
+        }
+        
+        await userToUpdate.save();
+        res.json({ success: true, message: 'User details updated successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error updating user" });
     }
 });
 

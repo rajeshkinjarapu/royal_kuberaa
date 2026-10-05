@@ -1054,18 +1054,22 @@ function App() {
 
   const renderManageUsers = () => {
     const [usersList, setUsersList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [editingUser, setEditingUser] = useState(null);
+    const [editForm, setEditForm] = useState({ name: '', mobile: '', password: '' });
     
     useEffect(() => {
-       const fetchUsers = async () => {
-          try {
-             const token = localStorage.getItem('token');
-             const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` }});
-             const result = await res.json();
-             if(result.success) setUsersList(result.data);
-          } catch(err) { console.error(err); }
-       };
        fetchUsers();
     }, []);
+
+    const fetchUsers = async () => {
+       try {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` }});
+          const result = await res.json();
+          if(result.success) setUsersList(result.data);
+       } catch(err) { console.error(err); }
+    };
 
     const handleToggleBlock = async (memberId) => {
        try {
@@ -1083,23 +1087,59 @@ function App() {
        } catch(err) { console.error(err); }
     };
 
+    const handleEditSave = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/admin/users/${editingUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(editForm)
+            });
+            const result = await res.json();
+            if(result.success) {
+                alert('User details updated successfully');
+                setEditingUser(null);
+                fetchUsers();
+            } else {
+                alert(result.message);
+            }
+        } catch(err) { console.error(err); }
+    };
+
+    const filteredUsers = usersList.filter(u => 
+        u.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (u.mobile && u.mobile.includes(searchTerm))
+    );
+
     return (
       <CardWrapper>
-        <PageHeader title="Manage Users" subtitle="View and edit network members" />
-        <Table headers={['ID', 'Name / Email', 'Wallet', 'Status', 'Action']}>
-          {usersList.length === 0 && <tr><td colSpan="5" style={{ padding: '16px', textAlign: 'center' }}>No users found.</td></tr>}
-          {usersList.map(user => (
+        <PageHeader title="Member Management" subtitle="Search, view and edit network members" />
+        
+        <div style={{ marginBottom: '20px' }}>
+            <input 
+                type="text" 
+                placeholder="Search by ID, Name or Mobile Number..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '14px' }}
+            />
+        </div>
+
+        <Table headers={['ID', 'Name', 'Mobile', 'Wallet', 'Status', 'Action']}>
+          {filteredUsers.length === 0 && <tr><td colSpan="6" style={{ padding: '16px', textAlign: 'center' }}>No users found.</td></tr>}
+          {filteredUsers.map(user => (
             <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
               <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.id}</td>
-              <td style={{ padding: '15px' }}>
-                <div style={{ fontWeight: 'bold' }}>{user.name}</div>
-                <div style={{ fontSize: '12px', color: '#64748B' }}>User</div>
-              </td>
+              <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
+              <td style={{ padding: '15px' }}>{user.mobile || 'N/A'}</td>
               <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{user.wallet.toLocaleString()}</td>
               <td style={{ padding: '15px' }}>
                 <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>{user.status}</span>
               </td>
               <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
+                 <button onClick={() => { setEditingUser(user); setEditForm({ name: user.name, mobile: user.mobile || '', password: '' }); }} style={{ padding: '6px 12px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Edit</button>
                  <button onClick={() => handleToggleBlock(user.id)} style={{ padding: '6px 12px', background: user.status === 'Active' ? '#EF4444' : '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
                     {user.status === 'Active' ? 'Block' : 'Unblock'}
                  </button>
@@ -1107,6 +1147,32 @@ function App() {
             </tr>
           ))}
         </Table>
+
+        {editingUser && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px' }}>
+                    <h3 style={{ marginBottom: '16px', color: '#0F172A' }}>Edit User: {editingUser.id}</h3>
+                    <form onSubmit={handleEditSave}>
+                        <div style={{ marginBottom: '16px' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 'bold' }}>Name</label>
+                            <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1' }} required />
+                        </div>
+                        <div style={{ marginBottom: '16px' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 'bold' }}>Mobile Number</label>
+                            <input type="text" value={editForm.mobile} onChange={e => setEditForm({...editForm, mobile: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1' }} required />
+                        </div>
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 'bold' }}>New Password (Leave blank to keep current)</label>
+                            <input type="text" placeholder="Enter new password" value={editForm.password} onChange={e => setEditForm({...editForm, password: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button type="submit" style={{ flex: 1, padding: '12px', background: '#0F172A', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Save Changes</button>
+                            <button type="button" onClick={() => setEditingUser(null)} style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        )}
       </CardWrapper>
     );
   };
