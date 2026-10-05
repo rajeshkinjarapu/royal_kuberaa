@@ -22,45 +22,46 @@ mongoose.connect(MONGO_URI)
         
         // Initialize or Update Default Admin
         let adminUser = await User.findOne({ role: 'admin' });
-        const hashedAdminPassword = await bcrypt.hash('admin', 10);
+        const hashedAdminPassword = await bcrypt.hash('030507', 10);
 
         if (!adminUser) {
             await User.create({
-                memberId: 'ADMIN',
+                memberId: 'kallu',
                 password: hashedAdminPassword,
                 name: 'System Admin',
                 mobile: '0000000000',
                 role: 'admin',
                 rank: 'OWNER'
             });
-            console.log('✅ Default Admin User Created (ADMIN)');
+            console.log('✅ Default Admin User Created (kallu)');
         } else {
-            adminUser.memberId = 'ADMIN';
+            adminUser.memberId = 'kallu';
             adminUser.password = hashedAdminPassword;
             await adminUser.save();
-            console.log('✅ Default Admin User Updated (ADMIN)');
+            console.log('✅ Default Admin User Updated (kallu)');
         }
 
         // Initialize Company Top ID (Member)
-        let topIdUser = await User.findOne({ memberId: 'RAJESHKINJARAPU' });
-        const hashedTopIdPassword = await bcrypt.hash('474532', 10);
+        let topIdUser = await User.findOne({ memberId: '9502924437' });
+        const hashedTopIdPassword = await bcrypt.hash('201996', 10);
 
         if (!topIdUser) {
             await User.create({
-                memberId: 'RAJESHKINJARAPU',
-                sponsorId: 'ADMIN',
+                memberId: '9502924437',
+                sponsorId: 'RK0305',
                 password: hashedTopIdPassword,
-                name: 'Rajesh Kinjarapu',
-                mobile: '9999999999',
+                name: 'Company Top Leader',
+                mobile: '9502924437',
                 role: 'user',
                 rank: 'STARTER'
             });
-            console.log('✅ Company Top Member ID Created (RAJESHKINJARAPU)');
+            console.log('✅ Company Top Member ID Created (9502924437)');
         } else {
             topIdUser.password = hashedTopIdPassword;
+            topIdUser.sponsorId = 'RK0305';
             topIdUser.role = 'user';
             await topIdUser.save();
-            console.log('✅ Company Top Member ID Updated (RAJESHKINJARAPU)');
+            console.log('✅ Company Top Member ID Updated (9502924437)');
         }
     })
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
