@@ -5,7 +5,7 @@ const Transaction = require('./models/Transaction');
 const FundRequest = require('./models/FundRequest');
 const Withdrawal = require('./models/Withdrawal');
 
-mongoose.connect('mongodb://127.0.0.1:27017/royalkuberaa')
+mongoose.connect('mongodb://127.0.0.1:27017/royal_kuberaa')
     .then(async () => {
         console.log("Connected to MongoDB.");
 
