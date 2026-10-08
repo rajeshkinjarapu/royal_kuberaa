@@ -1686,21 +1686,25 @@ app.get('/api/admin/pools', authMiddleware, async (req, res) => {
         const pools = await GlobalPool.find().lean();
         
         const poolStats = await Promise.all(pools.map(async pool => {
-            let membersCount = pool.activeQueue ? pool.activeQueue.length : 0;
+            let membersList = [];
             if (pool.poolName === 'NON_WORKING') {
-                membersCount = await User.countDocuments({
+                const users = await User.find({
                     directReferralsCount: 0,
                     totalPairsMatched: 0,
                     cashbackEarnings: { $lt: 1500 },
                     isActive: true,
                     isRebirth: false
-                });
+                }).select('memberId');
+                membersList = users.map(u => u.memberId);
+            } else {
+                membersList = pool.activeQueue ? pool.activeQueue.map(q => q.memberId) : [];
             }
             return {
                 _id: pool._id,
                 poolName: pool.poolName,
                 totalFund: pool.totalFund,
-                membersCount
+                membersCount: membersList.length,
+                membersList
             };
         }));
         res.json({ success: true, data: poolStats });

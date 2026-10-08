@@ -2076,6 +2076,7 @@ function App() {
   const renderAutoPoolSettings = () => {
     const [pools, setPools] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedPoolMembers, setSelectedPoolMembers] = useState(null);
 
     useEffect(() => {
         const fetchPools = async () => {
@@ -2098,7 +2099,7 @@ function App() {
         ) : (
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
              {pools.length === 0 ? <p style={{ color: '#64748B' }}>No pools active yet.</p> : pools.map(pool => (
-               <div key={pool._id} style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+               <div key={pool._id} style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s' }} onClick={() => setSelectedPoolMembers(pool)} onMouseEnter={e => e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
                   <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
                      <span style={{ fontSize: '24px' }}>{pool.poolName === 'GOLD' ? '🥇' : pool.poolName === 'PLATINUM' ? '🥈' : pool.poolName === 'RUBY' ? '🔴' : '💎'}</span>
                      {pool.poolName} POOL
@@ -2112,10 +2113,28 @@ function App() {
                      <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#3B82F6' }}>{pool.membersCount} Members</span>
                   </div>
                   <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #F1F5F9', fontSize: '12px', color: '#94A3B8' }}>
-                     * Funds will be distributed equally among qualifiers daily at midnight.
+                     * Click to view list of qualified members.
                   </div>
                </div>
              ))}
+           </div>
+        )}
+
+        {selectedPoolMembers && (
+           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setSelectedPoolMembers(null)}>
+              <div style={{ background: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '400px', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+                 <h3 style={{ marginBottom: '16px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>{selectedPoolMembers.poolName} POOL Members</h3>
+                 {selectedPoolMembers.membersList && selectedPoolMembers.membersList.length > 0 ? (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                       {selectedPoolMembers.membersList.map((id, idx) => (
+                          <li key={idx} style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', color: '#334155' }}>👤 {id}</li>
+                       ))}
+                    </ul>
+                 ) : (
+                    <p style={{ color: '#64748B' }}>No active members in this pool yet.</p>
+                 )}
+                 <button onClick={() => setSelectedPoolMembers(null)} style={{ marginTop: '20px', width: '100%', padding: '12px', background: '#E2E8F0', color: '#334155', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Close</button>
+              </div>
            </div>
         )}
       </CardWrapper>
