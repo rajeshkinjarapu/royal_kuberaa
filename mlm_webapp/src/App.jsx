@@ -3531,14 +3531,12 @@ function App() {
                     <button onClick={handleDialogConfirm} style={{ flex: dialogState.type === 'confirm' ? 1 : 'none', minWidth: dialogState.type === 'alert' ? '140px' : 'auto', padding: '14px', background: '#0B1437', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(11, 20, 55, 0.2)' }}>OK</button>
                 </div>
             </div>
-            <style>
-            {\
+            <style>{`
                 @keyframes scaleIn {
                     from { transform: scale(0.95); opacity: 0; }
                     to { transform: scale(1); opacity: 1; }
                 }
-            \}
-            </style>
+            `}</style>
         </div>
       )}
               <div 
