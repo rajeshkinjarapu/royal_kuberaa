@@ -262,7 +262,13 @@ app.post('/api/register', async (req, res) => {
 // --- Fetch Sponsor Name ---
 app.get('/api/sponsor/:id', async (req, res) => {
     try {
-        const sponsor = await User.findOne({ memberId: req.params.id.toUpperCase() });
+        const searchParam = req.params.id.toUpperCase();
+        const sponsor = await User.findOne({
+            $or: [
+                { memberId: searchParam },
+                { mobile: searchParam }
+            ]
+        });
         if (sponsor) {
             res.json({ success: true, name: sponsor.name });
         } else {
@@ -1792,8 +1798,14 @@ app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
         if (!numAmount || numAmount <= 0) return res.status(400).json({ success: false, message: 'Please enter a valid positive amount' });
         
         const targetMemberId = (memberId || '').trim();
-        const user = await User.findOne({ memberId: new RegExp(`^${targetMemberId}$`, 'i') });
-        if (!user) return res.status(404).json({ success: false, message: `Member ID "${targetMemberId}" not found in system` });
+        const user = await User.findOne({
+            $or: [
+                { memberId: new RegExp(`^${targetMemberId}$`, 'i') },
+                { mobile: targetMemberId }
+            ]
+        });
+        
+        if (!user) return res.status(404).json({ success: false, message: `Member ID or Mobile "${targetMemberId}" not found in system` });
 
         const isCredit = actionType === 'credit';
         const isRebirth = walletType === 'rebirth';
