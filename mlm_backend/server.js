@@ -4,6 +4,9 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const User = require('./models/User');
 const mlmLogic = require('./mlmLogic');
 const cron = require('node-cron');
@@ -11,6 +14,16 @@ const cron = require('node-cron');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const appUploadDir = path.join(__dirname, 'public', 'app');
+if (!fs.existsSync(appUploadDir)) {
+  fs.mkdirSync(appUploadDir, { recursive: true });
+}
+const appStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, appUploadDir),
+  filename: (req, file, cb) => cb(null, 'RoyalKuberaa-Latest.apk')
+});
+const appUpload = multer({ storage: appStorage });
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/royalkuberaa';
@@ -107,6 +120,26 @@ app.post('/api/admin/trigger-cron', authMiddleware, async (req, res) => {
 
 // Basic Route
 app.get('/', (req, res) => res.json({ message: "Royal Kuberaa Secure API Running on MongoDB" }));
+
+// App APK Upload & Download
+app.post('/api/admin/upload-app', authMiddleware, appUpload.single('appFile'), (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    res.json({ success: true, message: 'App uploaded successfully!' });
+});
+
+app.get('/api/app/download', (req, res) => {
+    const filePath = path.join(appUploadDir, 'RoyalKuberaa-Latest.apk');
+    if (fs.existsSync(filePath)) {
+        res.download(filePath, 'RoyalKuberaa.apk');
+    } else {
+        res.status(404).json({ success: false, message: 'App not found or not uploaded yet.' });
+    }
+});
 
 // --- Auth Routes ---
 app.post('/api/login', async (req, res) => {

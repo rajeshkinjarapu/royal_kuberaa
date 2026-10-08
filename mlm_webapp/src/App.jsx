@@ -194,6 +194,7 @@ function App() {
     { name: 'Transaction PIN', icon: '🔒' },
     { name: 'Change Password', icon: '🔑' },
     { name: 'Support', icon: '🎧' },
+    { name: 'Download App', icon: '📱' },
     { header: 'INFORMATION' },
     { name: 'About Us', icon: 'ℹ️' },
     { name: 'Terms & Conditions', icon: '📄' },
@@ -214,6 +215,7 @@ function App() {
     { name: 'Products', icon: '🛍️' },
     { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
+    { name: 'App Upload', icon: '📱' },
     { name: 'System Reports', icon: '📊' },
   ];
 
@@ -1286,6 +1288,85 @@ function App() {
             </tr>
           ))}
         </Table>
+      </CardWrapper>
+    );
+  };
+
+  const renderAppUpload = () => {
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    
+    const handleFileChange = (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        setFile(e.target.files[0]);
+      }
+    };
+
+    const handleUpload = async () => {
+      if (!file) return;
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('appFile', file);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/admin/upload-app', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        const result = await res.json();
+        if (result.success) {
+          showDialog('alert', 'Success', 'App APK uploaded successfully. Members can now download it.');
+          setFile(null);
+        } else {
+          showDialog('alert', 'Error', result.message || 'Upload failed');
+        }
+      } catch (err) {
+        showDialog('alert', 'Error', 'Network error during upload');
+      }
+      setUploading(false);
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="App Upload" subtitle="Upload the latest Android APK for members to download." />
+        <div style={{ padding: '40px', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📱</div>
+            <h3 style={{ color: '#0f172a', marginBottom: '8px' }}>Upload Latest APK</h3>
+            <p style={{ color: '#64748b', fontSize: '14px' }}>Select the .apk file from your device and upload it. The previous app will be overwritten.</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <input 
+              type="file" 
+              accept=".apk"
+              onChange={handleFileChange}
+              style={{ padding: '12px', border: '2px dashed #cbd5e1', borderRadius: '8px', width: '100%', cursor: 'pointer' }}
+            />
+            {file && (
+              <div style={{ padding: '12px', background: '#f1f5f9', borderRadius: '8px', fontSize: '14px', color: '#334155' }}>
+                Selected: <strong>{file.name}</strong> ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+              </div>
+            )}
+            <button 
+              onClick={handleUpload} 
+              disabled={!file || uploading}
+              style={{
+                background: file && !uploading ? '#2563eb' : '#94a3b8',
+                color: 'white',
+                border: 'none',
+                padding: '14px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: file && !uploading ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s',
+                marginTop: '8px'
+              }}
+            >
+              {uploading ? 'Uploading...' : 'Upload App'}
+            </button>
+          </div>
+        </div>
       </CardWrapper>
     );
   };
@@ -3476,6 +3557,7 @@ function App() {
        case 'Payout Approvals':
        case 'Payouts & TDS': renderFn = renderPayoutApprovals; break;
        case 'Notifications': renderFn = renderNotifications; break;
+       case 'App Upload': renderFn = renderAppUpload; break;
        case 'Non-Working Cashback': renderFn = renderRoyaltyAndCashback; break;
        case 'Add Member': renderFn = renderAddMember; break;
        case 'Fund Management': renderFn = renderFundManagement; break;
@@ -3525,7 +3607,14 @@ function App() {
               <div 
                 key={item.name} 
                 className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
-                onClick={() => { setActiveMenu(item.name); setSidebarOpen(false); }}
+                onClick={() => { 
+                  if (item.name === 'Download App') {
+                    window.location.href = '/api/app/download';
+                    return;
+                  }
+                  setActiveMenu(item.name); 
+                  setSidebarOpen(false); 
+                }}
               >
                 <span className="menu-icon">{item.icon}</span>
                 {item.name}
