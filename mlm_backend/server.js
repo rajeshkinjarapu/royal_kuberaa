@@ -650,7 +650,16 @@ app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
         const Withdrawal = require('./models/Withdrawal');
         
         const request = await Withdrawal.findById(req.params.id);
-        if (!request || request.status !== 'Pending') {
+        if (!request) {
+            return res.status(404).json({ success: false, message: 'Request not found.' });
+        }
+        
+        if (action === 'delete') {
+            await Withdrawal.findByIdAndDelete(req.params.id);
+            return res.json({ success: true, message: 'Withdrawal record deleted permanently.' });
+        }
+
+        if (request.status !== 'Pending') {
             return res.status(400).json({ success: false, message: 'Invalid or already processed request.' });
         }
 

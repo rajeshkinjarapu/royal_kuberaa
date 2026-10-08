@@ -1266,7 +1266,11 @@ function App() {
           });
           const result = await res.json();
           if(result.success) {
-             setWithdrawals(prev => prev.map(w => w._id === id ? { ...w, status: action === 'approve' ? 'Approved' : 'Rejected' } : w));
+             if (action === 'delete') {
+                 setWithdrawals(prev => prev.filter(w => w._id !== id));
+             } else {
+                 setWithdrawals(prev => prev.map(w => w._id === id ? { ...w, status: action === 'approve' ? 'Approved' : 'Rejected' } : w));
+             }
           } else {
              window.customAlert(result.message);
           }
@@ -1293,6 +1297,7 @@ function App() {
                      <button onClick={() => handleAction(req._id, 'reject')} style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Reject</button>
                    </>
                  )}
+                 <button onClick={() => { if(window.confirm('Delete this record?')) handleAction(req._id, 'delete') }} style={{ padding: '6px 12px', background: '#64748B', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
               </td>
             </tr>
           ))}
