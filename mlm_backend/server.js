@@ -774,7 +774,8 @@ app.post('/api/admin/products', authMiddleware, async (req, res) => {
         await product.save();
         res.json({ success: true, message: 'Product added successfully!', data: product });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error adding product' });
+        console.error("Product add error:", error);
+        res.status(500).json({ success: false, message: 'Server error adding product: ' + error.message });
     }
 });
 
