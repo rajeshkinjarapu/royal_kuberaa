@@ -9,15 +9,33 @@ mongoose.connect('mongodb://127.0.0.1:27017/royal_kuberaa')
     .then(async () => {
         console.log("Connected to MongoDB.");
 
-        // Reset all user wallets to 0
+        // Reset all user wallets and team counts to 0
         const result = await User.updateMany({}, {
             $set: {
                 mainWallet: 0,
                 rebirthWallet: 0,
-                totalEarnings: 0
+                totalEarnings: 0,
+                directReferralsCount: 0,
+                totalTeamCount: 0,
+                isGold: false,
+                isPlatinum: false,
+                isRuby: false,
+                isDiamond: false,
+                goldEarnings: 0,
+                platinumEarnings: 0,
+                rubyEarnings: 0,
+                diamondEarnings: 0,
+                cashbackEarnings: 0,
+                autopoolBalance: 0,
+                autopoolLevel: 1,
+                rank: 'STARTER'
             }
         });
-        console.log(`Reset wallets for ${result.modifiedCount} users to 0.`);
+        
+        // Ensure Company Top ID is active
+        await User.updateOne({ memberId: 'RK0305' }, { $set: { isActive: true } });
+        
+        console.log(`Reset wallets, ranks, and team counts for ${result.modifiedCount} users to 0.`);
 
         // Delete all transactions so history is completely wiped
         await Transaction.deleteMany({});
