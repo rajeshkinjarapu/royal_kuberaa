@@ -4,7 +4,7 @@ const GlobalPoolSchema = new mongoose.Schema({
     poolName: {
         type: String,
         required: true,
-        enum: ['GOLD', 'PLATINUM', 'RUBY', 'CROWN_DIAMOND']
+        enum: ['GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'NON_WORKING']
     },
     totalFund: {
         type: Number,

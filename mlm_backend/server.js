@@ -1056,11 +1056,13 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
         }
         
         payer.mainWallet -= amountToDeduct;
-        await payer.save();
         
         targetUser.isActive = true;
         if (targetUser._id.toString() !== payer._id.toString()) {
             await targetUser.save();
+            await payer.save();
+        } else {
+            await targetUser.save(); // Since they are the same, this saves both mainWallet deduction and isActive
         }
         
         const Transaction = require('./models/Transaction');
@@ -1790,6 +1792,7 @@ app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
 
 app.delete('/api/admin/transactions/:id', authMiddleware, async (req, res) => {
     try {
+        const Transaction = require('./models/Transaction');
         if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
         const txId = req.params.id;
         

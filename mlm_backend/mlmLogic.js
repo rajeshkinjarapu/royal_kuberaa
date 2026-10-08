@@ -96,10 +96,11 @@ async function checkAndTriggerRebirth(user) {
 
             // ₹1100 to Daily Royalty Pools (Gold-440, Platinum-220, Ruby-220, Diamond-220)
             for (const [pool, amount] of Object.entries(REBIRTH_POOLS)) {
-                let globalPool = await GlobalPool.findOne({ poolName: pool });
-                if (!globalPool) globalPool = new GlobalPool({ poolName: pool });
-                globalPool.totalFund += amount;
-                await globalPool.save();
+                await GlobalPool.findOneAndUpdate(
+                    { poolName: pool },
+                    { $inc: { totalFund: amount } },
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                );
             }
         }
     }
@@ -154,17 +155,19 @@ async function activateUser(user, sponsor) {
 
     // 4. Daily Royalty Pools Fund Contribution (₹300)
     for (const [pool, amount] of Object.entries(NORMAL_POOLS)) {
-        let globalPool = await GlobalPool.findOne({ poolName: pool });
-        if (!globalPool) globalPool = new GlobalPool({ poolName: pool });
-        globalPool.totalFund += amount;
-        await globalPool.save();
+        await GlobalPool.findOneAndUpdate(
+            { poolName: pool },
+            { $inc: { totalFund: amount } },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
     }
 
     // 5. Global Non-Working Cashback Fund (₹100)
-    let nwPool = await GlobalPool.findOne({ poolName: 'NON_WORKING' });
-    if (!nwPool) nwPool = new GlobalPool({ poolName: 'NON_WORKING' });
-    nwPool.totalFund += NON_WORKING_FUND_AMOUNT;
-    await nwPool.save();
+    await GlobalPool.findOneAndUpdate(
+        { poolName: 'NON_WORKING' },
+        { $inc: { totalFund: NON_WORKING_FUND_AMOUNT } },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
     // 6. Remaining ₹400 = ₹250 Product Cost + ₹150 Company Net Profit per ₹1500 Joining
 }
