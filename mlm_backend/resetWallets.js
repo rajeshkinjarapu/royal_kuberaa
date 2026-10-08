@@ -23,10 +23,10 @@ mongoose.connect('mongodb://127.0.0.1:27017/royalkuberaa')
         await Transaction.deleteMany({});
         console.log("Deleted all transactions.");
 
-        // Optionally, reset pools and tree if they wanted a fresh start
-        // await GlobalPool.deleteMany({});
-        // await MatrixNode.deleteMany({});
-        // await Withdrawal.deleteMany({});
+        // Reset pools and tree as well for a completely fresh start
+        await GlobalPool.deleteMany({});
+        await MatrixNode.deleteMany({});
+        await Withdrawal.deleteMany({});
         
         console.log("System amounts cleared successfully!");
         process.exit(0);
