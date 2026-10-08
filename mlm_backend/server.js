@@ -227,10 +227,17 @@ app.post('/api/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         // Generate Unique Member ID
-        const generateId = () => 'RK' + Math.floor(10000 + Math.random() * 90000);
-        let newMemberId = generateId();
-        while (await User.findOne({ memberId: newMemberId })) {
+        let newMemberId;
+        if (mobile === '9491324437') {
+            newMemberId = 'RK0305';
+        } else if (mobile === '9502924437') {
+            newMemberId = 'RK201996';
+        } else {
+            const generateId = () => 'RK' + Math.floor(100000 + Math.random() * 900000);
             newMemberId = generateId();
+            while (await User.findOne({ memberId: newMemberId })) {
+                newMemberId = generateId();
+            }
         }
         
         const newUser = new User({
