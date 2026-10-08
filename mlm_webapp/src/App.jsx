@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
-// Intercept fetch calls to route /api requests to the VPS backend
+// Intercept fetch calls to route /api requests to Vercel (which proxies to VPS)
 const originalFetch = window.fetch;
 window.fetch = async function() {
   let [resource, config] = arguments;
-  const baseURL = 'http://66.116.252.191:5555';
+  const baseURL = 'https://royal-kuberaa.vercel.app';
   if (typeof resource === 'string' && resource.startsWith('/api')) {
     resource = baseURL + resource;
   }
@@ -3624,7 +3624,7 @@ function App() {
                 className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
                 onClick={() => { 
                   if (item.name === 'Download App') {
-                    window.location.href = 'http://66.116.252.191:5555/api/app/download';
+                    window.location.href = 'https://royal-kuberaa.vercel.app/api/app/download';
                     return;
                   }
                   setActiveMenu(item.name); 
