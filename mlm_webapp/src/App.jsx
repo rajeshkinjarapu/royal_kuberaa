@@ -2525,6 +2525,10 @@ function App() {
 
     const handleSaveProduct = async (e) => {
         e.preventDefault();
+        if (!editForm.name.trim() || !editForm.description.trim()) {
+            window.customAlert('Product Name and Description are required!');
+            return;
+        }
         try {
             const token = localStorage.getItem('token');
             const method = editForm._id ? 'PUT' : 'POST';
