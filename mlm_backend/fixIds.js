@@ -8,13 +8,13 @@ mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log("Connected to MongoDB.");
         
-        const user1 = await User.findOneAndUpdate({ mobile: '9491324437' }, { memberId: 'RK0305' });
-        if (user1) console.log("Updated 9491324437 to RK0305");
-        else console.log("User 9491324437 not found");
-
-        const user2 = await User.findOneAndUpdate({ mobile: '9502924437' }, { memberId: 'RK201996' });
-        if (user2) console.log("Updated 9502924437 to RK201996");
+        const user1 = await User.findOneAndUpdate({ memberId: '9502924437' }, { memberId: 'RK0305' });
+        if (user1) console.log("Updated TULASI KALYANI to RK0305");
         else console.log("User 9502924437 not found");
+
+        const user2 = await User.findOneAndUpdate({ memberId: 'RK38919' }, { memberId: 'RK201996' });
+        if (user2) console.log("Updated RAJESH KINJARAPU to RK201996");
+        else console.log("User RK38919 not found");
 
         console.log("Finished updating existing users.");
         process.exit(0);
