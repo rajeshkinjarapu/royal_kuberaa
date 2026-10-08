@@ -1266,19 +1266,24 @@ body {
 
 @media (max-width: 480px) {
   .login-wrapper {
-    padding: 16px;
+    padding: 0;
     align-items: center;
-    background: linear-gradient(135deg, #6c28d9 0%, #4c1d95 100%);
+    background: #ffffff;
   }
   
   .login-container {
-    height: auto;
-    max-height: calc(100vh - 32px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    border-radius: 24px;
+    height: 100vh;
+    min-height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
     max-width: 100%;
+    width: 100%;
+    box-shadow: none;
     overflow-y: auto;
     background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .login-illustration {
