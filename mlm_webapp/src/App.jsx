@@ -186,6 +186,7 @@ function App() {
   const menuItems = [
     { header: 'MAIN MENU' },
     { name: 'Dashboard', icon: '📊' },
+    { name: 'ID Activation', icon: '⚡' },
     { name: 'Non-Working Cashback', icon: '💸' },
     { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
@@ -626,50 +627,7 @@ function App() {
           </div>
         )}
         
-        {userRole === 'member' && userData?.isActive && (
-          <div style={{ background: '#F8FAFC', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', marginTop: '24px' }}>
-             <h3 style={{ margin: '0 0 16px 0', color: '#0F172A', fontSize: '18px', fontWeight: '800' }}>⚡ Quick ID Activation (Using Wallet)</h3>
-             <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '16px' }}>Activate any new member ID instantly using your Main Wallet balance (Cost: ₹1500).</p>
-             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <input 
-                   type="text" 
-                   id="quickActivateId"
-                   placeholder="Enter Member ID (e.g. RK...)" 
-                   style={{ flex: 1, minWidth: '200px', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', textTransform: 'uppercase', fontSize: '15px' }}
-                />
-                <button 
-                   onClick={async (e) => {
-                       const btn = e.target;
-                       const targetId = document.getElementById('quickActivateId').value;
-                       if (!targetId.trim()) return window.customAlert('Please enter a Member ID');
-                       if (!await window.customConfirm(`Are you sure you want to deduct ₹1500 from your wallet to activate ID: ${targetId.toUpperCase()}?`)) return;
-                       
-                       btn.disabled = true;
-                       btn.innerText = 'Activating...';
-                       try {
-                           const token = localStorage.getItem('token');
-                           const res = await fetch('/api/user/activate', { 
-                               method: 'POST', 
-                               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                               body: JSON.stringify({ targetMemberId: targetId })
-                           });
-                           const result = await res.json();
-                           window.customAlert(result.message);
-                           if(result.success) window.location.reload();
-                       } catch(err) {
-                           window.customAlert('Activation failed');
-                       } finally {
-                           btn.disabled = false;
-                           btn.innerText = 'Activate Member (₹1500)';
-                       }
-                   }}
-                   style={{ padding: '12px 24px', background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)', color: '#FFF', borderRadius: '8px', fontWeight: '800', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 10px rgba(79,70,229,0.3)' }}
-                >
-                   Activate Member (₹1500)
-                </button>
-             </div>
-          </div>
-        )}
+      </>
       </>
     );
   };
@@ -2518,6 +2476,65 @@ function App() {
                 </div>
             </div>
         </CardWrapper>
+    );
+  };
+
+  const renderIDActivation = () => {
+    return (
+      <CardWrapper>
+        <PageHeader title="ID Activation" subtitle="Activate any Member ID instantly using your Main Wallet balance" />
+        <div style={{ background: '#FFF', padding: '30px', borderRadius: '24px', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.1)', maxWidth: '500px', margin: '0 auto', textAlign: 'center', border: '1px solid #F1F5F9' }}>
+           <div style={{ width: '80px', height: '80px', background: 'linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', margin: '0 auto 20px auto', boxShadow: '0 10px 20px -5px rgba(79,70,229,0.4)' }}>⚡</div>
+           <h3 style={{ margin: '0 0 10px 0', color: '#0F172A', fontSize: '24px', fontWeight: '900' }}>Activate Member</h3>
+           <p style={{ color: '#64748B', fontSize: '15px', marginBottom: '24px', lineHeight: '1.6' }}>Enter the Member ID or Mobile Number to activate. This will deduct <b>₹1500</b> from your Main Wallet.</p>
+           
+           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '16px', marginBottom: '24px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <span style={{ color: '#475569', fontWeight: '600', fontSize: '14px' }}>Main Wallet Balance:</span>
+               <span style={{ color: '#10B981', fontWeight: '900', fontSize: '18px' }}>₹{(userData?.mainWallet || 0).toLocaleString()}</span>
+           </div>
+
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input 
+                 type="text" 
+                 id="quickActivateIdSidebar"
+                 placeholder="Enter Member ID or Mobile..." 
+                 style={{ width: '100%', padding: '16px', border: '2px solid #E2E8F0', borderRadius: '12px', textTransform: 'uppercase', fontSize: '16px', fontWeight: '600', outline: 'none', transition: 'border-color 0.2s', textAlign: 'center' }}
+                 onFocus={e => e.target.style.borderColor = '#4F46E5'}
+                 onBlur={e => e.target.style.borderColor = '#E2E8F0'}
+              />
+              <button 
+                 onClick={async (e) => {
+                     const btn = e.target;
+                     const targetId = document.getElementById('quickActivateIdSidebar').value;
+                     if (!targetId.trim()) return window.customAlert('Please enter a Member ID or Mobile Number');
+                     if (!await window.customConfirm(`Are you sure you want to deduct ₹1500 to activate: ${targetId.toUpperCase()}?`)) return;
+                     
+                     btn.disabled = true;
+                     btn.innerText = 'Processing...';
+                     try {
+                         const token = localStorage.getItem('token');
+                         const res = await fetch('/api/user/activate', { 
+                             method: 'POST', 
+                             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                             body: JSON.stringify({ targetMemberId: targetId })
+                         });
+                         const result = await res.json();
+                         window.customAlert(result.message);
+                         if(result.success) window.location.reload();
+                     } catch(err) { window.customAlert('Activation failed'); } finally {
+                         btn.disabled = false;
+                         btn.innerText = 'Activate Now (₹1500)';
+                     }
+                 }}
+                 style={{ width: '100%', padding: '16px', background: 'linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%)', color: '#FFF', border: 'none', borderRadius: '12px', fontWeight: '900', cursor: 'pointer', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px', boxShadow: '0 4px 14px 0 rgba(79,70,229,0.39)', transition: 'transform 0.2s' }}
+                 onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                 onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                 >
+                 Activate Now (₹1500)
+              </button>
+           </div>
+        </div>
+      </CardWrapper>
     );
   };
 

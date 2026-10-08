@@ -1150,8 +1150,14 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
         
         let targetUser = payer;
         if (targetMemberId && targetMemberId.trim() !== '') {
-            targetUser = await User.findOne({ memberId: targetMemberId.trim().toUpperCase() });
-            if (!targetUser) return res.status(404).json({ success: false, message: 'Target Member ID not found' });
+            const searchVal = targetMemberId.trim().toUpperCase();
+            targetUser = await User.findOne({
+                $or: [
+                    { memberId: searchVal },
+                    { mobile: searchVal } // Mobile is usually stored exactly as input, so uppercase is fine if it's numbers
+                ]
+            });
+            if (!targetUser) return res.status(404).json({ success: false, message: 'Target Member ID or Mobile not found' });
         }
         
         if (targetUser.isActive) {
