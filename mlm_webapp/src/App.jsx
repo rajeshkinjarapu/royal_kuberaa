@@ -383,10 +383,10 @@ function App() {
             <img src="https://img.freepik.com/free-vector/secure-login-concept-illustration_114360-4685.jpg" alt="Secure Login" />
           </div>
           <div className="login-content">
-            <div className="login-header">
-              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" />
-              {authView === 'login' && <h1 className="login-brand-name">Royal Kuberaa</h1>}
-              {authView === 'register' && <h2 className="login-title" style={{ marginTop: '16px' }}>Create Account</h2>}
+            <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%', marginBottom: '8px' }}>
+              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" style={{ display: 'block', margin: '0 auto 8px auto' }} />
+              {authView === 'login' && <h1 className="login-brand-name" style={{ textAlign: 'center', width: '100%' }}>Royal Kuberaa</h1>}
+              {authView === 'register' && <h2 className="login-title" style={{ marginTop: '16px', textAlign: 'center', width: '100%' }}>Create Account</h2>}
             </div>
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
