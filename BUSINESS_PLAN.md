@@ -63,7 +63,6 @@ This is a zero-risk guarantee for all members! ₹100 from every joining is adde
   - *(Note: Rebirth IDs DO NOT generate Binary Matching, and there is no direct company profit from the rebirth allocation itself).*
 
 
-
 ## 6. Rules & Conditions
 - **Minimum Withdrawal:** ₹500
 - **Withdrawal Deductions:** 10% Total (5% TDS + 5% Admin Charges)
