@@ -380,13 +380,18 @@ function App() {
       <div className="login-wrapper">
         <div className="login-container">
           <div className="login-illustration">
-            <img src="https://img.freepik.com/free-vector/secure-login-concept-illustration_114360-4685.jpg" alt="Secure Login" />
+            <img src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg" alt="Welcome" />
           </div>
           <div className="login-content">
-            <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%', marginBottom: '8px' }}>
-              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" style={{ display: 'block', margin: '0 auto 8px auto' }} />
-              {authView === 'login' && <h1 className="login-brand-name" style={{ textAlign: 'center', width: '100%' }}>Royal Kuberaa</h1>}
-              {authView === 'register' && <h2 className="login-title" style={{ marginTop: '16px', textAlign: 'center', width: '100%' }}>Create Account</h2>}
+            <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', width: '100%', marginBottom: '24px' }}>
+              <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" style={{ display: 'block', margin: '0 auto 12px auto' }} />
+              {authView === 'login' && (
+                <>
+                  <h1 className="login-brand-name">Royal Kuberaa</h1>
+                  <p style={{ fontSize: '13px', color: '#9ca3af', marginTop: '4px' }}>Welcome Back! Login to continue</p>
+                </>
+              )}
+              {authView === 'register' && <h2 className="login-title" style={{ marginTop: '12px' }}>Create Account</h2>}
             </div>
             {authView === 'login' ? (
               <form className="login-form" onSubmit={handleLogin}>
