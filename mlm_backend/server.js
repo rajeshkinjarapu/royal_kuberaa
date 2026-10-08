@@ -39,6 +39,19 @@ const qrStorage = multer.diskStorage({
 });
 const qrUpload = multer({ storage: qrStorage });
 
+// Product Image Upload Configuration
+const productUploadDir = path.join(__dirname, 'uploads/products');
+if (!fs.existsSync(productUploadDir)) {
+    fs.mkdirSync(productUploadDir, { recursive: true });
+}
+const productStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, productUploadDir),
+    filename: (req, file, cb) => {
+        cb(null, `product_${Date.now()}_${Math.round(Math.random()*1E9)}${path.extname(file.originalname)}`);
+    }
+});
+const productUpload = multer({ storage: productStorage });
+
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/royalkuberaa';
 const JWT_SECRET = process.env.JWT_SECRET || 'royal_kuberaa_super_secret_key';
@@ -831,6 +844,26 @@ app.put('/api/admin/products/:id', authMiddleware, async (req, res) => {
         res.json({ success: true, message: 'Product updated successfully!', data: product });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error updating product' });
+    }
+});
+
+// Admin: Upload Product Image
+app.post('/api/admin/products/:id/image', authMiddleware, productUpload.single('image'), async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        if (!req.file) return res.status(400).json({ success: false, message: 'No image uploaded' });
+
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+        const imageUrl = `/uploads/products/${req.file.filename}`;
+        product.image = imageUrl;
+        await product.save();
+
+        res.json({ success: true, message: 'Product image uploaded successfully!', image: imageUrl });
+    } catch (error) {
+        console.error("Product image upload error:", error);
+        res.status(500).json({ success: false, message: 'Server error uploading product image' });
     }
 });
 

@@ -2526,6 +2526,7 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
+    const [productImageFile, setProductImageFile] = useState(null);
     
     useEffect(() => {
         if (activeMenu === 'Products') {
@@ -2561,10 +2562,24 @@ function App() {
                 body: JSON.stringify(editForm)
             });
             const result = await res.json();
-            window.customAlert(result.message);
+            
             if(result.success) {
+                const productId = result.data._id;
+                if (productImageFile) {
+                    const formData = new FormData();
+                    formData.append('image', productImageFile);
+                    await fetch(`/api/admin/products/${productId}/image`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                }
+                window.customAlert(result.message);
                 setIsEditing(false);
+                setProductImageFile(null);
                 fetchProducts();
+            } else {
+                window.customAlert(result.message);
             }
         } catch(err) { window.customAlert('Failed to save product'); }
     };
@@ -2631,8 +2646,9 @@ function App() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                        <div>
-                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Icon / Emoji (URL or Emoji)</label>
-                           <input placeholder="📦" value={editForm.image} onChange={e=>setEditForm({...editForm, image: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Product Image File (Replaces Emoji/URL)</label>
+                           <input type="file" accept="image/*" onChange={e => setProductImageFile(e.target.files[0])} style={{ width: '100%', padding: '10px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                           {editForm.image && !productImageFile && <div style={{marginTop: '5px', fontSize: '12px', color: '#64748B'}}>Current: {editForm.image.substring(0, 30)}...</div>}
                        </div>
                        <div>
                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Badge (Optional)</label>
@@ -2677,7 +2693,11 @@ function App() {
                      </div>
                   )}
                   <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
-                    {product.image || '📦'}
+                    {product.image && product.image.includes('/') ? (
+                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                    ) : (
+                        product.image || '📦'
+                    )}
                   </div>
                   <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>{product.name}</h3>
                   <p style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5', marginBottom: '16px', whiteSpace: 'pre-wrap' }}>
