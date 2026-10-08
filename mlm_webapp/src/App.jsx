@@ -3503,6 +3503,7 @@ function App() {
   };
 
   return (
+    <>
     <div className="app-container">
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}></div>
       <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
