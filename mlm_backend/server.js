@@ -14,6 +14,7 @@ const cron = require('node-cron');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const appUploadDir = path.join(__dirname, 'public', 'app');
 if (!fs.existsSync(appUploadDir)) {
@@ -24,6 +25,19 @@ const appStorage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, 'RoyalKuberaa-Latest.apk')
 });
 const appUpload = multer({ storage: appStorage });
+
+// QR Code Upload Configuration
+const qrUploadDir = path.join(__dirname, 'uploads/qr_codes');
+if (!fs.existsSync(qrUploadDir)) {
+    fs.mkdirSync(qrUploadDir, { recursive: true });
+}
+const qrStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, qrUploadDir),
+    filename: (req, file, cb) => {
+        cb(null, `qr_${Date.now()}_${Math.round(Math.random()*1E9)}${path.extname(file.originalname)}`);
+    }
+});
+const qrUpload = multer({ storage: qrStorage });
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/royalkuberaa';

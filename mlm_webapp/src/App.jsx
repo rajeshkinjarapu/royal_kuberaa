@@ -702,18 +702,26 @@ function App() {
 
     const handleKycSubmit = async (e) => {
         e.preventDefault();
+        if (!kycForm.qrFile) return window.customAlert('Please select an image file');
+        
         try {
+            const formData = new FormData();
+            formData.append('qrCode', kycForm.qrFile);
+            
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/user/kyc', {
+            const res = await fetch('/api/user/upload-qr', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(kycForm)
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
             });
             const result = await res.json();
             window.customAlert(result.message);
-            if(result.success) setProfileData(result.user);
+            if(result.success) {
+                setProfileData({ ...profileData, paymentQrCode: result.qrUrl });
+                setKycForm({ qrFile: null });
+            }
         } catch (err) {
-            window.customAlert('Failed to update KYC');
+            window.customAlert('Failed to upload QR Code');
         }
     };
 
@@ -735,47 +743,37 @@ function App() {
                 <p><strong>Sponsor ID:</strong> {profileData.sponsorId || 'None'}</p>
               </div>
             </div>
-            <div>
-              <h3 style={{ marginBottom: '16px' }}>KYC Status</h3>
-              <div style={{ padding: '16px', background: profileData.kycStatus === 'Approved' ? 'rgba(16, 185, 129, 0.1)' : profileData.kycStatus === 'Submitted' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: `1px solid ${profileData.kycStatus === 'Approved' ? 'rgba(16, 185, 129, 0.3)' : profileData.kycStatus === 'Submitted' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}` }}>
-                 <p style={{ color: profileData.kycStatus === 'Approved' ? '#10B981' : profileData.kycStatus === 'Submitted' ? '#F59E0B' : '#EF4444', fontWeight: 'bold' }}>
-                    {profileData.kycStatus === 'Approved' ? '✅ KYC Verified' : profileData.kycStatus === 'Submitted' ? '⏳ KYC Submitted (Pending Review)' : '❌ KYC Pending'}
-                 </p>
-                 <p style={{ fontSize: '13px', marginTop: '8px', color: '#64748B' }}>
-                    {profileData.kycStatus === 'Approved' ? 'Your PAN and Bank Account details have been approved.' : 'Please update your details below to receive payouts.'}
-                 </p>
-              </div>
+              {profileData.paymentQrCode ? (
+                 <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                    <p style={{ color: '#10B981', fontWeight: 'bold' }}>✅ QR Code Uploaded</p>
+                    <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Your payment QR code is active for receiving payouts.</p>
+                 </div>
+              ) : (
+                 <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                    <p style={{ color: '#EF4444', fontWeight: 'bold' }}>❌ No QR Code Uploaded</p>
+                    <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Upload your payment QR code to receive your payouts.</p>
+                 </div>
+              )}
             </div>
           </div>
 
-          <h3 style={{ marginTop: '40px', marginBottom: '16px' }}>Bank & Identity Details</h3>
-          <form onSubmit={handleKycSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', maxWidth: '800px' }}>
+          <h3 style={{ marginTop: '40px', marginBottom: '16px' }}>Payment QR Code (UPI)</h3>
+          <form onSubmit={handleKycSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '400px' }}>
+             
+             {profileData.paymentQrCode && (
+               <div style={{ marginBottom: '16px' }}>
+                 <img src={profileData.paymentQrCode} alt="Payment QR" style={{ width: '200px', borderRadius: '12px', border: '1px solid #E2E8F0' }} />
+               </div>
+             )}
+
              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>PAN Number</label>
-                <input type="text" className="form-input" value={kycForm.panNumber} onChange={e => setKycForm({...kycForm, panNumber: e.target.value.toUpperCase()})} readOnly={isReadOnly} required />
-             </div>
-             <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Aadhar Number</label>
-                <input type="text" className="form-input" value={kycForm.aadharNumber} onChange={e => setKycForm({...kycForm, aadharNumber: e.target.value})} readOnly={isReadOnly} required />
-             </div>
-             <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Bank Name</label>
-                <input type="text" className="form-input" value={kycForm.bankName} onChange={e => setKycForm({...kycForm, bankName: e.target.value})} readOnly={isReadOnly} required />
-             </div>
-             <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>Account Number</label>
-                <input type="text" className="form-input" value={kycForm.accountNumber} onChange={e => setKycForm({...kycForm, accountNumber: e.target.value})} readOnly={isReadOnly} required />
-             </div>
-             <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '600' }}>IFSC Code</label>
-                <input type="text" className="form-input" value={kycForm.ifscCode} onChange={e => setKycForm({...kycForm, ifscCode: e.target.value.toUpperCase()})} readOnly={isReadOnly} required />
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>Upload New QR Code Image</label>
+                <input type="file" accept="image/*" onChange={e => setKycForm({ qrFile: e.target.files[0] })} required style={{ width: '100%', padding: '10px', background: '#F8FAFC', border: '1px dashed #CBD5E1', borderRadius: '8px' }} />
              </div>
              
-             {!isReadOnly && (
-                <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
-                   <button type="submit" style={{ padding: '12px 24px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Submit KYC Details</button>
-                </div>
-             )}
+             <div style={{ marginTop: '10px' }}>
+                <button type="submit" style={{ padding: '12px 24px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Upload QR Code</button>
+             </div>
           </form>
         </CardWrapper>
     );
