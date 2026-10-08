@@ -2,6 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
+// Intercept fetch calls to route /api requests to the VPS backend
+const originalFetch = window.fetch;
+window.fetch = async function() {
+  let [resource, config] = arguments;
+  const baseURL = 'http://66.116.252.191:5555';
+  if (typeof resource === 'string' && resource.startsWith('/api')) {
+    resource = baseURL + resource;
+  }
+  return originalFetch(resource, config);
+};
+
 let dialogController = null;
 
 window.customAlert = (message) => {
@@ -3609,7 +3620,7 @@ function App() {
                 className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
                 onClick={() => { 
                   if (item.name === 'Download App') {
-                    window.location.href = '/api/app/download';
+                    window.location.href = 'http://66.116.252.191:5555/api/app/download';
                     return;
                   }
                   setActiveMenu(item.name); 
