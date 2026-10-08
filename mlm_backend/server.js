@@ -70,13 +70,16 @@ mongoose.connect(MONGO_URI)
         }
 
         // Initialize Company Top ID (Member)
-        let topIdUser = await User.findOne({ memberId: '9502924437' });
+        // First migrate if old ID exists
+        await User.updateOne({ memberId: '9502924437' }, { $set: { memberId: 'RK0305', sponsorId: '' } });
+        
+        let topIdUser = await User.findOne({ memberId: 'RK0305' });
         const hashedTopIdPassword = await bcrypt.hash('201996', 10);
 
         if (!topIdUser) {
             await User.create({
-                memberId: '9502924437',
-                sponsorId: 'RK0305',
+                memberId: 'RK0305',
+                sponsorId: '',
                 password: hashedTopIdPassword,
                 name: 'Company Top Leader',
                 mobile: '9502924437',
@@ -84,14 +87,14 @@ mongoose.connect(MONGO_URI)
                 rank: 'STARTER',
                 isActive: false
             });
-            console.log('✅ Company Top Member ID Created (9502924437)');
+            console.log('✅ Company Top Member ID Created (RK0305)');
         } else {
             topIdUser.password = hashedTopIdPassword;
-            topIdUser.sponsorId = 'RK0305';
+            topIdUser.sponsorId = '';
             topIdUser.role = 'member';
             if (topIdUser.isActive === undefined) topIdUser.isActive = false;
             await topIdUser.save();
-            console.log('✅ Company Top Member ID Updated (9502924437)');
+            console.log('✅ Company Top Member ID Updated (RK0305)');
         }
     })
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
@@ -242,9 +245,7 @@ app.post('/api/register', async (req, res) => {
         
         // Generate Unique Member ID
         let newMemberId;
-        if (mobile === '9491324437') {
-            newMemberId = 'RK0305';
-        } else if (mobile === '9502924437') {
+        if (mobile === '9502924437') {
             newMemberId = 'RK201996';
         } else {
             const generateId = () => 'RK' + Math.floor(100000 + Math.random() * 900000);
