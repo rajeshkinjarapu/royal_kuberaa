@@ -560,9 +560,23 @@ app.delete('/api/admin/users/:memberId', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot delete the admin user' });
         }
         
+        // Delete all related records
+        const Transaction = require('./models/Transaction');
+        const MatrixNode = require('./models/MatrixNode');
+        const FundRequest = require('./models/FundRequest');
+        const Withdrawal = require('./models/Withdrawal');
+        const SupportTicket = require('./models/SupportTicket');
+
+        await Transaction.deleteMany({ memberId });
+        await MatrixNode.deleteMany({ memberId });
+        await FundRequest.deleteMany({ memberId });
+        await Withdrawal.deleteMany({ memberId });
+        await SupportTicket.deleteMany({ memberId });
+
         await User.deleteOne({ memberId });
-        res.json({ success: true, message: 'User deleted successfully' });
+        res.json({ success: true, message: 'User and all related records (incomes, etc.) deleted successfully' });
     } catch (error) {
+        console.error("Delete User Error:", error);
         res.status(500).json({ success: false, message: "Server error deleting user" });
     }
 });
