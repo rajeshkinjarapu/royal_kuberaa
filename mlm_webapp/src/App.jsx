@@ -202,7 +202,7 @@ function App() {
     { name: 'Team Network', icon: '🕸️' },
     { name: 'Profile', icon: '👤' },
     { name: 'KYC', icon: '🛡️' },
-    { name: 'Bank Settings', icon: '🏦' },
+    { name: 'Payment Settings', icon: '🏦' },
     { name: 'Transaction PIN', icon: '🔒' },
     { name: 'Change Password', icon: '🔑' },
     { name: 'Support', icon: '🎧' },
@@ -686,51 +686,64 @@ function App() {
 
     const isReadOnly = profileData.kycStatus === 'Approved' || profileData.kycStatus === 'Submitted';
 
+    const isPaymentSettings = activeMenu === 'Payment Settings';
+
     return (
         <CardWrapper>
-          <PageHeader title="My Profile & KYC" subtitle="Manage your personal details and verify identity" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-            <div>
-              <h3 style={{ marginBottom: '16px' }}>Personal Details</h3>
-              <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px' }}>
-                <p><strong>Name:</strong> {profileData.name}</p>
-                <p><strong>Member ID:</strong> {profileData.memberId}</p>
-                <p><strong>Mobile:</strong> {profileData.mobile}</p>
-                <p><strong>Join Date:</strong> {new Date(profileData.createdAt).toLocaleDateString()}</p>
-                <p><strong>Sponsor ID:</strong> {profileData.sponsorId || 'None'}</p>
-              </div>
-            </div>
-              {profileData.paymentQrCode ? (
-                 <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                    <p style={{ color: '#10B981', fontWeight: 'bold' }}>✅ QR Code Uploaded</p>
-                    <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Your payment QR code is active for receiving payouts.</p>
-                 </div>
-              ) : (
-                 <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                    <p style={{ color: '#EF4444', fontWeight: 'bold' }}>❌ No QR Code Uploaded</p>
-                    <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Upload your payment QR code to receive your payouts.</p>
-                 </div>
-              )}
-          </div>
-
-          <h3 style={{ marginTop: '40px', marginBottom: '16px' }}>Payment QR Code (UPI)</h3>
-          <form onSubmit={handleKycSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '400px' }}>
-             
-             {profileData.paymentQrCode && (
-               <div style={{ marginBottom: '16px' }}>
-                 <img src={profileData.paymentQrCode} alt="Payment QR" style={{ width: '200px', borderRadius: '12px', border: '1px solid #E2E8F0' }} />
+          <PageHeader 
+              title={isPaymentSettings ? "Payment Settings" : "My Profile & KYC"} 
+              subtitle={isPaymentSettings ? "Manage your withdrawal methods" : "Manage your personal details and verify identity"} 
+          />
+          
+          {!isPaymentSettings && (
+             <div style={{ marginBottom: '24px' }}>
+               <h3 style={{ marginBottom: '16px' }}>Personal Details</h3>
+               <div style={{ padding: '16px', background: '#F8FAFC', borderRadius: '12px' }}>
+                 <p><strong>Name:</strong> {profileData.name}</p>
+                 <p><strong>Member ID:</strong> {profileData.memberId}</p>
+                 <p><strong>Mobile:</strong> {profileData.mobile}</p>
+                 <p><strong>Join Date:</strong> {new Date(profileData.createdAt).toLocaleDateString()}</p>
+                 <p><strong>Sponsor ID:</strong> {profileData.sponsorId || 'None'}</p>
                </div>
-             )}
+             </div>
+          )}
 
-             <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>Upload New QR Code Image</label>
-                <input type="file" accept="image/*" onChange={e => setKycForm({ qrFile: e.target.files[0] })} required style={{ width: '100%', padding: '10px', background: '#F8FAFC', border: '1px dashed #CBD5E1', borderRadius: '8px' }} />
-             </div>
-             
-             <div style={{ marginTop: '10px' }}>
-                <button type="submit" style={{ padding: '12px 24px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Upload QR Code</button>
-             </div>
-          </form>
+          {isPaymentSettings && (
+             <>
+               <div style={{ marginBottom: '24px' }}>
+                  {profileData.paymentQrCode ? (
+                     <div style={{ padding: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                        <p style={{ color: '#10B981', fontWeight: 'bold' }}>✅ QR Code Uploaded</p>
+                        <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Your payment QR code is active for receiving payouts.</p>
+                     </div>
+                  ) : (
+                     <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                        <p style={{ color: '#EF4444', fontWeight: 'bold' }}>❌ No QR Code Uploaded</p>
+                        <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Upload your payment QR code to receive your payouts.</p>
+                     </div>
+                  )}
+               </div>
+
+               <h3 style={{ marginTop: '20px', marginBottom: '16px' }}>Payment QR Code (UPI)</h3>
+               <form onSubmit={handleKycSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '400px' }}>
+                  
+                  {profileData.paymentQrCode && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <img src={profileData.paymentQrCode} alt="Payment QR" style={{ width: '200px', borderRadius: '12px', border: '1px solid #E2E8F0' }} />
+                    </div>
+                  )}
+
+                  <div>
+                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>Upload New QR Code Image</label>
+                     <input type="file" accept="image/*" onChange={e => setKycForm({ qrFile: e.target.files[0] })} required style={{ width: '100%', padding: '10px', background: '#F8FAFC', border: '1px dashed #CBD5E1', borderRadius: '8px' }} />
+                  </div>
+                  
+                  <div style={{ marginTop: '10px' }}>
+                     <button type="submit" style={{ padding: '12px 24px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Upload QR Code</button>
+                  </div>
+               </form>
+             </>
+          )}
         </CardWrapper>
     );
   };
@@ -3616,7 +3629,7 @@ function App() {
     switch(activeMenu) {
        case 'Dashboard': renderFn = renderDashboard; break;
        case 'Profile':
-       case 'Bank Settings':
+       case 'Payment Settings':
        case 'KYC': renderFn = renderProfile; break;
        case 'My Network': renderFn = renderNetwork; break;
        case 'Team Network': renderFn = renderBinaryTree; break;
