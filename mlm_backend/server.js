@@ -380,6 +380,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                     directReferrals: user.directReferralsCount, 
                     totalTeamSize: user.role === 'admin' ? adminStats.totalSystemMembers : (user.totalTeamCount || 0)
                 },
+                hasTpin: !!user.tpin,
                 ...adminStats
             }
         });
