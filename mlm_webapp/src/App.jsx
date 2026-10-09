@@ -2985,7 +2985,7 @@ function App() {
     e.preventDefault();
     const name = e.target.name.value;
     const mobile = e.target.mobile.value;
-    const password = e.target.password.value;
+    const password = Math.floor(100000 + Math.random() * 900000).toString();
     const btn = e.target.submitBtn;
     
     btn.disabled = true;
@@ -3005,7 +3005,7 @@ function App() {
       });
       const data = await response.json();
       if (data.success) {
-        window.customAlert('Member Registered Successfully! ID: ' + data.user.memberId);
+        setRegisteredDetails({ memberId: data.user.memberId, name, mobile, password });
         e.target.reset();
       } else {
         window.customAlert('Error: ' + data.message);
@@ -3022,6 +3022,56 @@ function App() {
     <CardWrapper>
       <PageHeader title="Add New Member" subtitle="Register a new member in your downline" />
       <div style={{ padding: '32px', background: '#F8FAFC', borderRadius: '24px', border: '1px solid #E2E8F0', maxWidth: '600px', margin: '0 auto' }}>
+          {registeredDetails ? (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '56px', marginBottom: '16px', animation: 'floatUp 1s ease-out' }}>🎉</div>
+              <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', marginBottom: '8px' }}>Registration Successful!</h2>
+              <p style={{ color: '#64748B', marginBottom: '24px' }}>Member has been added to your downline.</p>
+              
+              <div ref={captureRef} style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+                <p style={{ color: '#6c28d9', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontWeight: '800' }}>Member Account Details</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', background: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Login ID</span>
+                      <span style={{ fontSize: '18px', color: '#1e1b4b', fontWeight: '800' }}>{registeredDetails.memberId}</span>
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }}></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Name</span>
+                      <span style={{ fontSize: '15px', color: '#1e1b4b', fontWeight: '700' }}>{registeredDetails.name}</span>
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }}></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Mobile</span>
+                      <span style={{ fontSize: '15px', color: '#1e1b4b', fontWeight: '700' }}>{registeredDetails.mobile}</span>
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }}></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Password</span>
+                      <span style={{ fontSize: '15px', color: '#1e1b4b', fontWeight: '700' }}>{registeredDetails.password}</span>
+                   </div>
+                </div>
+
+                <p style={{ color: '#f43f5e', fontSize: '12px', marginTop: '16px', fontWeight: '600' }}>⚠️ Please save these details safely!</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={handleDownloadImage}
+                  style={{ flex: 1, background: '#10b981', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 14px 0 rgba(16, 185, 129, 0.39)' }}
+                >
+                  Download Image
+                </button>
+                <button 
+                  onClick={() => setRegisteredDetails(null)}
+                  style={{ flex: 1, background: '#0F172A', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  Add Another Member
+                </button>
+              </div>
+            </div>
+          ) : (
           <form onSubmit={handleAddMember} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -3039,21 +3089,13 @@ function App() {
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Mobile Number</label>
                   <input type="tel" name="mobile" className="form-input" placeholder="10-digit mobile number" required pattern="[0-9]{10}" maxLength="10" />
                 </div>
-
-
-
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Password (6 Digits)</label>
-                  <div style={{ padding: '8px 0' }}>
-                     <PinInput name="password" />
-                  </div>
-                </div>
             </div>
 
             <button type="submit" name="submitBtn" style={{ marginTop: '16px', padding: '16px', background: 'linear-gradient(135deg, #4F46E5 0%, #3730A3 100%)', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '800', fontSize: '16px', boxShadow: '0 10px 25px -5px rgba(79,70,229,0.4)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}>
                Register Member
             </button>
           </form>
+          )}
       </div>
     </CardWrapper>
   );
@@ -3714,7 +3756,7 @@ function App() {
         </div>
         <div style={{ padding: '20px', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
           <button 
-            onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); localStorage.clear(); }}
+            onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); setRegisteredDetails(null); localStorage.clear(); }}
             style={{ width: '100%', padding: '12px', background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48', border: '1px solid rgba(225, 29, 72, 0.2)', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
           >
             <span>🚪</span> Logout
