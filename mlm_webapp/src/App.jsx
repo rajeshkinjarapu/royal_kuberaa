@@ -3661,6 +3661,7 @@ function App() {
        case 'Payouts & TDS': renderFn = renderPayoutApprovals; break;
        case 'Notifications': renderFn = renderNotifications; break;
        case 'App Upload': renderFn = renderAppUpload; break;
+       case 'ID Activation': renderFn = renderIDActivation; break;
        case 'Non-Working Cashback': renderFn = renderRoyaltyAndCashback; break;
        case 'Add Member': renderFn = renderAddMember; break;
        case 'Fund Management': renderFn = renderFundManagement; break;
