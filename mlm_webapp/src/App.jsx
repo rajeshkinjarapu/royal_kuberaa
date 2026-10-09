@@ -780,7 +780,7 @@ function App() {
           ) : networkData.length === 0 ? (
              <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>You haven't referred anyone yet.</div>
           ) : (
-            <Table headers={['Member ID', 'Name', 'Rank', 'Join Date', 'Password', 'Status']}>
+            <Table headers={['Member ID', 'Name', 'Rank', 'Join Date', 'Status']}>
               {networkData.map(user => (
                 <tr key={user.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
                   <td style={{ padding: '15px', fontWeight: 'bold', color: '#0EA5E9' }}>{user.id}</td>
@@ -789,9 +789,6 @@ function App() {
                      <span style={{ fontWeight: 'bold', color: user.rank === 'Gold' ? '#F59E0B' : '#94A3B8' }}>{user.rank}</span>
                   </td>
                   <td style={{ padding: '15px', color: '#64748B' }}>{user.joinDate}</td>
-                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#1E293B', fontFamily: 'monospace', letterSpacing: '2px' }}>
-                     {user.password}
-                  </td>
                   <td style={{ padding: '15px' }}>
                     <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>
                       {user.status}

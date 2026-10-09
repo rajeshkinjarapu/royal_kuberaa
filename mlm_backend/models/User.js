@@ -22,10 +22,6 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false // Not required for rebirth IDs
     },
-    plainPassword: {
-        type: String,
-        required: false
-    },
     tpin: {
         type: String,
         default: '' // Default empty means user has to set it first
