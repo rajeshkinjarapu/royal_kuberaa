@@ -436,7 +436,7 @@ function App() {
               <form className="login-form" onSubmit={handleRegister}>
                 <div className="form-group">
                   <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Full Name</label>
-                  <input type="text" name="name" className="form-input" placeholder="Enter Full Name" required />
+                  <input type="text" name="name" className="form-input" placeholder="Enter Full Name" required onInput={(e) => e.target.value = e.target.value.toUpperCase()} style={{ textTransform: 'uppercase' }} />
                 </div>
                 <div className="form-group">
                   <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Mobile Number</label>
@@ -3027,7 +3027,7 @@ function App() {
                 
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>Full Name</label>
-                  <input type="text" name="name" className="form-input" placeholder="Enter member name" required />
+                  <input type="text" name="name" className="form-input" placeholder="Enter member name" required onInput={(e) => e.target.value = e.target.value.toUpperCase()} style={{ textTransform: 'uppercase' }} />
                 </div>
                 
                 <div style={{ gridColumn: '1 / -1' }}>
