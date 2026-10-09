@@ -711,7 +711,6 @@ function App() {
                     <p style={{ fontSize: '13px', marginTop: '4px', color: '#64748B' }}>Upload your payment QR code to receive your payouts.</p>
                  </div>
               )}
-            </div>
           </div>
 
           <h3 style={{ marginTop: '40px', marginBottom: '16px' }}>Payment QR Code (UPI)</h3>
