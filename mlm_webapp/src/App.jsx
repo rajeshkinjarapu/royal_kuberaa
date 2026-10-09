@@ -307,7 +307,7 @@ function App() {
       const result = await response.json();
       
       if (result.success) {
-        setRegisteredDetails({ memberId: result.user.memberId, mobile, password });
+        setRegisteredDetails({ memberId: result.user.memberId, name, mobile, password });
       } else {
         setErrorMsg(result.message || 'Registration failed');
       }
@@ -352,6 +352,11 @@ function App() {
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Login ID</span>
                       <span style={{ fontSize: '18px', color: '#1e1b4b', fontWeight: '800' }}>{registeredDetails.memberId}</span>
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }}></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Name</span>
+                      <span style={{ fontSize: '15px', color: '#1e1b4b', fontWeight: '700' }}>{registeredDetails.name}</span>
                    </div>
                    <div style={{ height: '1px', background: '#f1f5f9' }}></div>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
