@@ -1959,16 +1959,7 @@ function App() {
          <PageHeader title="Deposit Funds" subtitle="Add funds to your wallet using UPI or Bank Transfer" />
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
             <div style={{ padding: '24px', background: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-               <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🏦</span> Company Bank Details
-               </h3>
-               <div style={{ background: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
-                 <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>Bank Name:</strong> {companyInfo.companyBankName}</p>
-                 <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>A/C Name:</strong> {companyInfo.companyAccountName}</p>
-                 <p style={{ color: '#64748B', marginBottom: '8px', fontSize: '14px' }}><strong>A/C Number:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#0F172A' }}>{companyInfo.companyAccountNumber}</span></p>
-                 <p style={{ color: '#64748B', fontSize: '14px' }}><strong>IFSC Code:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#0F172A' }}>{companyInfo.companyIfsc}</span></p>
-               </div>
-               
+
                <h4 style={{ marginBottom: '12px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>📱</span> UPI QR Code Payment
                </h4>
@@ -1998,22 +1989,6 @@ function App() {
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                   <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>⚡</span> Instant Payment (Razorpay)
-                   </h3>
-                   <p style={{ color: '#64748B', fontSize: '14px', marginBottom: '20px' }}>Deposit funds instantly using Cards, UPI, or Netbanking. No manual approval required!</p>
-                   
-                   <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>Deposit Amount (₹)</label>
-                      <input type="number" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="e.g. 1000" style={{ width: '100%', padding: '12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' }} />
-                   </div>
-                   
-                   <button onClick={handleRazorpaySubmit} disabled={loading} style={{ width: '100%', padding: '14px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '15px' }}>
-                      {loading ? 'Processing...' : 'Pay Instantly'}
-                   </button>
-                </div>
-
                 <div style={{ padding: '24px', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
                    <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>📝</span> Submit UTR Reference (Manual)
