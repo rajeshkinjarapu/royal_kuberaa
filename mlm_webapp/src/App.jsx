@@ -2776,11 +2776,11 @@ function App() {
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
             <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🔄 Daily Midnight Pools</strong>
-            <span style={{ fontSize: '13px', color: '#64748B' }}>₹250 from every active ID is pooled and split evenly every single night at 12:01 AM among achievers.</span>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>₹300 from every active ID is pooled and split evenly every single night at 12:00 AM among Royalty achievers, plus ₹100 for Non-Working members.</span>
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
             <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🌱 Perpetual Rebirth IDs</strong>
-            <span style={{ fontSize: '13px', color: '#64748B' }}>Automatic 20% re-investment cycle creating fresh IDs, fresh sponsor bonuses, and new pool fuel.</span>
+            <span style={{ fontSize: '13px', color: '#64748B' }}>Automatic 10% re-investment cycle creating fresh IDs, fresh sponsor bonuses (₹400), and new pool fuel (₹1100).</span>
           </div>
           <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
             <strong style={{ color: '#0F172A', display: 'block', marginBottom: '6px' }}>🛡️ 100% Legal & Compliant</strong>
@@ -2809,12 +2809,12 @@ function App() {
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. One-Time Membership & Product Package</h4>
         <p style={{ marginBottom: '16px' }}>
-          Membership activation requires a one-time fee of ₹1,000 (inclusive of taxes and selected product kit). Activation grants access to the member portal, educational resources, and binary network placement.
+          Membership activation requires a one-time fee of ₹1,500 (inclusive of taxes and selected tangible welcome product kit). Activation grants access to the member portal, income dashboards, and unilevel team network placement.
         </p>
 
-        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Binary Matching Compensation & Capping</h4>
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Direct & Team Level Income</h4>
         <p style={{ marginBottom: '16px' }}>
-          The first binary pair payout requires a 2:1 or 1:2 ratio with at least 1 personally sponsored direct active member on the Left and 1 on the Right. Subsequent pairs are matched on a 1:1 basis at ₹100 per matched pair. A maximum daily capping limit of 5 pairs (₹500 per day) applies to every active ID. Unmatched volume beyond the daily cap is flushed out to preserve network integrity.
+          Every direct referral earns you an instant ₹400. In addition, you earn income up to 10 levels deep from your entire network without any binary matching requirements. Level incomes range from ₹100 at Level 1 down to ₹10 at Level 10. There are no daily caps or flush outs on team level income.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Daily Royalty Pools & Lifetime Limits</h4>
@@ -2824,12 +2824,12 @@ function App() {
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. Non-Working Cashback Policy</h4>
         <p style={{ marginBottom: '16px' }}>
-          The daily non-working cashback fund is distributed strictly among active members who have zero (0) direct referrals until their ₹1,000 joining fee is recovered. If a user sponsors even 1 direct member, cashback eligibility stops permanently as they transition to the active earning plan.
+          The daily non-working cashback fund is distributed strictly among active members who have earned zero (0) commissions, until their ₹1,500 joining fee is recovered. If a user earns any commission (Direct or Level income), cashback eligibility stops permanently as they transition to the active earning plan.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>6. Rebirth ID System</h4>
         <p style={{ marginBottom: '16px' }}>
-          Twenty percent (20%) of all earnings are systematically directed to the member's Rebirth Wallet. When this wallet accumulates ₹1,000, an automated new position is generated in the binary tree under the sponsor, distributing ₹300 sponsor bonus and ₹700 into community pools.
+          Ten percent (10%) of all earnings are systematically directed to the member's Rebirth Wallet. When this wallet accumulates ₹1,500, an automated new position is generated under the same sponsor, distributing ₹400 sponsor bonus and ₹1,100 into the daily royalty pools.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>7. Statutory Deductions & Payouts</h4>
@@ -2856,7 +2856,7 @@ function App() {
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. Use of Collected Data</h4>
         <p style={{ marginBottom: '16px' }}>
-          Your data is used strictly for user identification, binary genealogy processing, automated commission payouts, statutory tax filings (Form 16A TDS certificates), and vital system notifications.
+          Your data is used strictly for user identification, unilevel team network processing, automated commission payouts, statutory tax filings (Form 16A TDS certificates), and vital system notifications.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>3. Data Protection & Security</h4>
@@ -2924,7 +2924,7 @@ function App() {
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>1. Earnings & Income Representation</h4>
         <p style={{ marginBottom: '16px' }}>
-          Any earnings examples, binary match figures, or pool distributions displayed in promotional presentations are for educational illustration only. Income is strictly contingent upon genuine product distribution, sales volume, and individual performance. There is no guaranteed minimum earning.
+          Any earnings examples, team level income figures, or pool distributions displayed in promotional presentations are for educational illustration only. Income is strictly contingent upon genuine product distribution, sales volume, and individual performance. There is no guaranteed minimum earning.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>2. Regulatory Compliance</h4>
