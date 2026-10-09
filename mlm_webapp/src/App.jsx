@@ -2700,9 +2700,9 @@ function App() {
                        {product.badge.toUpperCase()}
                      </div>
                   )}
-                  <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '16px' }}>
+                  <div style={{ width: '100%', height: '200px', borderRadius: '14px', background: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', marginBottom: '16px', overflow: 'hidden' }}>
                     {product.image && product.image.includes('/') ? (
-                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }} />
+                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                         product.image || '📦'
                     )}
@@ -2712,10 +2712,6 @@ function App() {
                     {product.description}
                   </p>
                   <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
-                      <span style={{ color: '#64748B' }}>Business Volume (BV):</span>
-                      <strong style={{ color: '#0F172A' }}>{product.bv} BV</strong>
-                    </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                       <span style={{ color: '#64748B' }}>Delivery:</span>
                       <strong style={{ color: '#10B981' }}>{product.deliveryInfo}</strong>
