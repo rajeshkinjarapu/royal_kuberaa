@@ -6,7 +6,10 @@ const MatrixNode = require('./models/MatrixNode');
 const Withdrawal = require('./models/Withdrawal');
 const FundRequest = require('./models/FundRequest');
 
-mongoose.connect('mongodb://127.0.0.1:27017/royal_kuberaa')
+require('dotenv').config();
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/royalkuberaa';
+
+mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log("Connected to MongoDB for Clean Wipe.");
 
