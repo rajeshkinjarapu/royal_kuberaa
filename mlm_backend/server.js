@@ -607,6 +607,20 @@ app.delete('/api/admin/users/:memberId', authMiddleware, async (req, res) => {
         await Withdrawal.deleteMany({ memberId });
         await SupportTicket.deleteMany({ memberId });
 
+        // Update the sponsor's counts before deleting
+        if (userToDelete.sponsorId) {
+            await User.updateOne(
+                { memberId: userToDelete.sponsorId },
+                { 
+                    $pull: { directs: memberId },
+                    $inc: { 
+                        directReferralsCount: -1,
+                        totalTeamCount: -1 // at least deduct 1 from the immediate sponsor
+                    } 
+                }
+            );
+        }
+
         await User.deleteOne({ memberId });
         res.json({ success: true, message: 'User and all related records (incomes, etc.) deleted successfully' });
     } catch (error) {
