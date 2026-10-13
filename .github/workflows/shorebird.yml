@@ -1,0 +1,67 @@
+name: Shorebird Release & Patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      action_type:
+        description: 'Choose Shorebird action'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - release
+
+jobs:
+  shorebird:
+    name: Run Shorebird (${{ github.event.inputs.action_type }})
+    runs-on: ubuntu-latest
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Shorebird
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Accept Android Licenses
+        run: yes "y" | flutter doctor --android-licenses || true
+
+      - name: Install Dependencies
+        working-directory: ./mlm_flutter_app
+        run: shorebird flutter pub get
+
+      - name: Make gradlew executable
+        run: |
+          if [ -f mlm_flutter_app/android/gradlew ]; then
+            chmod +x mlm_flutter_app/android/gradlew
+          fi
+
+      - name: Run Shorebird Release (APK)
+        if: ${{ github.event.inputs.action_type == 'release' }}
+        working-directory: ./mlm_flutter_app
+        run: shorebird release android --artifact=apk
+
+      - name: Upload Shorebird Release APK
+        if: ${{ github.event.inputs.action_type == 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: RoyalKuberaa-Shorebird-Release-APK
+          path: mlm_flutter_app/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+
+      - name: Run Shorebird Patch (OTA)
+        if: ${{ github.event.inputs.action_type == 'patch' }}
+        working-directory: ./mlm_flutter_app
+        run: shorebird patch android --force
