@@ -32,8 +32,14 @@ jobs:
       - name: Check Flutter Doctor
         run: flutter doctor -v
 
+      - name: Accept Android Licenses
+        run: yes "y" | flutter doctor --android-licenses || true
+
       - name: Make gradlew executable
-        run: chmod +x mlm_flutter_app/android/gradlew
+        run: |
+          if [ -f mlm_flutter_app/android/gradlew ]; then
+            chmod +x mlm_flutter_app/android/gradlew
+          fi
 
       - name: Install Dependencies
         working-directory: ./mlm_flutter_app
