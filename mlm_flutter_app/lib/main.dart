@@ -235,7 +235,7 @@ class RoyalKuberaaApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+        fontFamily: GoogleFonts.inter().fontFamily,
       ),
       routerConfig: router,
     );
