@@ -73,7 +73,7 @@ class ProfileScreen extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Personal Details are shown above.')));
               }),
               _buildSettingsTile(context, Icons.verified_user_outlined, 'KYC Verification', () => context.push('/kyc')),
-              _buildSettingsTile(context, Icons.account_balance_outlined, 'Payment / Bank Settings', () => context.push('/kyc')), // Bank details are in KYC screen
+              _buildSettingsTile(context, Icons.account_balance_outlined, 'Payment / Bank Settings', () => context.push('/payment-settings')),
             ],
           ),
           
@@ -94,6 +94,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               _buildSettingsTile(context, Icons.headset_mic_outlined, 'Customer Support Tickets', () => context.push('/support')),
               _buildSettingsTile(context, Icons.notifications_none, 'Account Notifications', () => context.push('/notifications')),
+              _buildSettingsTile(context, Icons.description_outlined, 'Legal Policies & Compliance', () => context.push('/legal')),
             ],
           ),
 

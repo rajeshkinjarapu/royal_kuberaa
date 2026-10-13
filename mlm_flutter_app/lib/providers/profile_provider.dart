@@ -8,13 +8,16 @@ class ProfileProvider with ChangeNotifier {
   Map<String, dynamic>? _profileData;
   bool _isLoading = false;
   bool _hasTpin = false;
+  String _errorMessage = '';
 
   Map<String, dynamic>? get profileData => _profileData;
   bool get isLoading => _isLoading;
   bool get hasTpin => _hasTpin;
+  String get errorMessage => _errorMessage;
 
   Future<void> fetchProfile() async {
     _isLoading = true;
+    _errorMessage = '';
     notifyListeners();
 
     try {
@@ -35,11 +38,13 @@ class ProfileProvider with ChangeNotifier {
             
             // Also update the local cached user so AuthProvider gets updated name/rank etc.
             await prefs.setString('user', jsonEncode(_profileData));
+          } else {
+            _errorMessage = data['message'] ?? 'Failed to load profile';
           }
         }
       }
     } catch (e) {
-      print('Fetch profile error: $e');
+      _errorMessage = 'Fetch profile error: $e';
     }
 
     _isLoading = false;
@@ -48,6 +53,7 @@ class ProfileProvider with ChangeNotifier {
 
   Future<bool> updateKyc(Map<String, String> kycData) async {
     _isLoading = true;
+    _errorMessage = '';
     notifyListeners();
     bool success = false;
 
@@ -68,9 +74,11 @@ class ProfileProvider with ChangeNotifier {
       if (response.statusCode == 200 && data['success']) {
         await fetchProfile(); // Refresh profile
         success = true;
+      } else {
+        _errorMessage = data['message'] ?? 'Failed to update KYC';
       }
     } catch (e) {
-      print('KYC update error: $e');
+      _errorMessage = 'KYC update error: $e';
     }
 
     _isLoading = false;

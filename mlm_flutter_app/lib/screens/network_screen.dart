@@ -315,9 +315,9 @@ class _RebirthsViewState extends State<_RebirthsView> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(member['id'] ?? 'N/A', style: const TextStyle(fontSize: 16, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                              Text(member['memberId'] ?? member['id'] ?? 'N/A', style: const TextStyle(fontSize: 16, color: AppColors.primary, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
-                              Text('Created: ${member['createdDate']}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text('Created: ${member['createdDate'] ?? member['createdAt'] ?? 'Recently'}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             ],
                           ),
                           Container(

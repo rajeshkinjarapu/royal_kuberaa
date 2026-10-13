@@ -34,6 +34,14 @@ import 'screens/admin_fund_management_screen.dart';
 import 'screens/admin_support_screen.dart';
 import 'screens/support_screen.dart';
 import 'screens/notifications_screen.dart';
+import 'screens/rebirth_screen.dart';
+import 'screens/add_member_screen.dart';
+import 'screens/team_network_screen.dart';
+import 'screens/payment_settings_screen.dart';
+import 'screens/admin_pools_screen.dart';
+import 'screens/admin_reports_screen.dart';
+import 'screens/admin_app_upload_screen.dart';
+import 'screens/legal_policy_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
@@ -169,6 +177,54 @@ class RoyalKuberaaApp extends StatelessWidget {
         GoRoute(
           path: '/notifications',
           builder: (context, state) => const NotificationsScreen(),
+        ),
+        GoRoute(
+          path: '/rebirth',
+          builder: (context, state) => const RebirthScreen(),
+        ),
+        GoRoute(
+          path: '/add-member',
+          builder: (context, state) => const AddMemberScreen(),
+        ),
+        GoRoute(
+          path: '/team-network',
+          builder: (context, state) => const TeamNetworkScreen(),
+        ),
+        GoRoute(
+          path: '/payment-settings',
+          builder: (context, state) => const PaymentSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/pools',
+          builder: (context, state) => const AdminPoolsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/reports',
+          builder: (context, state) => const AdminReportsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/app-upload',
+          builder: (context, state) => const AdminAppUploadScreen(),
+        ),
+        GoRoute(
+          path: '/legal',
+          builder: (context, state) => const LegalPolicyScreen(),
+        ),
+        GoRoute(
+          path: '/terms',
+          builder: (context, state) => const LegalPolicyScreen(initialTabIndex: 0),
+        ),
+        GoRoute(
+          path: '/privacy',
+          builder: (context, state) => const LegalPolicyScreen(initialTabIndex: 1),
+        ),
+        GoRoute(
+          path: '/refund',
+          builder: (context, state) => const LegalPolicyScreen(initialTabIndex: 2),
+        ),
+        GoRoute(
+          path: '/disclaimer',
+          builder: (context, state) => const LegalPolicyScreen(initialTabIndex: 3),
         ),
       ],
     );

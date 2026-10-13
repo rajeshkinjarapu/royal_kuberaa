@@ -218,6 +218,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () => context.push('/terms'),
+                      child: const Text('Terms & Conditions', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                    ),
+                    const Text('•', style: TextStyle(color: AppColors.textSecondary)),
+                    TextButton(
+                      onPressed: () => context.push('/privacy'),
+                      child: const Text('Privacy Policy', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

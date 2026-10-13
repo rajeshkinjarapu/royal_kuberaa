@@ -10,7 +10,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
-    
+
     return Drawer(
       backgroundColor: Colors.white,
       child: ListView(
@@ -18,7 +18,6 @@ class AppDrawer extends StatelessWidget {
         children: [
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(
-              color: AppColors.primary,
               gradient: LinearGradient(
                 colors: [AppColors.primary, AppColors.primaryDark],
                 begin: Alignment.topLeft,
@@ -26,48 +25,150 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             accountName: Text(
-              user?['fullName'] ?? 'Royal Member',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              user?['fullName'] ?? user?['name'] ?? 'Royal Member',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
             ),
             accountEmail: Text(
-              user?['memberId'] ?? 'ID Not Found',
-              style: const TextStyle(color: Colors.white70),
+              'ID: ${user?['memberId'] ?? 'N/A'}',
+              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
             ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                (user?['fullName'] ?? 'R')[0].toUpperCase(),
+                (user?['fullName'] ?? user?['name'] ?? 'R')[0].toUpperCase(),
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
             ),
           ),
+
+          // --- NETWORK & TEAM ---
+          _buildSectionHeader('NETWORK & GROWTH'),
           _buildDrawerItem(
-            icon: Icons.shopping_bag_outlined, 
-            title: 'Welcome Products', 
+            icon: Icons.person_add_alt_1_outlined,
+            title: 'Add New Member',
+            iconColor: Colors.blue,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/add-member');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.account_tree_outlined,
+            title: 'Team Network',
+            iconColor: Colors.teal,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/team-network');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.all_inclusive,
+            title: 'Rebirth IDs',
+            iconColor: Colors.purple,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/rebirth');
+            },
+          ),
+
+          const Divider(),
+
+          // --- EARNINGS & POOLS ---
+          _buildSectionHeader('EARNINGS & POOLS'),
+          _buildDrawerItem(
+            icon: Icons.workspace_premium_outlined,
+            title: 'Royalty Pools',
+            iconColor: Colors.amber.shade800,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/royalty');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.monetization_on_outlined,
+            title: 'Non-Working Cashback',
+            iconColor: Colors.green,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/cashback');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.shopping_bag_outlined,
+            title: 'Welcome Products',
+            iconColor: Colors.deepOrange,
             onTap: () {
               Navigator.pop(context);
               context.push('/products');
             },
           ),
+
+          const Divider(),
+
+          // --- ACCOUNT & PAYMENTS ---
+          _buildSectionHeader('ACCOUNT & SETTINGS'),
           _buildDrawerItem(
-            icon: Icons.headset_mic_outlined, 
-            title: 'Customer Support', 
+            icon: Icons.account_balance_outlined,
+            title: 'Payment Settings',
+            iconColor: AppColors.primary,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/payment-settings');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.verified_user_outlined,
+            title: 'KYC Verification',
+            iconColor: Colors.indigo,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/kyc');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.pin_outlined,
+            title: 'Transaction PIN (TPIN)',
+            iconColor: Colors.blueGrey,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/tpin');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.lock_outline,
+            title: 'Change Password',
+            iconColor: Colors.blueGrey,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/change-password');
+            },
+          ),
+
+          const Divider(),
+
+          // --- SUPPORT & INFO ---
+          _buildSectionHeader('SUPPORT & INFO'),
+          _buildDrawerItem(
+            icon: Icons.headset_mic_outlined,
+            title: 'Customer Support',
+            iconColor: Colors.purple,
             onTap: () {
               Navigator.pop(context);
               context.push('/support');
             },
           ),
           _buildDrawerItem(
-            icon: Icons.notifications_none, 
-            title: 'Notifications', 
+            icon: Icons.notifications_none,
+            title: 'Notifications',
+            iconColor: Colors.orange,
             onTap: () {
               Navigator.pop(context);
               context.push('/notifications');
             },
           ),
           _buildDrawerItem(
-            icon: Icons.info_outline, 
-            title: 'About Royal Kuberaa', 
+            icon: Icons.info_outline,
+            title: 'About Royal Kuberaa',
             onTap: () {
               Navigator.pop(context);
               showDialog(
@@ -85,8 +186,52 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+
+          const Divider(),
+
+          // --- LEGAL & POLICIES ---
+          _buildSectionHeader('LEGAL & POLICIES'),
+          _buildDrawerItem(
+            icon: Icons.description_outlined,
+            title: 'Terms & Conditions',
+            iconColor: Colors.blueGrey,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/terms');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            iconColor: Colors.blueGrey,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/privacy');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.assignment_return_outlined,
+            title: 'Return & Refund Policy',
+            iconColor: Colors.blueGrey,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/refund');
+            },
+          ),
+          _buildDrawerItem(
+            icon: Icons.gavel_outlined,
+            title: 'Disclaimer & Compliance',
+            iconColor: Colors.blueGrey,
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/disclaimer');
+            },
+          ),
+
+          // Admin Menu
           if (user?['role'] == 'admin') ...[
             const Divider(),
+            _buildSectionHeader('ADMINISTRATION'),
             _buildDrawerItem(
               icon: Icons.admin_panel_settings,
               title: 'Admin Panel',
@@ -98,10 +243,11 @@ class AppDrawer extends StatelessWidget {
               },
             ),
           ],
+
           const Divider(),
           _buildDrawerItem(
-            icon: Icons.logout, 
-            title: 'Logout', 
+            icon: Icons.logout,
+            title: 'Logout',
             iconColor: AppColors.error,
             textColor: AppColors.error,
             onTap: () async {
@@ -109,17 +255,41 @@ class AppDrawer extends StatelessWidget {
               if (context.mounted) context.go('/login');
             },
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildDrawerItem({required IconData icon, required String title, required VoidCallback onTap, Color? iconColor, Color? textColor}) {
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 12, bottom: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? iconColor,
+    Color? textColor,
+  }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? AppColors.textSecondary),
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -1),
+      leading: Icon(icon, color: iconColor ?? AppColors.textSecondary, size: 20),
       title: Text(
         title,
-        style: TextStyle(color: textColor ?? AppColors.textPrimary, fontWeight: FontWeight.w600),
+        style: TextStyle(color: textColor ?? AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13),
       ),
       onTap: onTap,
     );

@@ -51,7 +51,7 @@ jobs:
       - name: Run Shorebird Release (APK)
         if: ${{ github.event.inputs.action_type == 'release' }}
         working-directory: ./mlm_flutter_app
-        run: shorebird release android --artifact=apk
+        run: shorebird release android --artifact=apk --no-confirm
 
       - name: Upload Shorebird Release APK
         if: ${{ github.event.inputs.action_type == 'release' }}

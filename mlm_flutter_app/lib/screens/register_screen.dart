@@ -97,13 +97,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 201 && data['success']) {
+      if ((response.statusCode == 200 || response.statusCode == 201) && data['success'] == true) {
         if (mounted) {
+          final registeredUser = data['user'] ?? data['data'] ?? {};
           // Go to success screen, passing credentials
           context.go('/register_success', extra: {
-            'memberId': data['user']['memberId'],
+            'memberId': registeredUser['memberId'] ?? '',
             'password': generatedPassword,
             'fullName': _nameController.text.toUpperCase(),
+            'mobile': _mobileController.text,
           });
         }
       } else {
@@ -205,7 +207,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     : const Text('REGISTER MEMBER', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
               ),
             ),
-          ],
+            const SizedBox(height: 16),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Text('By registering, you agree to our ', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                GestureDetector(
+                  onTap: () => context.push('/terms'),
+                  child: const Text('Terms', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                const Text(' & ', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                GestureDetector(
+                  onTap: () => context.push('/privacy'),
+                  child: const Text('Privacy Policy', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
         ),
       ),
     );
