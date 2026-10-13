@@ -30,6 +30,12 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
         with:
@@ -40,7 +46,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./mlm_flutter_app
-        run: shorebird flutter pub get
+        run: flutter pub get
 
       - name: Make gradlew executable
         run: |
