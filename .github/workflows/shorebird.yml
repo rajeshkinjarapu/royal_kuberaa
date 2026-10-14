@@ -1,6 +1,12 @@
 name: Shorebird Release & Patch
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mlm_flutter_app/**'
+      - '.github/workflows/shorebird.yml'
   workflow_dispatch:
     inputs:
       action_type:
@@ -14,7 +20,7 @@ on:
 
 jobs:
   shorebird:
-    name: Run Shorebird (${{ github.event.inputs.action_type }})
+    name: Run Shorebird (${{ github.event.inputs.action_type || 'patch' }})
     runs-on: ubuntu-latest
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -68,6 +74,6 @@ jobs:
           if-no-files-found: error
 
       - name: Run Shorebird Patch (OTA)
-        if: ${{ github.event.inputs.action_type == 'patch' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.action_type == 'patch' }}
         working-directory: ./mlm_flutter_app
         run: shorebird patch android --force --allow-asset-diffs
