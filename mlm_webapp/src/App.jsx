@@ -3325,9 +3325,9 @@ function App() {
                 </div>
 
                 <div style={{ padding: '10px', background: '#EFF6FF', borderRadius: '12px', border: '1px solid #BFDBFE', textAlign: 'center' }}>
-                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Share / ID</div>
-                  <div style={{ fontSize: '17px', fontWeight: '800', color: '#2563EB', margin: '2px 0' }}>₹15.00</div>
-                  <div style={{ fontSize: '10px', color: '#2563EB', fontWeight: 'bold' }}>Every Joining</div>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Pool Fund</div>
+                  <div style={{ fontSize: '17px', fontWeight: '800', color: '#2563EB', margin: '2px 0' }}>₹150</div>
+                  <div style={{ fontSize: '10px', color: '#2563EB', fontWeight: 'bold' }}>Per Joining</div>
                 </div>
 
                 <div style={{ padding: '10px', background: '#FAF5FF', borderRadius: '12px', border: '1px solid #E9D5FF', textAlign: 'center' }}>
@@ -3343,9 +3343,9 @@ function App() {
               {isCompleted ? (
                 <span>🎉 <strong>100% Cashback Completed!</strong> You have recovered your full ₹1,500 from the Autopool.</span>
               ) : isInTop10 ? (
-                <span>⚡ <strong>You are in the Active Top 10!</strong> Every new ID activated in the company instantly credits ₹15 to your wallet.</span>
+                <span>⚡ <strong>You are in the Active Top 10!</strong> The ₹150 pool from every new company activation is distributed equally among active queue members until ₹1,500 is reached.</span>
               ) : (
-                <span>⏳ <strong>Rank #{queuePos || 1} in Waiting Queue:</strong> As members ahead reach ₹1,500, they graduate and you advance into the active Top 10.</span>
+                <span>⏳ <strong>Rank #{queuePos || 1} in Waiting Queue:</strong> As active members complete ₹1,500, they graduate and you advance into the Top 10.</span>
               )}
             </div>
           </div>
@@ -3358,10 +3358,10 @@ function App() {
               <span style={{ fontSize: '24px' }}>🏆</span>
               <div>
                 <h3 style={{ margin: 0, color: '#0F172A', fontSize: '18px', fontWeight: '800' }}>
-                  Active Top 10 Members Queue (లైవ్ టాప్ 10 సభ్యుల ఐడీలు)
+                  Active Top 10 Members Queue (Live FIFO Active IDs)
                 </h3>
                 <p style={{ margin: '2px 0 0', color: '#64748B', fontSize: '12px' }}>
-                  ఈ 10 మంది సభ్యులు ప్రతి కొత్త జాయినింగ్‌పై ₹15.00 చొప్పున ₹1500 పూర్తయ్యే వరకు నేరుగా అందుకుంటారు.
+                  ₹150 from each new company activation is distributed equally among active queue members until their ₹1,500 cap is reached.
                 </p>
               </div>
             </div>
@@ -3378,7 +3378,7 @@ function App() {
             <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>Loading Top 10 Queue...</div>
           ) : top10.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '30px', color: '#94A3B8', background: '#F8FAFC', borderRadius: '12px' }}>
-              సభ్యులు యాక్టివేట్ కాగానే FIFO క్రమంలో ఇక్కడ 10 మంది సభ్యుల ఐడీలు ప్రత్యక్షంగా కనిపిస్తాయి.
+              Active member IDs will appear here in FIFO order upon activation.
             </div>
           ) : (
             <div style={{ overflowX: 'auto', marginTop: '16px' }}>
@@ -3387,7 +3387,6 @@ function App() {
                   <tr style={{ background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', color: '#475569', fontWeight: '700' }}>
                     <th style={{ padding: '12px 16px' }}>Rank</th>
                     <th style={{ padding: '12px 16px' }}>Member ID</th>
-                    <th style={{ padding: '12px 16px' }}>Member Name</th>
                     <th style={{ padding: '12px 16px' }}>Received / ₹1500</th>
                     <th style={{ padding: '12px 16px' }}>Progress</th>
                     <th style={{ padding: '12px 16px' }}>Remaining</th>
@@ -3424,13 +3423,10 @@ function App() {
                             </span>
                             {isMe && (
                               <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#059669', color: '#FFF', fontSize: '10px', fontWeight: 'bold' }}>
-                                YOU (మీరు)
+                                YOU
                               </span>
                             )}
                           </div>
-                        </td>
-                        <td style={{ padding: '12px 16px', color: '#334155' }}>
-                          {mem.name || mem.memberId}
                         </td>
                         <td style={{ padding: '12px 16px', fontWeight: 'bold', color: '#059669' }}>
                           ₹ {formatCurrency(memEarnings)} / ₹1,500
@@ -3444,7 +3440,7 @@ function App() {
                           </div>
                         </td>
                         <td style={{ padding: '12px 16px', color: '#64748B', fontSize: '12px' }}>
-                          ₹ {formatCurrency(remaining)} మిగిలింది
+                          ₹ {formatCurrency(remaining)} Left
                         </td>
                       </tr>
                     );
@@ -3454,7 +3450,7 @@ function App() {
 
               {top10.length < 10 && (
                 <div style={{ padding: '12px 16px', background: '#F8FAFC', borderRadius: '8px', marginTop: '12px', fontSize: '12px', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', border: '1px dashed #CBD5E1' }}>
-                  <span>🚀</span> <strong>స్లాట్లు #{top10.length + 1} నుండి #10:</strong> తదుపరి సభ్యులు యాక్టివేట్ కాగానే ఆటోమేటిక్‌గా ఈ స్థానాల్లోకి వస్తారు!
+                  <span>🚀</span> <strong>Slots #{top10.length + 1} to #10:</strong> Ready for incoming activations!
                 </div>
               )}
             </div>
@@ -3470,32 +3466,32 @@ function App() {
             <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>💰</div>
               <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>₹150 Autopool Fund</h4>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>కంపెనీలో జరిగే ప్రతి ₹1500 జాయినింగ్ నుండి ₹150 గ్లోబల్ ఆటోపూల్ పూల్‌కి చేరుతుంది.</p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>Every new ₹1,500 joining in the company contributes ₹150 to the Global Autopool Fund.</p>
             </div>
             <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>👥</div>
-              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>Top 10 Equal Share</h4>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>ఆ ₹150 ని క్యూలో ఉన్న మొదటి 10 మందికి ఒక్కొక్కరికీ ₹15 చొప్పున సమానంగా పంచబడుతుంది.</p>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>Equal Pool Sharing</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>The ₹150 pool from each activation is shared equally among active queue members until ₹1,500 is reached.</p>
             </div>
             <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>🎯</div>
               <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>₹1,500 Full Recovery Cap</h4>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>మీరు చెల్లించిన ₹1500 పూర్తి అయ్యే వరకు ప్రతి జాయినింగ్‌పై ₹15 వస్తూనే ఉంటుంది.</p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>Members continue receiving pool credits on company activations until they recover their full ₹1,500 joining fee.</p>
             </div>
             <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>🔄</div>
               <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>Queue Advancement</h4>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>సభ్యుడికి ₹1500 పూర్తి కాగానే వారు గ్రాడ్యుయేట్ అయి, 11వ సభ్యుడు టాప్ 10 లోకి వస్తారు.</p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>When a member completes ₹1,500, they graduate from the queue, and the next member advances into the active pool.</p>
             </div>
             <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>✅</div>
               <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>No Income Restrictions</h4>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>డైరెక్ట్ లేదా టీమ్ లెవల్ ఇన్‌కమ్ సంపాదించినప్పటికీ ఆటోపూల్ ఇన్‌కమ్ ఆగదు!</p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>Earning Direct Referral or Team Level income does not stop your Autopool earnings. Every active ID recovers ₹1,500!</p>
             </div>
             <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
               <div style={{ fontSize: '20px', marginBottom: '8px' }}>⚖️</div>
               <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>90% / 10% Split</h4>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>ఆటోపూల్ మొత్తం నుండి 90% మెయిన్ వాలెట్‌కు (విత్‌డ్రా), 10% రీబర్త్ వాలెట్‌కు జమ అవుతాయి.</p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>All Autopool credits split 90% to your Main Wallet (withdrawable) and 10% to your Rebirth Wallet.</p>
             </div>
           </div>
         </div>
@@ -3507,7 +3503,7 @@ function App() {
           </h3>
           {history.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
-              ఇంకా ఆటోపూల్ క్రెడిట్స్ రాలేదు. కొత్త జాయినింగ్స్ రాగానే ఇక్కడ కనిపిస్తాయి!
+              No Autopool credits yet. Credits will appear here in real-time as new company activations occur!
             </div>
           ) : (
             <Table headers={['Date', 'Amount', 'Type', 'Description']}>

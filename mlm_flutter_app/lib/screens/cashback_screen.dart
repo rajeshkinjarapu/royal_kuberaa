@@ -122,7 +122,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.all_inclusive_rounded, color: Colors.white, size: 20),
+                          Icon(Icons.all_inclusive, color: Colors.white, size: 20),
                           SizedBox(width: 8),
                           Text(
                             'FIFO Autopool Wallet',
@@ -252,10 +252,10 @@ class _CashbackScreenState extends State<CashbackScreen> {
                       ),
                       const SizedBox(width: 10),
                       _buildMetricTile(
-                        label: 'Share / ID',
-                        value: '₹15.00',
+                        label: 'Pool Fund',
+                        value: '₹150',
                         color: const Color(0xFF2563EB),
-                        subLabel: 'Every Joining',
+                        subLabel: 'Per Joining',
                       ),
                       const SizedBox(width: 10),
                       _buildMetricTile(
@@ -292,10 +292,10 @@ class _CashbackScreenState extends State<CashbackScreen> {
                       children: [
                         Icon(
                           isInTop10
-                              ? Icons.flash_on_rounded
+                              ? Icons.check_circle
                               : status == 'COMPLETED'
-                                  ? Icons.verified_rounded
-                                  : Icons.hourglass_top_rounded,
+                                  ? Icons.verified
+                                  : Icons.info_outline,
                           size: 20,
                           color: isInTop10
                               ? const Color(0xFF059669)
@@ -309,8 +309,8 @@ class _CashbackScreenState extends State<CashbackScreen> {
                             status == 'COMPLETED'
                                 ? '🎉 100% Joining Fee Cashback Completed! You have received the maximum ₹1,500 from the Autopool.'
                                 : isInTop10
-                                    ? '⚡ You are in the active Top 10! Every new ID activated anywhere in the company credits ₹15 instantly to your wallet.'
-                                    : '⏳ You are Rank #${queuePosition ?? 1} in the waiting queue. As members ahead reach ₹1,500, you will advance into the active Top 10.',
+                                    ? '⚡ You are in the active Top 10! The ₹150 pool from every new company activation is distributed equally among active queue members until ₹1,500 is reached.'
+                                    : '⏳ You are Rank #${queuePosition ?? 1} in the waiting queue. As active members complete ₹1,500, they graduate and you advance into the Top 10.',
                             style: TextStyle(
                               fontSize: 12,
                               color: isInTop10
@@ -359,42 +359,42 @@ class _CashbackScreenState extends State<CashbackScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildRuleRow(
-                    icon: Icons.monetization_on_rounded,
+                    icon: Icons.monetization_on,
                     color: const Color(0xFF059669),
                     title: '₹150 Autopool Fund Allocation',
                     desc: '₹150 is contributed from every ₹1,500 joining in the company to the Global FIFO Autopool Fund.',
                   ),
                   const Divider(height: 24, color: Color(0xFFF1F5F9)),
                   _buildRuleRow(
-                    icon: Icons.groups_rounded,
+                    icon: Icons.people,
                     color: const Color(0xFF2563EB),
-                    title: 'Top 10 Equal Share (FIFO)',
-                    desc: 'The ₹150 is distributed equally among the first 10 members in the active queue (₹15.00 per member on every joining).',
+                    title: 'Equal Pool Sharing (FIFO)',
+                    desc: 'The ₹150 pool from each activation is shared equally among active queue members until each reaches ₹1,500.',
                   ),
                   const Divider(height: 24, color: Color(0xFFF1F5F9)),
                   _buildRuleRow(
-                    icon: Icons.lock_clock_rounded,
+                    icon: Icons.lock_outline,
                     color: const Color(0xFF7C3AED),
                     title: '₹1,500 Capping (100% Cashback)',
-                    desc: 'You continue receiving ₹15 per joining until you recover your full ₹1,500 joining fee.',
+                    desc: 'Members continue receiving pool credits on company joinings until they recover their full ₹1,500 joining fee.',
                   ),
                   const Divider(height: 24, color: Color(0xFFF1F5F9)),
                   _buildRuleRow(
-                    icon: Icons.published_with_changes_rounded,
+                    icon: Icons.sync,
                     color: const Color(0xFFD97706),
                     title: 'Automatic Queue Advancement',
-                    desc: 'When a member completes ₹1,500, they graduate from the queue, and the 11th member steps into the active Top 10.',
+                    desc: 'When a member completes ₹1,500, they graduate from the queue, and the next member steps into the active pool.',
                   ),
                   const Divider(height: 24, color: Color(0xFFF1F5F9)),
                   _buildRuleRow(
-                    icon: Icons.check_circle_outline_rounded,
+                    icon: Icons.check_circle,
                     color: const Color(0xFF0D9488),
                     title: 'No Income Restrictions',
                     desc: 'Earning Direct Referral or Team Level income does NOT stop your Autopool earnings. Every active ID recovers ₹1,500!',
                   ),
                   const Divider(height: 24, color: Color(0xFFF1F5F9)),
                   _buildRuleRow(
-                    icon: Icons.pie_chart_rounded,
+                    icon: Icons.account_balance_wallet,
                     color: const Color(0xFFE11D48),
                     title: '90% / 10% Rebirth Wallet Split',
                     desc: 'All Autopool credits split 90% to your Main Wallet (withdrawable) and 10% to your Rebirth Wallet.',
@@ -516,7 +516,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.leaderboard_rounded, color: Colors.white, size: 18),
+                    child: const Icon(Icons.people, color: Colors.white, size: 18),
                   ),
                   const SizedBox(width: 10),
                   Column(
@@ -532,7 +532,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
                       ),
                       const SizedBox(height: 1),
                       Text(
-                        'లైవ్ టాప్ 10 సభ్యుల ఐడీలు',
+                        'Live Active Member IDs',
                         style: TextStyle(
                           fontSize: 11.5,
                           color: Colors.grey.shade600,
@@ -563,7 +563,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
                     ),
                     const SizedBox(width: 5),
                     const Text(
-                      '₹15 / Joining',
+                      'Live FIFO Queue',
                       style: TextStyle(
                         color: Color(0xFF065F46),
                         fontSize: 11,
@@ -587,16 +587,16 @@ class _CashbackScreenState extends State<CashbackScreen> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
-            child: Row(
+            child: const Row(
               children: [
-                const Icon(Icons.info_outline_rounded, size: 15, color: Color(0xFF64748B)),
-                const SizedBox(width: 8),
+                Icon(Icons.info_outline, size: 15, color: Color(0xFF64748B)),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'కంపెనీలో ప్రతి కొత్త జాయినింగ్ నుండి ₹150 ఈ 10 మందికి ఒక్కొక్కరికీ ₹15 చొప్పున చేరుతుంది.',
+                    '₹150 from every new company activation is distributed equally among active queue members until ₹1,500 is reached.',
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.grey.shade700,
+                      color: Color(0xFF475569),
                       height: 1.35,
                     ),
                   ),
@@ -629,22 +629,22 @@ class _CashbackScreenState extends State<CashbackScreen> {
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.groups_outlined, color: Color(0xFF94A3B8), size: 32),
+                  const Icon(Icons.people_outline, color: Color(0xFF94A3B8), size: 32),
                   const SizedBox(height: 8),
                   const Text(
-                    'టాప్ 10 సభ్యుల క్యూ సమాచారం లోడ్ అవుతోంది...',
+                    'Loading Active Queue Details...',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF475569)),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'సభ్యులు జాయిన్ లేదా యాక్టివేట్ కాగానే FIFO ఆర్డర్‌లో ఇక్కడ 10 సభ్యుల ఐడీలు ప్రత్యక్షంగా కనిపిస్తాయి.',
+                    'Active member IDs will appear here in FIFO order as accounts are activated.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
                     onPressed: _fetchAutopoolStatus,
-                    icon: const Icon(Icons.refresh_rounded, size: 15),
+                    icon: const Icon(Icons.refresh, size: 15),
                     label: const Text('Sync Queue', style: TextStyle(fontSize: 12)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
@@ -666,7 +666,6 @@ class _CashbackScreenState extends State<CashbackScreen> {
                 final member = top10List[index] as Map<String, dynamic>;
                 final int rank = (member['rank'] as num?)?.toInt() ?? (index + 1);
                 final String memberId = (member['memberId'] ?? '---').toString();
-                final String name = (member['name'] ?? '').toString();
                 final double memEarnings = ((member['earnings'] ?? 0) as num).toDouble();
                 final int progressPct = ((member['progressPercent'] ?? 0) as num).toInt();
                 final bool isMe = member['isCurrentUser'] == true;
@@ -674,7 +673,6 @@ class _CashbackScreenState extends State<CashbackScreen> {
                 return _buildTop10MemberCard(
                   rank: rank,
                   memberId: memberId,
-                  name: name,
                   earnings: memEarnings,
                   progressPct: progressPct,
                   isMe: isMe,
@@ -694,11 +692,11 @@ class _CashbackScreenState extends State<CashbackScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.add_circle_outline_rounded, size: 16, color: Color(0xFF64748B)),
+                    const Icon(Icons.info_outline, size: 16, color: Color(0xFF64748B)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'స్లాట్లు #${top10List.length + 1} నుండి #10 వరకు: తదుపరి ఐడీ యాక్టివేషన్లకు సిద్ధంగా ఉన్నాయి 🚀',
+                        'Slots #${top10List.length + 1} to #10: Ready for next activations',
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -719,7 +717,6 @@ class _CashbackScreenState extends State<CashbackScreen> {
   Widget _buildTop10MemberCard({
     required int rank,
     required String memberId,
-    required String name,
     required double earnings,
     required int progressPct,
     required bool isMe,
@@ -753,7 +750,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
     final double remaining = (1500.0 - earnings).clamp(0.0, 1500.0);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: isMe ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(12),
@@ -778,54 +775,37 @@ class _CashbackScreenState extends State<CashbackScreen> {
                 alignment: Alignment.center,
                 child: rankIcon,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
 
-              // Member ID & Name
+              // Member ID ONLY (No name rendered as requested)
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          memberId,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: isMe ? const Color(0xFF065F46) : const Color(0xFF0F172A),
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        if (isMe) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF059669),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'YOU (మీరు)',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                    Text(
+                      memberId,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: isMe ? const Color(0xFF065F46) : const Color(0xFF0F172A),
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    if (name.isNotEmpty && name != memberId) ...[
-                      const SizedBox(height: 1),
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
+                    if (isMe) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF059669),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'YOU',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ],
@@ -840,16 +820,16 @@ class _CashbackScreenState extends State<CashbackScreen> {
                   Text(
                     '₹${earnings.toStringAsFixed(0)} / 1500',
                     style: GoogleFonts.inter(
-                      fontSize: 13,
+                      fontSize: 13.5,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF059669),
                     ),
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    '₹${remaining.toStringAsFixed(0)} మిగిలింది',
+                    '₹${remaining.toStringAsFixed(0)} Left',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.5,
                       color: Colors.grey.shade600,
                       fontWeight: FontWeight.w600,
                     ),
