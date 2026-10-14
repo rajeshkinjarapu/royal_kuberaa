@@ -24,7 +24,8 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
     final nameController = TextEditingController();
     final priceController = TextEditingController(text: '1500');
     final descController = TextEditingController();
-    final deliveryController = TextEditingController(text: 'Free Delivery');
+    final deliveryController = TextEditingController(text: 'Doorstep Courier Delivery');
+    final imageController = TextEditingController();
 
     showDialog(
       context: context,
@@ -46,8 +47,16 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
               ),
               const SizedBox(height: 12),
               TextField(
+                controller: imageController,
+                decoration: const InputDecoration(
+                  labelText: 'Product Image URL',
+                  hintText: 'https://... or image link',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
                 controller: deliveryController,
-                decoration: const InputDecoration(labelText: 'Delivery Info (e.g. Free Delivery)'),
+                decoration: const InputDecoration(labelText: 'Delivery Info (e.g. Doorstep Courier Delivery)'),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -69,6 +78,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
               final price = double.tryParse(priceController.text) ?? 1500.0;
               final desc = descController.text.trim();
               final delivery = deliveryController.text.trim();
+              final image = imageController.text.trim();
 
               if (name.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -83,6 +93,8 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                 'price': price,
                 'description': desc,
                 'deliveryType': delivery,
+                'deliveryInfo': delivery,
+                'image': image.isNotEmpty ? image : 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80',
                 'isActive': true,
               });
 
@@ -149,16 +161,40 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                         final name = item['name'] ?? 'Kit Product';
                         final price = item['price'] ?? 1500;
                         final desc = item['description'] ?? 'Product Kit';
-                        final delivery = item['deliveryType'] ?? 'Free Delivery';
+                        final delivery = item['deliveryType'] ?? item['deliveryInfo'] ?? 'Doorstep Delivery';
+                        final rawImg = (item['image'] ?? '').toString();
+                        final String imgUrl = rawImg.startsWith('http')
+                            ? rawImg
+                            : rawImg.startsWith('/')
+                                ? '${AppConstants.apiBaseUrl.replaceAll('/api', '')}$rawImg'
+                                : '';
 
                         return Card(
                           margin: const EdgeInsets.only(bottom: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                if (imgUrl.isNotEmpty) ...[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 140,
+                                      color: const Color(0xFFF1F5F9),
+                                      child: Image.network(
+                                        imgUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (c, e, s) => const Center(
+                                          child: Icon(Icons.inventory_2, size: 40, color: Color(0xFF94A3B8)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [

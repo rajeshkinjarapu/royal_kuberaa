@@ -52,7 +52,7 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> uploadPaymentQr(File imageFile) async {
+  Future<bool> uploadPaymentQr(File imageFile, {String? upiId}) async {
     _isLoading = true;
     _errorMessage = '';
     notifyListeners();
@@ -68,6 +68,9 @@ class ProfileProvider with ChangeNotifier {
       );
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(await http.MultipartFile.fromPath('qrImage', imageFile.path));
+      if (upiId != null && upiId.isNotEmpty) {
+        request.fields['upiId'] = upiId;
+      }
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
@@ -88,7 +91,7 @@ class ProfileProvider with ChangeNotifier {
     return success;
   }
 
-  Future<bool> updatePaymentQr(String qrOrUpi) async {
+  Future<bool> updatePaymentQr({String? qrOrUpi, String? upiId}) async {
     _isLoading = true;
     _errorMessage = '';
     notifyListeners();
@@ -98,13 +101,17 @@ class ProfileProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
+      final Map<String, dynamic> body = {};
+      if (qrOrUpi != null) body['paymentQrCode'] = qrOrUpi;
+      if (upiId != null) body['upiId'] = upiId;
+
       final response = await http.post(
         Uri.parse('${AppConstants.apiBaseUrl}/user/kyc'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'paymentQrCode': qrOrUpi}),
+        body: jsonEncode(body),
       );
 
       final data = jsonDecode(response.body);
@@ -112,10 +119,10 @@ class ProfileProvider with ChangeNotifier {
         await fetchProfile();
         success = true;
       } else {
-        _errorMessage = data['message'] ?? 'Failed to update payment QR';
+        _errorMessage = data['message'] ?? 'Failed to update payment details';
       }
     } catch (e) {
-      _errorMessage = 'Payment QR update error: $e';
+      _errorMessage = 'Payment update error: $e';
     }
 
     _isLoading = false;

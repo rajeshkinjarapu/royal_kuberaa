@@ -155,6 +155,50 @@ mongoose.connect(MONGO_URI)
             await topIdUser.save();
             console.log('✅ Company Top Member ID Updated (RK0305)');
         }
+
+        // Ensure Default Products Exist
+        try {
+            const Product = require('./models/Product');
+            const productCount = await Product.countDocuments();
+            if (productCount === 0) {
+                console.log('📦 Seeding default Welcome Kit products with high-res images...');
+                await Product.create([
+                    {
+                        name: 'Nord Buds 3 Wireless Earbuds Kit',
+                        description: 'Nord Buds 3 Truly Wireless Bluetooth Earbuds with up to 32dB Active Noise Cancellation, 10mins for 11Hours Fast Charging with Up to 43h Music Playback - Chromatic Blue.',
+                        price: 1500,
+                        bv: 100,
+                        image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80',
+                        badge: 'BEST SELLER',
+                        deliveryInfo: 'Doorstep Courier Delivery',
+                        isActive: true
+                    },
+                    {
+                        name: 'Royal Smartwatch & Fitness Kit',
+                        description: '1.96" AMOLED HD Curved Display Bluetooth Calling Smartwatch with Zinc Alloy Frame, Heart Rate, SpO2 & 100+ Sports Fitness Tracking Modes.',
+                        price: 1500,
+                        bv: 100,
+                        image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=80',
+                        badge: 'TRENDING',
+                        deliveryInfo: 'Doorstep Courier Delivery',
+                        isActive: true
+                    },
+                    {
+                        name: 'Royal Wellness & Ayurvedic Combo Kit',
+                        description: 'Immunity booster herbal organic extracts kit with Shilajit, Ashwagandha & Multivitamins crafted for everyday energy, strength, and vitality.',
+                        price: 1500,
+                        bv: 100,
+                        image: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&auto=format&fit=crop&q=80',
+                        badge: 'HERBAL CARE',
+                        deliveryInfo: 'Doorstep Courier Delivery',
+                        isActive: true
+                    }
+                ]);
+                console.log('✅ Default Welcome Kit products seeded successfully');
+            }
+        } catch (prodSeedErr) {
+            console.error('❌ Product seed error:', prodSeedErr.message);
+        }
     })
     .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
@@ -895,16 +939,251 @@ app.get('/api/user/profile', authMiddleware, async (req, res) => {
     }
 });
 
-// --- Products API ---
+// --- Products & Orders API ---
 const Product = require('./models/Product');
+const Order = require('./models/Order');
+
+// Helper to calculate delivery fee based on distance / pincode / state
+const calculateDeliveryCharge = (pincode, state) => {
+    const pinStr = (pincode || '').toString().trim();
+    const stStr = (state || '').toString().trim().toLowerCase();
+    
+    // Check Andhra Pradesh / Telangana Local Zone
+    if (
+        pinStr.startsWith('50') || pinStr.startsWith('51') || 
+        pinStr.startsWith('52') || pinStr.startsWith('53') ||
+        stStr.includes('andhra') || stStr.includes('telangana')
+    ) {
+        return {
+            zone: 'Local Zone (Andhra Pradesh & Telangana)',
+            approxDistanceKm: 250,
+            deliveryCharge: 50,
+            estimatedDays: '2 - 3 Business Days'
+        };
+    }
+    
+    // South Zone (Karnataka 56-59, Tamil Nadu & Pondicherry 60-64, Kerala 67-69)
+    if (
+        pinStr.startsWith('56') || pinStr.startsWith('57') || pinStr.startsWith('58') || pinStr.startsWith('59') ||
+        pinStr.startsWith('60') || pinStr.startsWith('61') || pinStr.startsWith('62') || pinStr.startsWith('63') || pinStr.startsWith('64') ||
+        pinStr.startsWith('67') || pinStr.startsWith('68') || pinStr.startsWith('69') ||
+        stStr.includes('karnataka') || stStr.includes('tamil') || stStr.includes('kerala') || stStr.includes('pondicherry')
+    ) {
+        return {
+            zone: 'South Regional Zone',
+            approxDistanceKm: 650,
+            deliveryCharge: 80,
+            estimatedDays: '3 - 4 Business Days'
+        };
+    }
+    
+    // Central & West Zone (Maharashtra 40-44, Gujarat 36-39, MP 45-48, Odisha 75-77, Chhattisgarh 49)
+    if (
+        pinStr.startsWith('40') || pinStr.startsWith('41') || pinStr.startsWith('42') || pinStr.startsWith('43') || pinStr.startsWith('44') ||
+        pinStr.startsWith('45') || pinStr.startsWith('46') || pinStr.startsWith('47') || pinStr.startsWith('48') || pinStr.startsWith('49') ||
+        pinStr.startsWith('36') || pinStr.startsWith('37') || pinStr.startsWith('38') || pinStr.startsWith('39') ||
+        pinStr.startsWith('75') || pinStr.startsWith('76') || pinStr.startsWith('77') ||
+        stStr.includes('maharashtra') || stStr.includes('gujarat') || stStr.includes('madhya') || stStr.includes('odisha') || stStr.includes('chhattisgarh')
+    ) {
+        return {
+            zone: 'Central & Western India Zone',
+            approxDistanceKm: 1100,
+            deliveryCharge: 110,
+            estimatedDays: '4 - 5 Business Days'
+        };
+    }
+    
+    // North & Eastern Zone (Delhi 11, Haryana 12-13, Punjab 14-15, HP 17, Rajasthan 30-34, UP 20-28, Bihar 80-85, WB 70-74, Jharkhand 81-83)
+    if (
+        pinStr.startsWith('11') || pinStr.startsWith('12') || pinStr.startsWith('13') || pinStr.startsWith('14') || pinStr.startsWith('15') ||
+        pinStr.startsWith('20') || pinStr.startsWith('21') || pinStr.startsWith('22') || pinStr.startsWith('23') || pinStr.startsWith('24') || pinStr.startsWith('25') || pinStr.startsWith('26') || pinStr.startsWith('27') || pinStr.startsWith('28') ||
+        pinStr.startsWith('30') || pinStr.startsWith('31') || pinStr.startsWith('32') || pinStr.startsWith('33') || pinStr.startsWith('34') ||
+        pinStr.startsWith('70') || pinStr.startsWith('71') || pinStr.startsWith('72') || pinStr.startsWith('73') || pinStr.startsWith('74') ||
+        pinStr.startsWith('80') || pinStr.startsWith('81') || pinStr.startsWith('82') || pinStr.startsWith('83') || pinStr.startsWith('84') || pinStr.startsWith('85')
+    ) {
+        return {
+            zone: 'North & Eastern India Zone',
+            approxDistanceKm: 1750,
+            deliveryCharge: 140,
+            estimatedDays: '5 - 6 Business Days'
+        };
+    }
+    
+    // Remote / Special / North-East / J&K (78-79, 18-19)
+    if (
+        pinStr.startsWith('78') || pinStr.startsWith('79') || pinStr.startsWith('18') || pinStr.startsWith('19') ||
+        stStr.includes('assam') || stStr.includes('kashmir') || stStr.includes('jammu') || stStr.includes('manipur') || stStr.includes('meghalaya') || stStr.includes('tripura') || stStr.includes('arunachal') || stStr.includes('mizoram') || stStr.includes('nagaland') || stStr.includes('sikkim')
+    ) {
+        return {
+            zone: 'Special / Remote Express Zone',
+            approxDistanceKm: 2400,
+            deliveryCharge: 180,
+            estimatedDays: '6 - 8 Business Days'
+        };
+    }
+    
+    // Default Pan-India
+    return {
+        zone: 'Standard All-India Zone',
+        approxDistanceKm: 950,
+        deliveryCharge: 100,
+        estimatedDays: '4 - 5 Business Days'
+    };
+};
 
 // Get all active products (Public/Member)
 app.get('/api/products', authMiddleware, async (req, res) => {
     try {
-        const products = await Product.find({ isActive: true });
+        const products = await Product.find({ isActive: true }).sort({ createdAt: -1 });
         res.json({ success: true, data: products });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error fetching products' });
+    }
+});
+
+// Calculate Delivery Fee based on distance/pincode
+app.post('/api/products/calculate-delivery', authMiddleware, async (req, res) => {
+    try {
+        const { pincode, state } = req.body;
+        if (!pincode || pincode.toString().trim().length < 6) {
+            return res.status(400).json({ success: false, message: 'Valid 6-digit Pincode is required' });
+        }
+        const deliveryInfo = calculateDeliveryCharge(pincode, state);
+        res.json({ success: true, data: deliveryInfo });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error calculating delivery charge' });
+    }
+});
+
+// Member: Place an Order & Deduct from Wallet
+app.post('/api/orders/create', authMiddleware, async (req, res) => {
+    try {
+        const { productId, shippingAddress } = req.body;
+        if (!productId) return res.status(400).json({ success: false, message: 'Product ID is required' });
+        if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.pincode || !shippingAddress.state || !shippingAddress.city || !shippingAddress.addressLine) {
+            return res.status(400).json({ success: false, message: 'Complete delivery address with Name, Phone, Pincode, State, City, and Address Line is required' });
+        }
+
+        const user = await User.findById(req.user.id || req.user._id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const product = await Product.findById(productId);
+        if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+        // Calculate delivery charge dynamically based on destination distance/pincode
+        const deliveryCalc = calculateDeliveryCharge(shippingAddress.pincode, shippingAddress.state);
+        const deliveryCharge = Number(deliveryCalc.deliveryCharge) || 50;
+        const productPrice = Number(product.price) || 0;
+        const totalAmount = cleanFigure(productPrice + deliveryCharge);
+
+        // Check wallet balance
+        if (user.mainWallet < totalAmount) {
+            return res.status(400).json({
+                success: false,
+                message: `Insufficient Main Wallet balance! Required: ₹${totalAmount} (Product: ₹${productPrice} + Delivery: ₹${deliveryCharge}). Available: ₹${cleanFigure(user.mainWallet)}. Please deposit funds to proceed.`
+            });
+        }
+
+        // Deduct from Main Wallet
+        user.mainWallet = cleanFigure(user.mainWallet - totalAmount);
+        await user.save();
+
+        const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+
+        // Record Transaction
+        const Transaction = require('./models/Transaction');
+        await Transaction.create({
+            userId: user._id,
+            memberId: user.memberId,
+            type: 'Debit',
+            category: 'PRODUCT_ORDER',
+            amount: totalAmount,
+            description: `Order #${orderId} - ${product.name} (Item: ₹${productPrice}, Delivery: ₹${deliveryCharge})`
+        });
+
+        // Create Order Record
+        const order = await Order.create({
+            orderId,
+            userId: user._id,
+            memberId: user.memberId,
+            memberName: user.name,
+            memberMobile: user.mobile,
+            productId: product._id,
+            productName: product.name,
+            productImage: product.image || '',
+            productPrice,
+            deliveryCharge,
+            distanceKm: deliveryCalc.approxDistanceKm,
+            deliveryZone: deliveryCalc.zone,
+            totalAmount,
+            shippingAddress: {
+                fullName: shippingAddress.fullName.trim(),
+                phone: shippingAddress.phone.trim(),
+                pincode: shippingAddress.pincode.toString().trim(),
+                state: shippingAddress.state.trim(),
+                city: shippingAddress.city.trim(),
+                addressLine: shippingAddress.addressLine.trim(),
+                landmark: (shippingAddress.landmark || '').trim()
+            },
+            orderStatus: 'Pending',
+            paymentStatus: 'Paid',
+            paymentMethod: 'MAIN_WALLET'
+        });
+
+        res.json({
+            success: true,
+            message: `Order #${orderId} placed successfully! ₹${totalAmount} has been deducted from your Main Wallet.`,
+            order,
+            newWalletBalance: user.mainWallet
+        });
+    } catch (error) {
+        console.error('Order creation error:', error);
+        res.status(500).json({ success: false, message: 'Server error placing order: ' + error.message });
+    }
+});
+
+// Member: Get My Orders
+app.get('/api/orders/my-orders', authMiddleware, async (req, res) => {
+    try {
+        const orders = await Order.find({ userId: req.user.id || req.user._id }).sort({ createdAt: -1 });
+        res.json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching orders' });
+    }
+});
+
+// Admin: Get all orders
+app.get('/api/admin/orders', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const orders = await Order.find({}).sort({ createdAt: -1 });
+        res.json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching admin orders' });
+    }
+});
+
+// Admin: Update order status & tracking info
+app.put('/api/admin/orders/:id/status', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+        const { orderStatus, courierPartner, trackingNumber, adminNotes } = req.body;
+
+        const updateData = {};
+        if (orderStatus) updateData.orderStatus = orderStatus;
+        if (courierPartner !== undefined) updateData.courierPartner = courierPartner;
+        if (trackingNumber !== undefined) updateData.trackingNumber = trackingNumber;
+        if (adminNotes !== undefined) updateData.adminNotes = adminNotes;
+
+        if (orderStatus === 'Shipped') updateData.dispatchDate = new Date();
+        if (orderStatus === 'Delivered') updateData.deliveryDate = new Date();
+
+        const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+        res.json({ success: true, message: `Order #${order.orderId} status updated to "${order.orderStatus}"`, order });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error updating order status' });
     }
 });
 
@@ -912,7 +1191,7 @@ app.get('/api/products', authMiddleware, async (req, res) => {
 app.get('/api/admin/products', authMiddleware, async (req, res) => {
     try {
         if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
-        const products = await Product.find({});
+        const products = await Product.find({}).sort({ createdAt: -1 });
         res.json({ success: true, data: products });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
@@ -1361,13 +1640,16 @@ app.post('/api/user/upload-qr', authMiddleware, qrUpload.single('qrImage'), asyn
             return res.status(400).json({ success: false, message: 'Please select an image file to upload.' });
         }
         const qrUrl = `/uploads/qr_codes/${req.file.filename}`;
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id || req.user._id);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
         
         user.paymentQrCode = qrUrl;
+        if (req.body && req.body.upiId !== undefined) {
+            user.upiId = req.body.upiId.trim();
+        }
         await user.save();
         
-        res.json({ success: true, message: 'Payment QR code uploaded successfully!', qrUrl, user });
+        res.json({ success: true, message: 'Payment QR code uploaded and saved successfully!', qrUrl, user });
     } catch (error) {
         console.error("QR upload error:", error);
         res.status(500).json({ success: false, message: 'Server error uploading QR code: ' + error.message });
@@ -1377,13 +1659,16 @@ app.post('/api/user/upload-qr', authMiddleware, qrUpload.single('qrImage'), asyn
 // Update User KYC / Payment QR
 app.post('/api/user/kyc', authMiddleware, async (req, res) => {
     try {
-        const { panNumber, aadharNumber, bankName, accountNumber, ifscCode, paymentQrCode } = req.body;
-        const user = await User.findById(req.user.id);
+        const { panNumber, aadharNumber, bankName, accountNumber, ifscCode, paymentQrCode, upiId } = req.body;
+        const user = await User.findById(req.user.id || req.user._id);
         
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         if (paymentQrCode !== undefined) {
             user.paymentQrCode = paymentQrCode;
+        }
+        if (upiId !== undefined) {
+            user.upiId = upiId.trim();
         }
         user.panNumber = panNumber || user.panNumber;
         user.aadharNumber = aadharNumber || user.aadharNumber;

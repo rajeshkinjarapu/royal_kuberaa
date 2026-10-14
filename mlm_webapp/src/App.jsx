@@ -191,6 +191,7 @@ function App() {
     { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
     { name: 'Products', icon: '🛍️' },
+    { name: 'My Orders', icon: '📦' },
     { header: 'FINANCE' },
     { name: 'Deposit Funds', icon: '💳' },
     { name: 'Passbook', icon: '📒' },
@@ -225,6 +226,7 @@ function App() {
     { name: 'Pool Distributions', icon: '🔄' },
     { name: 'KYC Approvals', icon: '📄' },
     { name: 'Products', icon: '🛍️' },
+    { name: 'Product Orders', icon: '📦' },
     { name: 'Support Tickets', icon: '🎧' },
     { name: 'System Settings', icon: '⚙️' },
     { name: 'App Upload', icon: '📱' },
@@ -2571,8 +2573,28 @@ function App() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true });
+    const [editForm, setEditForm] = useState({ name: '', description: '', price: 1500, bv: 100, image: '', badge: '', deliveryInfo: 'Doorstep Courier Delivery', isActive: true });
     const [productImageFile, setProductImageFile] = useState(null);
+
+    // Order modal states
+    const [orderingProduct, setOrderingProduct] = useState(null);
+    const [shippingForm, setShippingForm] = useState({
+      fullName: '',
+      phone: '',
+      pincode: '',
+      state: 'Andhra Pradesh',
+      city: '',
+      addressLine: '',
+      landmark: ''
+    });
+    const [deliveryInfo, setDeliveryInfo] = useState({
+      deliveryCharge: 50,
+      zone: 'Local Zone (Andhra Pradesh & Telangana)',
+      approxDistanceKm: 250,
+      estimatedDays: '2 - 3 Business Days'
+    });
+    const [calculatingDelivery, setCalculatingDelivery] = useState(false);
+    const [submittingOrder, setSubmittingOrder] = useState(false);
     
     useEffect(() => {
         if (activeMenu === 'Products') {
@@ -2641,27 +2663,89 @@ function App() {
         } catch(err) { window.customAlert('Failed to delete product'); }
     };
 
-    const handleBuyAndActivate = async (product) => {
-        if (userData?.isActive) {
-            window.customAlert('Your ID is already activated!');
-            return;
-        }
-        if(!await window.customConfirm(`Are you sure you want to buy ${product.name} and activate your ID for ₹${product.price}? (Requires wallet balance)`)) return;
+    const handleCalculateDelivery = async (pin, stateVal) => {
+        if (!pin || pin.toString().trim().length !== 6) return;
+        setCalculatingDelivery(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/user/activate', {
+            const res = await fetch('/api/products/calculate-delivery', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ productId: product._id })
+                body: JSON.stringify({ pincode: pin.trim(), state: stateVal || shippingForm.state })
             });
             const result = await res.json();
-            window.customAlert(result.message);
-            if(result.success) {
-                const ud = {...userData, isActive: true};
-                setUserData(ud);
-                window.location.reload();
+            if (result.success && result.data) {
+                setDeliveryInfo(result.data);
             }
-        } catch(err) { window.customAlert('Activation failed'); }
+        } catch(err) { console.error(err); }
+        setCalculatingDelivery(false);
+    };
+
+    const handleOpenOrderModal = (product) => {
+        setOrderingProduct(product);
+        setShippingForm({
+            fullName: userData?.name || '',
+            phone: userData?.mobile || '',
+            pincode: '',
+            state: 'Andhra Pradesh',
+            city: '',
+            addressLine: '',
+            landmark: ''
+        });
+        setDeliveryInfo({
+            deliveryCharge: 50,
+            zone: 'Local Zone (Andhra Pradesh & Telangana)',
+            approxDistanceKm: 250,
+            estimatedDays: '2 - 3 Business Days'
+        });
+    };
+
+    const handleSubmitOrder = async (e) => {
+        e.preventDefault();
+        if (!shippingForm.fullName.trim() || !shippingForm.phone.trim() || !shippingForm.pincode.trim() || !shippingForm.city.trim() || !shippingForm.addressLine.trim()) {
+            window.customAlert('Please fill all required delivery address fields!');
+            return;
+        }
+
+        const productPrice = Number(orderingProduct.price) || 1500;
+        const deliveryCharge = Number(deliveryInfo.deliveryCharge) || 50;
+        const totalAmount = productPrice + deliveryCharge;
+        const availableBalance = Number(userData?.mainWallet) || 0;
+
+        if (availableBalance < totalAmount) {
+            window.customAlert(`Insufficient Main Wallet balance!\nRequired: ₹${totalAmount} (Item: ₹${productPrice} + Delivery: ₹${deliveryCharge})\nAvailable: ₹${availableBalance}\nPlease deposit funds to proceed.`);
+            return;
+        }
+
+        const confirmPay = await window.customConfirm(`Confirm Order Placement:\n\nProduct: ${orderingProduct.name}\nItem Price: ₹${productPrice}\nDelivery Fee: ₹${deliveryCharge} (~${deliveryInfo.approxDistanceKm} km)\nTotal Deduction: ₹${totalAmount}\n\nAre you sure you want to deduct ₹${totalAmount} from your Main Wallet?`);
+        if (!confirmPay) return;
+
+        setSubmittingOrder(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/orders/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    productId: orderingProduct._id,
+                    shippingAddress: shippingForm
+                })
+            });
+            const result = await res.json();
+            if (result.success) {
+                window.customAlert(result.message);
+                if (result.newWalletBalance !== undefined) {
+                    setUserData(prev => ({ ...prev, mainWallet: result.newWalletBalance }));
+                }
+                setOrderingProduct(null);
+                setActiveMenu('My Orders');
+            } else {
+                window.customAlert(result.message);
+            }
+        } catch(err) {
+            window.customAlert('Failed to place order');
+        }
+        setSubmittingOrder(false);
     };
 
     if (isEditing && userRole === 'admin') {
@@ -2690,11 +2774,15 @@ function App() {
                        </div>
                     </div>
 
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Product Image URL (or upload below)</label>
+                        <input placeholder="https://... direct image URL" value={editForm.image} onChange={e=>setEditForm({...editForm, image: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                    </div>
+
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                        <div>
-                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Product Image File (Replaces Emoji/URL)</label>
+                           <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Upload Image File</label>
                            <input type="file" accept="image/*" onChange={e => setProductImageFile(e.target.files[0])} style={{ width: '100%', padding: '10px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
-                           {editForm.image && !productImageFile && <div style={{marginTop: '5px', fontSize: '12px', color: '#64748B'}}>Current: {editForm.image.substring(0, 30)}...</div>}
                        </div>
                        <div>
                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Badge (Optional)</label>
@@ -2704,7 +2792,7 @@ function App() {
 
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Delivery Information</label>
-                        <input placeholder="e.g. Free Delivery" value={editForm.deliveryInfo} onChange={e=>setEditForm({...editForm, deliveryInfo: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
+                        <input placeholder="e.g. Doorstep Courier Delivery" value={editForm.deliveryInfo} onChange={e=>setEditForm({...editForm, deliveryInfo: e.target.value})} style={{ width: '100%', padding: '14px', border: '1px solid #CBD5E1', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
                     </div>
 
                     <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
@@ -2721,7 +2809,7 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <PageHeader title="Welcome Product Packages" subtitle="Select your preferred high-value product kit" />
           {userRole === 'admin' && (
-             <button onClick={() => { setEditForm({ name: '', description: '', price: 1500, bv: 100, image: '📦', badge: '', deliveryInfo: 'Free Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
+             <button onClick={() => { setEditForm({ name: '', description: '', price: 1500, bv: 100, image: '', badge: '', deliveryInfo: 'Doorstep Courier Delivery', isActive: true }); setIsEditing(true); }} style={{ padding: '10px 20px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Product</button>
           )}
         </div>
         
@@ -2731,16 +2819,16 @@ function App() {
             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No products available yet.</div>
         ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginTop: '16px' }}>
-              {products.map((product, idx) => (
+              {products.map((product) => (
                 <div key={product._id} style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', position: 'relative' }}>
                   {product.badge && (
                      <div style={{ position: 'absolute', top: '16px', right: '16px', background: '#DEF7EC', color: '#03543F', fontSize: '12px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px' }}>
                        {product.badge.toUpperCase()}
                      </div>
                   )}
-                  <div style={{ width: '100%', height: '200px', borderRadius: '14px', background: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', marginBottom: '16px', overflow: 'hidden' }}>
-                    {product.image && product.image.includes('/') ? (
-                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ width: '100%', height: '200px', borderRadius: '14px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', marginBottom: '16px', overflow: 'hidden' }}>
+                    {product.image && (product.image.startsWith('http') || product.image.startsWith('/')) ? (
+                        <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e)=>{e.target.style.display='none';}} />
                     ) : (
                         product.image || '📦'
                     )}
@@ -2752,12 +2840,12 @@ function App() {
                   <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                       <span style={{ color: '#64748B' }}>Delivery:</span>
-                      <strong style={{ color: '#10B981' }}>{product.deliveryInfo}</strong>
+                      <strong style={{ color: '#10B981' }}>{product.deliveryInfo || 'Doorstep Courier Delivery'}</strong>
                     </div>
                   </div>
                   <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹{product.price.toLocaleString()}</div>
+                      <div style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>₹{Number(product.price).toLocaleString()}</div>
                     </div>
                     {userRole === 'admin' ? (
                        <div style={{ display: 'flex', gap: '8px' }}>
@@ -2765,14 +2853,401 @@ function App() {
                            <button onClick={() => handleDeleteProduct(product._id)} style={{ padding: '6px 12px', background: '#EF4444', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
                        </div>
                     ) : (
-                       !userData?.isActive && (
-                           <button onClick={() => handleBuyAndActivate(product)} style={{ padding: '8px 16px', background: '#0F172A', color: '#FFF', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', border: 'none' }}>Buy & Activate</button>
-                       )
+                       <button onClick={() => handleOpenOrderModal(product)} style={{ padding: '9px 18px', background: '#2563EB', color: '#FFF', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                         🛍️ Order This Product
+                       </button>
                     )}
                   </div>
                 </div>
               ))}
             </div>
+        )}
+
+        {/* ORDER MODAL */}
+        {orderingProduct && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+            <div style={{ background: '#FFF', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', padding: '28px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>Order & Delivery Details</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748B' }}>Deliver to your doorstep with dynamic distance calculation</p>
+                </div>
+                <button onClick={() => setOrderingProduct(null)} style={{ background: '#F1F5F9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '16px' }}>✕</button>
+              </div>
+
+              {/* Product preview */}
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'center', background: '#F8FAFC', padding: '12px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #E2E8F0' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '8px', background: '#E2E8F0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {orderingProduct.image && (orderingProduct.image.startsWith('http') || orderingProduct.image.startsWith('/')) ? (
+                    <img src={orderingProduct.image} alt={orderingProduct.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : '📦'}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#0F172A' }}>{orderingProduct.name}</div>
+                  <div style={{ color: '#059669', fontWeight: 'bold', fontSize: '13px' }}>Price: ₹{Number(orderingProduct.price).toLocaleString()}</div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmitOrder} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>Full Name *</label>
+                  <input required value={shippingForm.fullName} onChange={e => setShippingForm({ ...shippingForm, fullName: e.target.value })} placeholder="Recipient Full Name" style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px' }} />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>Phone Number (10 Digits) *</label>
+                  <input required type="tel" maxLength={10} value={shippingForm.phone} onChange={e => setShippingForm({ ...shippingForm, phone: e.target.value })} placeholder="10-digit mobile number" style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px' }} />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>Pincode *</label>
+                    <input required maxLength={6} value={shippingForm.pincode} onChange={e => {
+                      const pin = e.target.value;
+                      setShippingForm({ ...shippingForm, pincode: pin });
+                      if (pin.length === 6) handleCalculateDelivery(pin, shippingForm.state);
+                    }} placeholder="6-digit pincode" style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>State *</label>
+                    <input required value={shippingForm.state} onChange={e => {
+                      setShippingForm({ ...shippingForm, state: e.target.value });
+                      if (shippingForm.pincode.length === 6) handleCalculateDelivery(shippingForm.pincode, e.target.value);
+                    }} placeholder="e.g. Andhra Pradesh" style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>City / Town *</label>
+                  <input required value={shippingForm.city} onChange={e => setShippingForm({ ...shippingForm, city: e.target.value })} placeholder="City or District" style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px' }} />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>Street Address / Flat / Building *</label>
+                  <textarea required value={shippingForm.addressLine} onChange={e => setShippingForm({ ...shippingForm, addressLine: e.target.value })} placeholder="House/Flat No., Apartment, Street, Colony..." style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px', minHeight: '60px' }} />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '6px' }}>Landmark (Optional)</label>
+                  <input value={shippingForm.landmark} onChange={e => setShippingForm({ ...shippingForm, landmark: e.target.value })} placeholder="Nearby landmark" style={{ width: '100%', padding: '10px 12px', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '13px' }} />
+                </div>
+
+                {/* Distance & Delivery Breakdown Banner */}
+                <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '14px', borderRadius: '10px', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#1E40AF' }}>🚚 {deliveryInfo.zone}</div>
+                    <span style={{ background: '#2563EB', color: '#FFF', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+                      ₹{deliveryInfo.deliveryCharge} Delivery
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#3B82F6', lineHeight: '1.4' }}>
+                    • Estimated Distance: ~{deliveryInfo.approxDistanceKm} km<br />
+                    • Estimated Time: {deliveryInfo.estimatedDays}
+                  </div>
+                </div>
+
+                {/* Bill Breakdown & Wallet info */}
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px', borderRadius: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
+                    <span style={{ color: '#64748B' }}>Product Price:</span>
+                    <strong>₹{Number(orderingProduct.price).toLocaleString()}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
+                    <span style={{ color: '#64748B' }}>Delivery Fee:</span>
+                    <strong style={{ color: '#059669' }}>₹{deliveryInfo.deliveryCharge}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid #E2E8F0', paddingTop: '8px', fontWeight: 'bold' }}>
+                    <span>Total Amount:</span>
+                    <span style={{ color: '#0F172A', fontSize: '16px' }}>₹{(Number(orderingProduct.price) + Number(deliveryInfo.deliveryCharge)).toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '6px' }}>
+                    <span style={{ color: '#64748B' }}>Main Wallet Balance:</span>
+                    <strong style={{ color: Number(userData?.mainWallet) >= (Number(orderingProduct.price) + Number(deliveryInfo.deliveryCharge)) ? '#059669' : '#DC2626' }}>
+                      ₹{Number(userData?.mainWallet || 0).toLocaleString()}
+                    </strong>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <button type="submit" disabled={submittingOrder} style={{ flex: 1, padding: '12px', background: '#059669', color: '#FFF', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}>
+                    {submittingOrder ? 'Placing Order...' : `Confirm & Deduct ₹${Number(orderingProduct.price) + Number(deliveryInfo.deliveryCharge)}`}
+                  </button>
+                  <button type="button" onClick={() => setOrderingProduct(null)} style={{ padding: '12px 20px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </CardWrapper>
+    );
+  };
+
+  // ADMIN PRODUCT ORDERS SCREEN
+  const renderAdminOrders = () => {
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [updatingOrder, setUpdatingOrder] = useState(null);
+    const [statusForm, setStatusForm] = useState({ orderStatus: 'Shipped', courierPartner: 'Delhivery', trackingNumber: '', adminNotes: '' });
+
+    useEffect(() => {
+      fetchOrders();
+    }, []);
+
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } });
+        const result = await res.json();
+        if (result.success) setOrders(result.data || []);
+      } catch (err) { console.error(err); }
+      setLoading(false);
+    };
+
+    const handleUpdateStatus = async (e) => {
+      e.preventDefault();
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/admin/orders/${updatingOrder._id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(statusForm)
+        });
+        const result = await res.json();
+        window.customAlert(result.message);
+        if (result.success) {
+          setUpdatingOrder(null);
+          fetchOrders();
+        }
+      } catch (err) { window.customAlert('Failed to update order status'); }
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="Product Kit Orders Management" subtitle="Track member orders, courier dispatches, and delivery status" />
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Orders...</div>
+        ) : orders.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No member orders placed yet.</div>
+        ) : (
+          <div style={{ overflowX: 'auto', background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#475569' }}>
+                  <th style={{ padding: '14px 16px' }}>Order ID & Date</th>
+                  <th style={{ padding: '14px 16px' }}>Member</th>
+                  <th style={{ padding: '14px 16px' }}>Product</th>
+                  <th style={{ padding: '14px 16px' }}>Amounts Paid</th>
+                  <th style={{ padding: '14px 16px' }}>Shipping Address</th>
+                  <th style={{ padding: '14px 16px' }}>Status</th>
+                  <th style={{ padding: '14px 16px' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => {
+                  const addr = o.shippingAddress || {};
+                  const isDelivered = o.orderStatus === 'Delivered';
+                  const isShipped = o.orderStatus === 'Shipped';
+                  return (
+                    <tr key={o._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                      <td style={{ padding: '14px 16px' }}>
+                        <strong style={{ color: '#0F172A' }}>{o.orderId}</strong>
+                        <div style={{ fontSize: '11px', color: '#94A3B8' }}>{new Date(o.createdAt).toLocaleDateString()}</div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ fontWeight: 'bold', color: '#1E40AF' }}>{o.memberId}</div>
+                        <div style={{ fontSize: '12px', color: '#475569' }}>{o.memberName}</div>
+                        <div style={{ fontSize: '11px', color: '#94A3B8' }}>{o.memberMobile}</div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {o.productImage && o.productImage.startsWith('http') && (
+                            <img src={o.productImage} alt={o.productName} style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} />
+                          )}
+                          <div>
+                            <div style={{ fontWeight: 'bold' }}>{o.productName}</div>
+                            <div style={{ fontSize: '11px', color: '#64748B' }}>Zone: {o.deliveryZone || 'Standard'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <strong style={{ color: '#059669', fontSize: '14px' }}>₹{o.totalAmount}</strong>
+                        <div style={{ fontSize: '11px', color: '#64748B' }}>Item: ₹{o.productPrice} + Delivery: ₹{o.deliveryCharge}</div>
+                      </td>
+                      <td style={{ padding: '14px 16px', maxWidth: '240px' }}>
+                        <div style={{ fontWeight: 'bold', color: '#0F172A' }}>{addr.fullName} ({addr.phone})</div>
+                        <div style={{ fontSize: '12px', color: '#475569', lineHeight: '1.3' }}>
+                          {addr.addressLine}, {addr.city}, {addr.state} - {addr.pincode}
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          background: isDelivered ? '#DEF7EC' : isShipped ? '#E0F2FE' : '#FEF3C7',
+                          color: isDelivered ? '#03543F' : isShipped ? '#0369A1' : '#92400E'
+                        }}>
+                          {o.orderStatus}
+                        </span>
+                        {o.trackingNumber && (
+                          <div style={{ fontSize: '11px', color: '#2563EB', marginTop: '4px' }}>
+                            {o.courierPartner}: {o.trackingNumber}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <button
+                          onClick={() => {
+                            setUpdatingOrder(o);
+                            setStatusForm({
+                              orderStatus: o.orderStatus || 'Shipped',
+                              courierPartner: o.courierPartner || 'Delhivery',
+                              trackingNumber: o.trackingNumber || '',
+                              adminNotes: o.adminNotes || ''
+                            });
+                          }}
+                          style={{ padding: '6px 12px', background: '#0F172A', color: '#FFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* UPDATE DISPATCH MODAL */}
+        {updatingOrder && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+            <div style={{ background: '#FFF', borderRadius: '16px', width: '100%', maxWidth: '450px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800' }}>Update Dispatch - {updatingOrder.orderId}</h3>
+                <button onClick={() => setUpdatingOrder(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+              </div>
+
+              <form onSubmit={handleUpdateStatus} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px' }}>Order Status</label>
+                  <select value={statusForm.orderStatus} onChange={e => setStatusForm({ ...statusForm, orderStatus: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px' }}>Courier Partner</label>
+                  <input value={statusForm.courierPartner} onChange={e => setStatusForm({ ...statusForm, courierPartner: e.target.value })} placeholder="e.g. Delhivery / BlueDart / India Post" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px' }}>Tracking Number / AWB</label>
+                  <input value={statusForm.trackingNumber} onChange={e => setStatusForm({ ...statusForm, trackingNumber: e.target.value })} placeholder="Tracking or Consignment No." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1' }} />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <button type="submit" style={{ flex: 1, padding: '12px', background: '#10B981', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    Save Status
+                  </button>
+                  <button type="button" onClick={() => setUpdatingOrder(null)} style={{ padding: '12px 20px', background: '#F1F5F9', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </CardWrapper>
+    );
+  };
+
+  // MEMBER MY ORDERS SCREEN
+  const renderMyOrders = () => {
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      fetchMyOrders();
+    }, []);
+
+    const fetchMyOrders = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/orders/my-orders', { headers: { 'Authorization': `Bearer ${token}` } });
+        const result = await res.json();
+        if (result.success) setOrders(result.data || []);
+      } catch (err) { console.error(err); }
+      setLoading(false);
+    };
+
+    return (
+      <CardWrapper>
+        <PageHeader title="My Product Kit Orders" subtitle="Track dispatch and doorstep delivery of your tangible welcome kits" />
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Orders...</div>
+        ) : orders.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>
+            <div>No orders placed yet.</div>
+            <button onClick={() => setActiveMenu('Products')} style={{ marginTop: '14px', padding: '10px 20px', background: '#2563EB', color: '#FFF', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+              Browse Welcome Kits
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
+            {orders.map((o) => {
+              const addr = o.shippingAddress || {};
+              const isDelivered = o.orderStatus === 'Delivered';
+              const isShipped = o.orderStatus === 'Shipped';
+              return (
+                <div key={o._id} style={{ background: '#FFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <strong style={{ color: '#0F172A' }}>{o.orderId}</strong>
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: '20px',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      background: isDelivered ? '#DEF7EC' : isShipped ? '#E0F2FE' : '#FEF3C7',
+                      color: isDelivered ? '#03543F' : isShipped ? '#0369A1' : '#92400E'
+                    }}>
+                      {o.orderStatus}
+                    </span>
+                  </div>
+
+                  <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#1E293B', marginBottom: '4px' }}>{o.productName}</div>
+                  <div style={{ fontSize: '12px', color: '#059669', fontWeight: 'bold', marginBottom: '12px' }}>
+                    Total Paid: ₹{o.totalAmount} (Item: ₹{o.productPrice} + Delivery: ₹{o.deliveryCharge})
+                  </div>
+
+                  <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', fontSize: '12px', color: '#475569', lineHeight: '1.4' }}>
+                    <div style={{ fontWeight: 'bold', color: '#0F172A', marginBottom: '2px' }}>📍 Delivery Address:</div>
+                    {addr.fullName} ({addr.phone})<br />
+                    {addr.addressLine}, {addr.city}, {addr.state} - {addr.pincode}
+                  </div>
+
+                  {o.courierPartner && (
+                    <div style={{ marginTop: '12px', padding: '10px', background: '#EFF6FF', borderRadius: '8px', fontSize: '12px', color: '#1E40AF' }}>
+                      🚚 <strong>Courier:</strong> {o.courierPartner} • <strong>Tracking:</strong> {o.trackingNumber || 'In Transit'}
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: '12px', fontSize: '11px', color: '#94A3B8' }}>
+                    Ordered on: {new Date(o.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </CardWrapper>
     );
@@ -4006,6 +4481,8 @@ function App() {
        case 'Support Tickets': renderFn = renderSupportTickets; break;
        case 'Change Password': renderFn = renderChangePassword; break;
        case 'Products': renderFn = renderProducts; break;
+       case 'Product Orders': renderFn = renderAdminOrders; break;
+       case 'My Orders': renderFn = renderMyOrders; break;
        case 'About Us': renderFn = renderAboutUs; break;
        case 'Terms & Conditions': renderFn = renderTermsAndConditions; break;
        case 'Privacy Policy': renderFn = renderPrivacyPolicy; break;

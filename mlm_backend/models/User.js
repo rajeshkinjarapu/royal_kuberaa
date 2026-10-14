@@ -91,6 +91,7 @@ const UserSchema = new mongoose.Schema({
     ifscCode: { type: String, default: '' },
     kycStatus: { type: String, enum: ['Pending', 'Submitted', 'Approved', 'Rejected'], default: 'Pending' },
     paymentQrCode: { type: String, default: '' },
+    upiId: { type: String, default: '' },
     
     // Awards & Rewards Tracking
     claimedRewards: [{

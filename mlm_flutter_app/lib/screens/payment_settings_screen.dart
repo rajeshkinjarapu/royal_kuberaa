@@ -36,7 +36,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     final data = provider.profileData;
     if (data != null && mounted) {
       setState(() {
-        _upiController.text = data['paymentQrCode'] ?? '';
+        _upiController.text = (data['upiId'] ?? '').toString();
       });
     }
   }
@@ -63,16 +63,28 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error picking image: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
   }
 
   Future<void> _saveQrSettings() async {
-    if (_selectedImage == null && _upiController.text.trim().isEmpty) {
+    final upi = _upiController.text.trim();
+    final profile = context.read<ProfileProvider>().profileData;
+    final currentQr = (profile?['paymentQrCode'] ?? '').toString();
+
+    if (_selectedImage == null && upi.isEmpty && currentQr.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a QR code image or enter UPI ID.')),
+        const SnackBar(
+          content: Text('Please select a QR code image or enter UPI ID.'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -81,11 +93,11 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     final provider = context.read<ProfileProvider>();
     bool success = false;
 
-    // 1. Upload QR image file if chosen
+    // 1. Upload QR image file with UPI ID if chosen
     if (_selectedImage != null) {
-      success = await provider.uploadPaymentQr(_selectedImage!);
-    } else if (_upiController.text.trim().isNotEmpty) {
-      success = await provider.updatePaymentQr(_upiController.text.trim());
+      success = await provider.uploadPaymentQr(_selectedImage!, upiId: upi);
+    } else {
+      success = await provider.updatePaymentQr(upiId: upi);
     }
 
     setState(() => _isLoading = false);
@@ -98,18 +110,20 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
               children: [
                 Icon(Icons.check_circle, color: Colors.white, size: 20),
                 SizedBox(width: 8),
-                Text('Payment QR Code Saved Successfully!'),
+                Text('Payment details saved successfully!'),
               ],
             ),
             backgroundColor: AppColors.secondary,
+            behavior: SnackBarBehavior.floating,
           ),
         );
         setState(() => _selectedImage = null);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Failed to save QR code.'),
+            content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Failed to save payment settings.'),
             backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -119,78 +133,34 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().profileData;
-    final currentQr = profile?['paymentQrCode'] ?? '';
-    final hasExistingQr = currentQr.toString().isNotEmpty;
+    final currentQr = (profile?['paymentQrCode'] ?? '').toString();
+    final hasExistingQr = currentQr.isNotEmpty;
 
     String qrImageUrl = '';
-    if (hasExistingQr && currentQr.toString().startsWith('/uploads')) {
+    if (hasExistingQr && currentQr.startsWith('/uploads')) {
       final base = AppConstants.apiBaseUrl.replaceAll('/api', '');
       qrImageUrl = '$base$currentQr';
-    } else if (hasExistingQr && (currentQr.toString().startsWith('http://') || currentQr.toString().startsWith('https://'))) {
-      qrImageUrl = currentQr.toString();
+    } else if (hasExistingQr && (currentQr.startsWith('http://') || currentQr.startsWith('https://'))) {
+      qrImageUrl = currentQr;
     }
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Payment QR Settings', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+        title: Text(
+          'Payment QR Settings',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+        ),
         backgroundColor: AppColors.darkNavy,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 40.0),
+        padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Info Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.darkNavy, Color(0xFF1E293B)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(color: AppColors.darkNavy.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.qr_code_2_rounded, color: Color(0xFFD4AF37), size: 32),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Direct QR Code Payouts',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Upload PhonePe, GooglePay, or Paytm QR to receive direct payouts without bank forms.',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // QR Code Upload Box
+            // QR Code Upload Box Card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -199,7 +169,11 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.border),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: Column(
@@ -222,12 +196,15 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                       width: 220,
                       height: 220,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: _selectedImage != null ? AppColors.secondary : AppColors.primary.withOpacity(0.4),
+                          color: _selectedImage != null
+                              ? AppColors.secondary
+                              : hasExistingQr
+                                  ? AppColors.primary.withOpacity(0.6)
+                                  : AppColors.border,
                           width: 2,
-                          style: BorderStyle.solid,
                         ),
                       ),
                       child: ClipRRect(
@@ -239,6 +216,12 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                                     qrImageUrl,
                                     fit: BoxFit.contain,
                                     errorBuilder: (ctx, err, stack) => _buildPlaceholder(),
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return const Center(
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      );
+                                    },
                                   )
                                 : _buildPlaceholder(),
                       ),
@@ -256,17 +239,40 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                     ),
                     icon: const Icon(Icons.photo_library_outlined, size: 20),
-                    label: Text(_selectedImage != null ? 'Change Selected Image' : 'Select QR from Gallery'),
+                    label: Text(
+                      _selectedImage != null
+                          ? 'Change Selected Image'
+                          : hasExistingQr
+                              ? 'Change Uploaded QR'
+                              : 'Select QR from Gallery',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
                   ),
 
                   if (_selectedImage != null) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.check_circle, color: AppColors.secondary, size: 16),
                         const SizedBox(width: 6),
-                        Text('Image ready to upload', style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text(
+                          'New image selected (Tap Save below)',
+                          style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ] else if (hasExistingQr) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.verified, color: AppColors.secondary, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          'QR code active in database',
+                          style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ],
@@ -276,13 +282,20 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
 
             const SizedBox(height: 20),
 
-            // Optional UPI ID
+            // Optional UPI ID Card
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,41 +309,82 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                     controller: _upiController,
                     decoration: InputDecoration(
                       hintText: 'e.g. 9876543210@paytm / name@upi',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                       prefixIcon: const Icon(Icons.alternate_email, color: AppColors.primary),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                      ),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Direct payouts will be credited to this QR Code / UPI ID.',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 28),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _saveQrSettings,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 2,
-                ),
-                icon: _isLoading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Icon(Icons.cloud_upload_outlined),
-                label: Text(
-                  _isLoading ? 'Uploading...' : 'SAVE PAYMENT QR CODE',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
+          ],
+        ),
+      ),
+      // Sticky bottom navigation bar with SafeArea so it never collides with Android navigation bar
+      bottomNavigationBar: SafeArea(
+        top: false,
+        bottom: true,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _isLoading ? null : _saveQrSettings,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+              ),
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_upload_outlined, size: 22),
+              label: Text(
+                _isLoading ? 'SAVING...' : 'SAVE PAYMENT QR CODE',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  letterSpacing: 0.8,
+                  color: Colors.white,
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -342,9 +396,15 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
       children: [
         Icon(Icons.qr_code_scanner, size: 48, color: Colors.grey.shade400),
         const SizedBox(height: 8),
-        Text('No QR Code Uploaded', style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          'No QR Code Uploaded',
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 4),
-        Text('Tap to select image', style: TextStyle(color: AppColors.primary.withOpacity(0.8), fontSize: 11, fontWeight: FontWeight.bold)),
+        Text(
+          'Tap to select image',
+          style: TextStyle(color: AppColors.primary.withOpacity(0.8), fontSize: 11, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
