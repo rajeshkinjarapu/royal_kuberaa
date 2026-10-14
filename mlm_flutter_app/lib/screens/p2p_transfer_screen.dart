@@ -208,19 +208,21 @@ class _P2PTransferScreenState extends State<P2PTransferScreen> {
             ),
             
             const SizedBox(height: 16),
-            const Text('Transaction PIN (T-PIN)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text('Transaction PIN (4-digit T-PIN)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             
             TextField(
               controller: _tpinController,
               keyboardType: TextInputType.number,
               obscureText: true,
+              maxLength: 4,
               decoration: InputDecoration(
-                hintText: 'Enter 6-digit T-PIN',
-                prefixIcon: const Icon(Icons.lock),
+                hintText: 'Enter 4-digit T-PIN',
+                prefixIcon: const Icon(Icons.lock_outline),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
                 fillColor: Colors.white,
+                counterText: '',
               ),
             ),
             

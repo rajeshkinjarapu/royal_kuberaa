@@ -1625,9 +1625,13 @@ app.post('/api/user/tpin', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: "Incorrect current T-PIN" });
         }
         
-        user.tpin = newTpin;
+        if (!newTpin || !/^\d{4}$/.test(newTpin.toString().trim())) {
+            return res.status(400).json({ success: false, message: "T-PIN must be exactly 4 digits (0-9)" });
+        }
+
+        user.tpin = newTpin.toString().trim();
         await user.save();
-        res.json({ success: true, message: "T-PIN updated successfully!" });
+        res.json({ success: true, message: "4-Digit T-PIN updated successfully!" });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error updating T-PIN" });
     }
@@ -1753,13 +1757,22 @@ app.post('/api/withdraw', authMiddleware, async (req, res) => {
         const requestedAmount = Number(amount);
 
         const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
         
-        if (!user.tpin || user.tpin !== tpin) {
-            return res.status(400).json({ success: false, message: "Invalid Transaction PIN (T-PIN)." });
+        if (!user.tpin || user.tpin !== (tpin || '').toString().trim()) {
+            return res.status(400).json({ success: false, message: "Invalid 4-digit Transaction PIN (T-PIN)." });
         }
 
-        if (user.kycStatus !== 'Approved') {
-            return res.status(400).json({ success: false, message: "KYC must be Approved to make a withdrawal. Please update Bank Settings." });
+        // Allow withdrawal if user has Payment QR or UPI ID or Approved Bank KYC
+        const hasPaymentDest = (user.paymentQrCode && user.paymentQrCode.trim() !== '') || 
+                               (user.upiId && user.upiId.trim() !== '') || 
+                               (user.accountNumber && user.accountNumber.trim() !== '' && user.kycStatus === 'Approved');
+
+        if (!hasPaymentDest) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Please upload your Payment QR code or UPI ID in Payment Settings to receive withdrawal payouts." 
+            });
         }
 
         const SystemSetting = require('./models/SystemSetting');
