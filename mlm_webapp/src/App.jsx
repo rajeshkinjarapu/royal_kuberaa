@@ -187,7 +187,7 @@ function App() {
     { header: 'MAIN MENU' },
     { name: 'Dashboard', icon: '📊' },
     { name: 'ID Activation', icon: '⚡' },
-    { name: 'Non-Working Cashback', icon: '💸' },
+    { name: 'Autopool Income', icon: '🌊' },
     { name: 'Royalty Pools', icon: '👑' },
     { name: 'Rebirth ID', icon: '♾️' },
     { name: 'Products', icon: '🛍️' },
@@ -543,6 +543,7 @@ function App() {
         { id: 1, title: 'Main Wallet', amount: dashboardData?.mainWallet || 0, icon: '💳', bg: '#f0fdf4', iconBg: '#bbf7d0', color: '#15803d' },
         { id: 10, title: 'Direct Income', amount: dashboardData?.directIncome || 0, icon: '🎯', bg: '#fff7ed', iconBg: '#ffedd5', color: '#c2410c' },
         { id: 11, title: 'Team Level Income', amount: dashboardData?.levelIncome || 0, icon: '📈', bg: '#ecfdf5', iconBg: '#d1fae5', color: '#047857' },
+        { id: 12, title: 'Autopool Income', amount: dashboardData?.autopoolIncome || dashboardData?.cashbackIncome || 0, icon: '🌊', bg: '#f0fdfa', iconBg: '#ccfbf1', color: '#0f766e' },
         { id: 2, title: 'Rebirth Wallet', amount: dashboardData?.rebirthWallet || 0, icon: '🌱', bg: '#fdf4ff', iconBg: '#f5d0fe', color: '#86198f' },
         { id: 3, title: 'Total Earnings', amount: dashboardData?.totalEarnings || 0, icon: '🚀', bg: '#f0f9ff', iconBg: '#bae6fd', color: '#0369a1' },
         { id: 4, title: 'Total Team (10 Levels)', amount: dashboardData?.networkStats?.totalTeamSize || 0, icon: '👥', bg: '#eff6ff', iconBg: '#bfdbfe', color: '#1d4ed8', isCount: true },
@@ -2836,9 +2837,9 @@ function App() {
           Royalty pools (Gold, Platinum, Ruby, Diamond) require active direct referrals and carry defined lifetime payout caps: Gold (₹20,000), Platinum (₹1,00,000), Ruby (₹5,00,000), and Diamond (₹25,00,000). Once the lifetime cap is reached, pool distributions for that tier cease.
         </p>
 
-        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. Non-Working Cashback Policy</h4>
+        <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. FIFO Autopool Income (100% Cashback Recovery)</h4>
         <p style={{ marginBottom: '16px' }}>
-          The daily non-working cashback fund is distributed strictly among active members who have earned zero (0) commissions, until their ₹1,500 joining fee is recovered. If a user earns any commission (Direct or Level income), cashback eligibility stops permanently as they transition to the active earning plan.
+          From every ₹1,500 joining in the company, ₹150 is contributed directly to the Global FIFO Autopool Fund. This fund is distributed equally to the active Top 10 members in queue (₹15.00 each on every company joining) until they recover their full ₹1,500 joining fee. Once ₹1,500 is reached, the member graduates from the queue, allowing the next member to step into the active Top 10. Earning Direct or Team Level income does NOT terminate Autopool earnings.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>6. Rebirth ID System</h4>
@@ -3213,119 +3214,407 @@ function App() {
     );
   };
 
-  const renderRoyaltyAndCashback = () => {
+  const renderAutopool = () => {
+    const [autopoolStatus, setAutopoolStatus] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
-    
-    const isRoyalty = activeMenu === 'Royalty Pools';
-    const filterCategory = isRoyalty ? 'ROYALTY' : 'CASHBACK';
-    
-    useEffect(() => {
-        const fetchHistory = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` }});
-                const result = await res.json();
-                if(result.success) {
-                    const filtered = result.data.filter(tx => tx.category === filterCategory);
-                    setHistory(filtered);
-                }
-            } catch(err) { console.error(err); }
-            setLoading(false);
-        };
-        if (activeMenu === 'Royalty Pools' || activeMenu === 'Non-Working Cashback') {
-            fetchHistory();
+
+    const fetchStatusAndHistory = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const [statusRes, txRes] = await Promise.all([
+          fetch('/api/user/autopool-status', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        const statusData = await statusRes.json();
+        if (statusData.success) {
+          setAutopoolStatus(statusData.data);
         }
+        const txData = await txRes.json();
+        if (txData.success) {
+          const filtered = txData.data.filter(tx => tx.category === 'AUTOPOOL' || tx.category === 'CASHBACK');
+          setHistory(filtered);
+        }
+      } catch (err) {
+        console.error('Error fetching autopool data', err);
+      }
+      setLoading(false);
+    };
+
+    useEffect(() => {
+      if (activeMenu === 'Autopool Income' || activeMenu === 'Non-Working Cashback') {
+        fetchStatusAndHistory();
+      }
     }, [activeMenu]);
 
+    const earnings = autopoolStatus?.autopoolEarnings ?? dashboardData?.autopoolIncome ?? dashboardData?.cashbackIncome ?? 0;
+    const progress = Math.min((earnings / 1500) * 100, 100);
+    const top10 = autopoolStatus?.top10Members || [];
+    const isInTop10 = autopoolStatus?.isInTop10 || false;
+    const queuePos = autopoolStatus?.queuePosition;
+    const isCompleted = autopoolStatus?.status === 'COMPLETED' || earnings >= 1500;
+
     return (
-        <CardWrapper>
-          <PageHeader 
-             title={isRoyalty ? 'Daily Royalty Pools' : 'Non-Working Cashback'} 
-             subtitle={isRoyalty ? "Your daily share from Global Royalty Pools" : "Your daily non-working cashback earnings"} 
-          />
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-             <div style={{ padding: '20px', background: isRoyalty ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #10B981 0%, #059669 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
-                <h3 style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Total Earned ({isRoyalty ? 'Royalty' : 'Cashback'})</h3>
-                <h1 style={{ fontSize: '32px', margin: '8px 0 0' }}>
-                    ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
-                </h1>
-             </div>
-             
-             {!isRoyalty && (
-                <div style={{ padding: '20px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569' }}>₹1,500 Guarantee Recovery</span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#10B981' }}>₹{dashboardData?.royaltyStats?.cashbackEarnings || 0} / ₹1,500</span>
-                   </div>
-                   <div style={{ width: '100%', height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', margin: '12px 0 8px 0' }}>
-                      <div style={{ width: `${Math.min(((dashboardData?.royaltyStats?.cashbackEarnings || 0) / 1500) * 100, 100)}%`, height: '100%', background: '#10B981', transition: 'width 0.5s' }}></div>
-                   </div>
-                   <span style={{ fontSize: '11px', color: '#94A3B8' }}>* Non-working members receive daily share until ₹1500 fee is recovered.</span>
-                </div>
-             )}
+      <CardWrapper>
+        <PageHeader 
+          title="FIFO Autopool Income" 
+          subtitle="Global Queue: Every new ID activation credits ₹15 directly to the active Top 10 members until ₹1,500 recovery" 
+        />
+
+        {/* ── TOP STATS ROW ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+          {/* Hero Earnings Card */}
+          <div style={{ padding: '24px', background: 'linear-gradient(135deg, #0F766E 0%, #059669 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(5,150,105,0.4)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.9 }}>
+                🌊 FIFO Autopool Wallet
+              </span>
+              <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                {isCompleted ? '₹1500 Completed' : isInTop10 ? 'Active Top 10' : queuePos ? `Rank #${queuePos}` : 'In Queue'}
+              </span>
+            </div>
+            <h1 style={{ fontSize: '38px', margin: '4px 0 8px 0', fontWeight: '900', letterSpacing: '-0.5px' }}>
+              ₹ {earnings.toLocaleString()}
+            </h1>
+            <div style={{ fontSize: '12px', opacity: 0.9, marginBottom: '16px' }}>
+              100% Joining Fee Recovery Target: <strong>₹1,500.00</strong>
+            </div>
+
+            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.25)', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+              <div style={{ width: `${progress}%`, height: '100%', background: '#FFF', transition: 'width 0.5s' }}></div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', opacity: 0.95 }}>
+              <span>₹{earnings} / ₹1500 Received</span>
+              <span>{Math.round(progress)}% Completed</span>
+            </div>
           </div>
 
-          {isRoyalty && (
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '30px' }}>
-                {[
-                   { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: '🥇', req: '2 Active Directs', color: '#F59E0B' },
-                   { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: '🥈', req: '2 Gold Directs', color: '#3B82F6' },
-                   { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: '🔴', req: '5 Platinum Directs', color: '#EF4444' },
-                   { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: '💎', req: '5 Ruby Directs', color: '#8B5CF6' }
-                ].map(pool => {
-                   const userRank = dashboardData?.royaltyStats?.rank || 'STARTER';
-                   const ranksOrder = ['STARTER', 'GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'OWNER'];
-                   const isQualified = ranksOrder.indexOf(userRank) >= ranksOrder.indexOf(pool.name);
-                   const progress = Math.min((pool.earned / pool.cap) * 100, 100);
+          {/* Queue Status Card */}
+          <div style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <span style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>Live FIFO Queue Status</span>
+                <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', background: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0' }}>
+                  ⚡ ₹15 / Joining
+                </span>
+              </div>
 
-                   return (
-                      <div key={pool.name} style={{ background: '#FFF', padding: '18px', borderRadius: '16px', border: `1px solid ${isQualified ? pool.color : '#E2E8F0'}`, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)' }}>
-                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <span style={{ fontWeight: '800', fontSize: '15px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                               <span>{pool.icon}</span> {pool.name} POOL
+              {/* 3 Metrics */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '14px' }}>
+                <div style={{ padding: '10px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Your Rank</div>
+                  <div style={{ fontSize: '17px', fontWeight: '800', color: isInTop10 ? '#059669' : '#D97706', margin: '2px 0' }}>
+                    {queuePos ? `#${queuePos}` : '#1'}
+                  </div>
+                  <div style={{ fontSize: '10px', color: isInTop10 ? '#059669' : '#D97706', fontWeight: 'bold' }}>
+                    {isInTop10 ? 'Active Top 10' : 'In Line'}
+                  </div>
+                </div>
+
+                <div style={{ padding: '10px', background: '#EFF6FF', borderRadius: '12px', border: '1px solid #BFDBFE', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Share / ID</div>
+                  <div style={{ fontSize: '17px', fontWeight: '800', color: '#2563EB', margin: '2px 0' }}>₹15.00</div>
+                  <div style={{ fontSize: '10px', color: '#2563EB', fontWeight: 'bold' }}>Every Joining</div>
+                </div>
+
+                <div style={{ padding: '10px', background: '#FAF5FF', borderRadius: '12px', border: '1px solid #E9D5FF', textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Max Cap</div>
+                  <div style={{ fontSize: '17px', fontWeight: '800', color: '#7C3AED', margin: '2px 0' }}>₹1,500</div>
+                  <div style={{ fontSize: '10px', color: '#7C3AED', fontWeight: 'bold' }}>100% Cashback</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Banner */}
+            <div style={{ padding: '12px 14px', borderRadius: '12px', background: isInTop10 ? '#ECFDF5' : isCompleted ? '#EFF6FF' : '#FFFBEB', border: `1px solid ${isInTop10 ? '#A7F3D0' : isCompleted ? '#BFDBFE' : '#FDE68A'}`, fontSize: '12px', color: isInTop10 ? '#065F46' : isCompleted ? '#1E40AF' : '#92400E', lineHeight: '1.4', fontWeight: '500' }}>
+              {isCompleted ? (
+                <span>🎉 <strong>100% Cashback Completed!</strong> You have recovered your full ₹1,500 from the Autopool.</span>
+              ) : isInTop10 ? (
+                <span>⚡ <strong>You are in the Active Top 10!</strong> Every new ID activated in the company instantly credits ₹15 to your wallet.</span>
+              ) : (
+                <span>⏳ <strong>Rank #{queuePos || 1} in Waiting Queue:</strong> As members ahead reach ₹1,500, they graduate and you advance into the active Top 10.</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── ACTIVE TOP 10 MEMBERS QUEUE TABLE (10 MEMBERS MEMBER IDS) ── */}
+        <div style={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '24px' }}>🏆</span>
+              <div>
+                <h3 style={{ margin: 0, color: '#0F172A', fontSize: '18px', fontWeight: '800' }}>
+                  Active Top 10 Members Queue (లైవ్ టాప్ 10 సభ్యుల ఐడీలు)
+                </h3>
+                <p style={{ margin: '2px 0 0', color: '#64748B', fontSize: '12px' }}>
+                  ఈ 10 మంది సభ్యులు ప్రతి కొత్త జాయినింగ్‌పై ₹15.00 చొప్పున ₹1500 పూర్తయ్యే వరకు నేరుగా అందుకుంటారు.
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={fetchStatusAndHistory} 
+              type="button" 
+              style={{ padding: '8px 14px', background: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              🔄 Refresh Queue
+            </button>
+          </div>
+
+          {loading && top10.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>Loading Top 10 Queue...</div>
+          ) : top10.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '30px', color: '#94A3B8', background: '#F8FAFC', borderRadius: '12px' }}>
+              సభ్యులు యాక్టివేట్ కాగానే FIFO క్రమంలో ఇక్కడ 10 మంది సభ్యుల ఐడీలు ప్రత్యక్షంగా కనిపిస్తాయి.
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto', marginTop: '16px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ background: '#F8FAFC', borderBottom: '2px solid #E2E8F0', color: '#475569', fontWeight: '700' }}>
+                    <th style={{ padding: '12px 16px' }}>Rank</th>
+                    <th style={{ padding: '12px 16px' }}>Member ID</th>
+                    <th style={{ padding: '12px 16px' }}>Member Name</th>
+                    <th style={{ padding: '12px 16px' }}>Received / ₹1500</th>
+                    <th style={{ padding: '12px 16px' }}>Progress</th>
+                    <th style={{ padding: '12px 16px' }}>Remaining</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {top10.map((mem, idx) => {
+                    const isMe = mem.isCurrentUser || mem.memberId === userData?.memberId;
+                    const rank = mem.rank || (idx + 1);
+                    const rankBadge = rank === 1 ? '🥇 #1' : rank === 2 ? '🥈 #2' : rank === 3 ? '🥉 #3' : `#${rank}`;
+                    const memEarnings = mem.earnings || 0;
+                    const pct = mem.progressPercent || Math.round((memEarnings / 1500) * 100);
+                    const remaining = Math.max(0, 1500 - memEarnings);
+
+                    return (
+                      <tr key={mem.memberId} style={{ borderBottom: '1px solid #F1F5F9', background: isMe ? '#F0FDF4' : 'transparent', fontWeight: isMe ? 'bold' : 'normal' }}>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span style={{ 
+                            padding: '4px 10px', 
+                            borderRadius: '8px', 
+                            fontWeight: '800', 
+                            fontSize: '12px',
+                            background: rank === 1 ? '#FEF3C7' : rank === 2 ? '#F1F5F9' : rank === 3 ? '#FFEDD5' : '#F8FAFC',
+                            color: rank === 1 ? '#B45309' : rank === 2 ? '#475569' : rank === 3 ? '#C2410C' : '#64748B',
+                            border: '1px solid rgba(0,0,0,0.06)'
+                          }}>
+                            {rankBadge}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: '800', color: isMe ? '#065F46' : '#0F172A', fontSize: '14px', letterSpacing: '0.5px' }}>
+                              {mem.memberId}
                             </span>
-                            <span style={{ padding: '3px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', background: isQualified ? '#D1FAE5' : '#F1F5F9', color: isQualified ? '#065F46' : '#94A3B8' }}>
-                               {isQualified ? 'Active' : 'Locked'}
-                            </span>
-                         </div>
-                         <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>Req: {pool.req}</div>
-                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
-                            <span style={{ color: '#059669' }}>₹{pool.earned.toLocaleString()}</span>
-                            <span style={{ color: '#94A3B8' }}>Cap: ₹{pool.cap.toLocaleString()}</span>
-                         </div>
-                         <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '3px', overflow: 'hidden' }}>
-                            <div style={{ width: `${progress}%`, height: '100%', background: pool.color }}></div>
-                         </div>
-                      </div>
-                   );
-                })}
-             </div>
+                            {isMe && (
+                              <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#059669', color: '#FFF', fontSize: '10px', fontWeight: 'bold' }}>
+                                YOU (మీరు)
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#334155' }}>
+                          {mem.name || mem.memberId}
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: 'bold', color: '#059669' }}>
+                          ₹ {memEarnings.toLocaleString()} / ₹1,500
+                        </td>
+                        <td style={{ padding: '12px 16px', minWidth: '140px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ flex: 1, height: '7px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+                              <div style={{ width: `${pct}%`, height: '100%', background: isMe ? '#059669' : '#10B981' }}></div>
+                            </div>
+                            <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#059669', minWidth: '35px' }}>{pct}%</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#64748B', fontSize: '12px' }}>
+                          ₹ {remaining.toLocaleString()} మిగిలింది
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {top10.length < 10 && (
+                <div style={{ padding: '12px 16px', background: '#F8FAFC', borderRadius: '8px', marginTop: '12px', fontSize: '12px', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', border: '1px dashed #CBD5E1' }}>
+                  <span>🚀</span> <strong>స్లాట్లు #{top10.length + 1} నుండి #10:</strong> తదుపరి సభ్యులు యాక్టివేట్ కాగానే ఆటోమేటిక్‌గా ఈ స్థానాల్లోకి వస్తారు!
+                </div>
+              )}
+            </div>
           )}
+        </div>
 
-          {loading ? (
-             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading History...</div>
-          ) : history.length === 0 ? (
-             <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No earnings yet. Check back tomorrow!</div>
+        {/* ── FIFO RULES & BENEFITS CARDS ── */}
+        <div style={{ marginBottom: '28px' }}>
+          <h3 style={{ margin: '0 0 14px 0', color: '#0F172A', fontSize: '17px', fontWeight: '800' }}>
+            FIFO Autopool Rules & Benefits
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+            <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>💰</div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>₹150 Autopool Fund</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>కంపెనీలో జరిగే ప్రతి ₹1500 జాయినింగ్ నుండి ₹150 గ్లోబల్ ఆటోపూల్ పూల్‌కి చేరుతుంది.</p>
+            </div>
+            <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>👥</div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>Top 10 Equal Share</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>ఆ ₹150 ని క్యూలో ఉన్న మొదటి 10 మందికి ఒక్కొక్కరికీ ₹15 చొప్పున సమానంగా పంచబడుతుంది.</p>
+            </div>
+            <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>🎯</div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>₹1,500 Full Recovery Cap</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>మీరు చెల్లించిన ₹1500 పూర్తి అయ్యే వరకు ప్రతి జాయినింగ్‌పై ₹15 వస్తూనే ఉంటుంది.</p>
+            </div>
+            <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>🔄</div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>Queue Advancement</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>సభ్యుడికి ₹1500 పూర్తి కాగానే వారు గ్రాడ్యుయేట్ అయి, 11వ సభ్యుడు టాప్ 10 లోకి వస్తారు.</p>
+            </div>
+            <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>✅</div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>No Income Restrictions</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>డైరెక్ట్ లేదా టీమ్ లెవల్ ఇన్‌కమ్ సంపాదించినప్పటికీ ఆటోపూల్ ఇన్‌కమ్ ఆగదు!</p>
+            </div>
+            <div style={{ background: '#FFF', padding: '18px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '20px', marginBottom: '8px' }}>⚖️</div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 'bold', color: '#0F172A' }}>90% / 10% Split</h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>ఆటోపూల్ మొత్తం నుండి 90% మెయిన్ వాలెట్‌కు (విత్‌డ్రా), 10% రీబర్త్ వాలెట్‌కు జమ అవుతాయి.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── TRANSACTION LOG ── */}
+        <div style={{ background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)' }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#0F172A', fontSize: '16px', fontWeight: '800' }}>
+            Autopool Credit History
+          </h3>
+          {history.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
+              ఇంకా ఆటోపూల్ క్రెడిట్స్ రాలేదు. కొత్త జాయినింగ్స్ రాగానే ఇక్కడ కనిపిస్తాయి!
+            </div>
           ) : (
             <Table headers={['Date', 'Amount', 'Type', 'Description']}>
               {history.map((tx, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                  <td style={{ padding: '15px', color: '#64748B' }}>{new Date(tx.createdAt).toLocaleString()}</td>
-                  <td style={{ padding: '15px', fontWeight: 'bold', color: '#10B981' }}>+ ₹{tx.amount}</td>
-                  <td style={{ padding: '15px' }}>
-                     <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
-                       {tx.category}
-                     </span>
+                  <td style={{ padding: '14px', color: '#64748B' }}>{new Date(tx.createdAt).toLocaleString()}</td>
+                  <td style={{ padding: '14px', fontWeight: 'bold', color: '#059669' }}>+ ₹{tx.amount}</td>
+                  <td style={{ padding: '14px' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', background: '#ECFDF5', color: '#065F46' }}>
+                      {tx.category || 'AUTOPOOL'}
+                    </span>
                   </td>
-                  <td style={{ padding: '15px', color: '#0F172A' }}>{tx.remark}</td>
+                  <td style={{ padding: '14px', color: '#0F172A', fontSize: '13px' }}>{tx.remark}</td>
                 </tr>
               ))}
             </Table>
           )}
-        </CardWrapper>
+        </div>
+      </CardWrapper>
+    );
+  };
+
+  const renderRoyaltyPools = () => {
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchHistory = async () => {
+        setLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/transactions', { headers: { 'Authorization': `Bearer ${token}` } });
+          const result = await res.json();
+          if (result.success) {
+            const filtered = result.data.filter(tx => tx.category === 'ROYALTY');
+            setHistory(filtered);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+        setLoading(false);
+      };
+      if (activeMenu === 'Royalty Pools') {
+        fetchHistory();
+      }
+    }, [activeMenu]);
+
+    return (
+      <CardWrapper>
+        <PageHeader 
+          title="Daily Royalty Pools" 
+          subtitle="Your daily share from Global Royalty Pools based on your rank" 
+        />
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ padding: '20px', background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(217,119,6,0.3)' }}>
+            <h3 style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Total Royalty Earned</h3>
+            <h1 style={{ fontSize: '32px', margin: '8px 0 0' }}>
+              ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
+            </h1>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '30px' }}>
+          {[
+            { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: '🥇', req: '2 Active Directs', color: '#F59E0B' },
+            { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: '🥈', req: '2 Gold Directs', color: '#3B82F6' },
+            { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: '🔴', req: '5 Platinum Directs', color: '#EF4444' },
+            { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: '💎', req: '5 Ruby Directs', color: '#8B5CF6' }
+          ].map(pool => {
+            const userRank = dashboardData?.royaltyStats?.rank || 'STARTER';
+            const ranksOrder = ['STARTER', 'GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'OWNER'];
+            const isQualified = ranksOrder.indexOf(userRank) >= ranksOrder.indexOf(pool.name);
+            const progress = Math.min((pool.earned / pool.cap) * 100, 100);
+
+            return (
+              <div key={pool.name} style={{ background: '#FFF', padding: '18px', borderRadius: '16px', border: `1px solid ${isQualified ? pool.color : '#E2E8F0'}`, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: '800', fontSize: '15px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>{pool.icon}</span> {pool.name} POOL
+                  </span>
+                  <span style={{ padding: '3px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold', background: isQualified ? '#D1FAE5' : '#F1F5F9', color: isQualified ? '#065F46' : '#94A3B8' }}>
+                    {isQualified ? 'Active' : 'Locked'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>Req: {pool.req}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
+                  <span style={{ color: '#059669' }}>₹{pool.earned.toLocaleString()}</span>
+                  <span style={{ color: '#94A3B8' }}>Cap: ₹{pool.cap.toLocaleString()}</span>
+                </div>
+                <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ width: `${progress}%`, height: '100%', background: pool.color }}></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>Loading Royalty History...</div>
+        ) : history.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>No royalty earnings yet.</div>
+        ) : (
+          <Table headers={['Date', 'Amount', 'Type', 'Description']}>
+            {history.map((tx, idx) => (
+              <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                <td style={{ padding: '15px', color: '#64748B' }}>{new Date(tx.createdAt).toLocaleString()}</td>
+                <td style={{ padding: '15px', fontWeight: 'bold', color: '#F59E0B' }}>+ ₹{tx.amount}</td>
+                <td style={{ padding: '15px' }}>
+                  <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: 'rgba(245,158,11,0.1)', color: '#D97706' }}>
+                    {tx.category}
+                  </span>
+                </td>
+                <td style={{ padding: '15px', color: '#0F172A' }}>{tx.remark}</td>
+              </tr>
+            ))}
+          </Table>
+        )}
+      </CardWrapper>
     );
   };
 
@@ -3687,7 +3976,8 @@ function App() {
        case 'Notifications': renderFn = renderNotifications; break;
        case 'App Upload': renderFn = renderAppUpload; break;
        case 'ID Activation': renderFn = renderIDActivation; break;
-       case 'Non-Working Cashback': renderFn = renderRoyaltyAndCashback; break;
+       case 'Autopool Income':
+       case 'Non-Working Cashback': renderFn = renderAutopool; break;
        case 'Add Member': renderFn = renderAddMember; break;
        case 'Fund Management': renderFn = renderFundManagement; break;
        case 'Fund Requests': renderFn = renderFundRequests; break;
@@ -3698,7 +3988,7 @@ function App() {
        case 'Support Tickets': renderFn = renderSupportTickets; break;
        case 'System Settings': renderFn = renderSystemSettings; break;
        case 'System Reports': renderFn = renderSystemReports; break;
-       case 'Royalty Pools': renderFn = renderRoyaltyAndCashback; break;
+       case 'Royalty Pools': renderFn = renderRoyaltyPools; break;
        case 'Rebirth ID': renderFn = renderRebirths; break;
        case 'Offers': 
  
