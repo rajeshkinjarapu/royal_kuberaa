@@ -1222,11 +1222,13 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
             productName = `Activated via ${product.name}`;
         }
         
-        if (payer.mainWallet < amountToDeduct) {
+        if (payer.role !== 'admin' && payer.mainWallet < amountToDeduct) {
             return res.status(400).json({ success: false, message: `Insufficient balance in your wallet. You need ₹${amountToDeduct}.` });
         }
         
-        payer.mainWallet -= amountToDeduct;
+        if (payer.mainWallet >= amountToDeduct) {
+            payer.mainWallet -= amountToDeduct;
+        }
         
         targetUser.isActive = true;
         if (targetUser._id.toString() !== payer._id.toString()) {

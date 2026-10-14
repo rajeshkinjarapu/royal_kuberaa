@@ -58,20 +58,52 @@ class _AdminMembersScreenState extends State<AdminMembersScreen> {
                       ),
                       title: Text('$name ($memberId)', style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text('Mobile: $mobile\nWallet: ₹$wallet | Status: ${user['status'] ?? (isBlocked ? 'Blocked' : 'Active')}'),
-                      trailing: ElevatedButton(
-                        onPressed: () async {
-                          final success = await provider.toggleUserBlock(memberId);
-                          if (success && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User ${isBlocked ? 'Unblocked' : 'Blocked'} Successfully')));
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isBlocked ? Colors.green : AppColors.error,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        ),
-                        child: Text(isBlocked ? 'UNBLOCK' : 'BLOCK', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ),
+                      trailing: user['status'] == 'Unactivated'
+                          ? ElevatedButton(
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Activate Member'),
+                                    content: Text('Are you sure you want to activate $name ($memberId)?'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCEL')),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(ctx, true),
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                        child: const Text('ACTIVATE', style: TextStyle(color: Colors.white)),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  final success = await provider.activateUser(memberId);
+                                  if (success && mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name ($memberId) Activated Successfully!'), backgroundColor: Colors.green));
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              ),
+                              child: const Text('ACTIVATE', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                            )
+                          : ElevatedButton(
+                              onPressed: () async {
+                                final success = await provider.toggleUserBlock(memberId);
+                                if (success && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User ${isBlocked ? 'Unblocked' : 'Blocked'} Successfully')));
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isBlocked ? Colors.green : AppColors.error,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              ),
+                              child: Text(isBlocked ? 'UNBLOCK' : 'BLOCK', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                            ),
                     ),
                   );
                 },

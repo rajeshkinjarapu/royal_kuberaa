@@ -1125,6 +1125,25 @@ function App() {
                 } catch(err) { console.error(err); }
     };
 
+    const handleActivateUser = async (memberId, name) => {
+        if (!await window.customConfirm(`Are you sure you want to activate Member: ${name} (${memberId})?`)) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/user/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ targetMemberId: memberId })
+            });
+            const result = await res.json();
+            window.customAlert(result.message);
+            if (result.success) {
+                fetchUsers();
+            }
+        } catch(err) {
+            window.customAlert('Activation failed');
+        }
+    };
+
     const handleDeleteUser = async (memberId) => {
         if (!await window.customConfirm(`Are you sure you want to permanently delete user ${memberId}? This action cannot be undone.`)) return;
         
@@ -1177,9 +1196,15 @@ function App() {
               </td>
               <td style={{ padding: '15px', display: 'flex', gap: '8px' }}>
                  <button onClick={() => { setEditingUser(user); setEditForm({ name: user.name, mobile: user.mobile || '', password: '' }); }} style={{ padding: '6px 12px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Edit</button>
-                 <button onClick={() => handleToggleBlock(user.id)} style={{ padding: '6px 12px', background: user.status === 'Active' ? '#F59E0B' : '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    {user.status === 'Active' ? 'Block' : 'Unblock'}
-                 </button>
+                 {user.status === 'Unactivated' ? (
+                   <button onClick={() => handleActivateUser(user.id, user.name)} style={{ padding: '6px 12px', background: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                      Activate
+                   </button>
+                 ) : (
+                   <button onClick={() => handleToggleBlock(user.id)} style={{ padding: '6px 12px', background: user.status === 'Active' ? '#F59E0B' : '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                      {user.status === 'Active' ? 'Block' : 'Unblock'}
+                   </button>
+                 )}
                  <button onClick={() => handleDeleteUser(user.id)} style={{ padding: '6px 12px', background: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
               </td>
             </tr>

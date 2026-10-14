@@ -54,6 +54,27 @@ class AdminProvider with ChangeNotifier {
     return false;
   }
 
+  Future<bool> activateUser(String memberId) async {
+    try {
+      final token = await _getToken();
+      final response = await http.post(
+        Uri.parse('${AppConstants.apiBaseUrl}/user/activate'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'targetMemberId': memberId}),
+      );
+      if (response.statusCode == 200 && jsonDecode(response.body)['success']) {
+        await fetchUsers();
+        return true;
+      }
+    } catch (e) {
+      print('Error activating user: $e');
+    }
+    return false;
+  }
+
   Future<void> fetchFundRequests() async {
     _setLoading(true);
     try {
