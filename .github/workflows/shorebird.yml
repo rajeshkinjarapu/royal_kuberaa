@@ -70,4 +70,4 @@ jobs:
       - name: Run Shorebird Patch (OTA)
         if: ${{ github.event.inputs.action_type == 'patch' }}
         working-directory: ./mlm_flutter_app
-        run: shorebird patch android --force
+        run: shorebird patch android --force --allow-asset-diffs

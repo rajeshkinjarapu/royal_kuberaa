@@ -13,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
     final user = context.watch<AuthProvider>().user;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 90.0),
       child: Column(
         children: [
           // Profile Header Card

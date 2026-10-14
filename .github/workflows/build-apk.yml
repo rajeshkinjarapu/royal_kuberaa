@@ -49,7 +49,7 @@ jobs:
 
       - name: Run Shorebird Patch (OTA)
         working-directory: ./mlm_flutter_app
-        run: shorebird patch android --no-confirm
+        run: shorebird patch android --no-confirm --allow-asset-diffs
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 

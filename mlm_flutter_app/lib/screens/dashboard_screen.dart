@@ -33,14 +33,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: AppColors.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 90.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppColors.darkNavy, Color(0xFF1E293B)],
@@ -49,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
-                  BoxShadow(color: AppColors.darkNavy.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 3)),
+                  BoxShadow(color: AppColors.darkNavy.withOpacity(0.12), blurRadius: 8, offset: const Offset(0, 3)),
                 ],
               ),
               child: Row(
@@ -59,13 +59,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Welcome, ${user?['fullName'] ?? user?['name'] ?? 'Member'}! 👋',
-                          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          '${user?['fullName'] ?? user?['name'] ?? 'Member'} 👋',
+                          style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         Text(
                           'Member ID: ${user?['memberId'] ?? 'N/A'}',
-                          style: const TextStyle(fontSize: 13, color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 12, color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -88,29 +90,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             if (user?['role'] == 'admin') ...[
               Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(colors: [Colors.purple, Colors.deepPurple]),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.admin_panel_settings, color: Colors.white, size: 28),
-                    const SizedBox(width: 12),
+                    const Icon(Icons.admin_panel_settings, color: Colors.white, size: 26),
+                    const SizedBox(width: 10),
                     const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Super Admin Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                          Text('Super Admin Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                           Text('Manage members, payouts, and system', style: TextStyle(color: Colors.white70, fontSize: 11)),
                         ],
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () => context.push('/admin'),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.deepPurple, padding: const EdgeInsets.symmetric(horizontal: 12)),
-                      child: const Text('Admin Panel', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.deepPurple,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text('Admin Panel', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                     )
                   ],
                 ),
@@ -122,105 +130,173 @@ class _DashboardScreenState extends State<DashboardScreen> {
             else if (dashProvider.errorMessage.isNotEmpty && dashData == null)
               Center(child: Text(dashProvider.errorMessage, style: const TextStyle(color: AppColors.error)))
             else ...[
-              // Main Wallet Card
+              // Main Wallet Card (Optimized Height & Sleek Finish)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
+                    BoxShadow(color: AppColors.primary.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 6)),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.account_balance_wallet, color: Colors.white70, size: 20),
-                        SizedBox(width: 8),
-                        Text('Main Wallet Balance', style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
+                        const Row(
+                          children: [
+                            Icon(Icons.account_balance_wallet, color: Colors.white70, size: 16),
+                            SizedBox(width: 6),
+                            Text('Main Wallet Balance', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(radius: 3, backgroundColor: Color(0xFF10B981)),
+                              SizedBox(width: 4),
+                              Text('Live', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
                     Text(
                       '₹${(dashData?['mainWallet'] ?? 0).toStringAsFixed(2)}',
-                      style: GoogleFonts.inter(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900),
+                      style: GoogleFonts.inter(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         _buildWalletAction(Icons.add, 'Deposit', () => context.push('/deposit')),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         _buildWalletAction(Icons.arrow_upward, 'Withdraw', () => context.push('/withdraw')),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         _buildWalletAction(Icons.swap_horiz, 'Transfer', () => context.push('/transfer')),
                       ],
                     )
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               
-              Text('Income Overview', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Income Overview', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  InkWell(
+                    onTap: () => context.push('/finance'),
+                    child: const Text('View All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               
-              // Stats Grid
+              // 6 Income Overview Cards in a 2x3 Grid
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.5,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.85,
                 children: [
-                  _buildStatCard('Non-Working Wallet', '₹${dashData?['rebirthWallet'] ?? 0}', Icons.monetization_on, Colors.green),
-                  _buildStatCard('Direct Earnings', '₹${dashData?['directIncome'] ?? 0}', Icons.people, Colors.blue),
-                  InkWell(
-                    onTap: () => context.push('/royalty'),
-                    child: _buildStatCard('Royalty Income', '₹${dashData?['royaltyIncome'] ?? 0}', Icons.workspace_premium, Colors.orange),
+                  _buildStatCard(
+                    title: 'Total Earning',
+                    value: '₹${(dashData?['totalEarnings'] ?? 0).toStringAsFixed(2)}',
+                    icon: Icons.account_balance_wallet_rounded,
+                    color: const Color(0xFF059669),
+                    onTap: () => context.push('/finance'),
                   ),
-                  InkWell(
+                  _buildStatCard(
+                    title: 'Direct Income',
+                    value: '₹${dashData?['directIncome'] ?? 0}',
+                    icon: Icons.person_add_alt_1_rounded,
+                    color: const Color(0xFF2563EB),
+                    onTap: () => context.push('/network'),
+                  ),
+                  _buildStatCard(
+                    title: 'Team Level Income',
+                    value: '₹${dashData?['levelIncome'] ?? dashData?['teamLevelIncome'] ?? 0}',
+                    icon: Icons.groups_rounded,
+                    color: const Color(0xFF7C3AED),
+                    onTap: () => context.push('/network'),
+                  ),
+                  _buildStatCard(
+                    title: 'Royality Income',
+                    value: '₹${dashData?['royaltyIncome'] ?? 0}',
+                    icon: Icons.workspace_premium_rounded,
+                    color: const Color(0xFFD97706),
+                    onTap: () => context.push('/royalty'),
+                  ),
+                  _buildStatCard(
+                    title: 'Autopool Income',
+                    value: '₹${dashData?['cashbackIncome'] ?? dashData?['autopoolIncome'] ?? 0}',
+                    icon: Icons.sync_rounded,
+                    color: const Color(0xFF0D9488),
                     onTap: () => context.push('/cashback'),
-                    child: _buildStatCard('Cashback', '₹${dashData?['cashbackIncome'] ?? 0}', Icons.monetization_on, Colors.teal),
+                  ),
+                  _buildStatCard(
+                    title: 'Rebirth Wallet',
+                    value: '₹${dashData?['rebirthWallet'] ?? 0}',
+                    icon: Icons.restart_alt_rounded,
+                    color: const Color(0xFFE11D48),
+                    onTap: () => context.push('/rebirth'),
                   ),
                 ],
               ),
               
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               
               // Quick Actions
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 3)),
+                  ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Activate ID Instantly', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        SizedBox(height: 4),
-                        Text('Use wallet funds to activate.', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                      ],
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Activate ID Instantly', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          SizedBox(height: 3),
+                          Text('Use wallet funds to activate instantly.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () => context.push('/activate'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.secondary,
                         foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Activate', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: const Text('Activate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                   ],
                 ),
@@ -234,53 +310,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildWalletAction(IconData icon, String label, VoidCallback onTap) {
     return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: Colors.white, size: 20),
-              const SizedBox(height: 4),
-              Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-            ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.16),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withOpacity(0.12)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 15),
+                const SizedBox(width: 5),
+                Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border.withOpacity(0.8)),
+            boxShadow: [
+              BoxShadow(color: color.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3)),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(title, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, size: 15, color: color),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (onTap != null)
+                    Icon(Icons.chevron_right_rounded, size: 13, color: Colors.grey.shade400),
+                ],
+              ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(value, style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-        ],
+        ),
       ),
     );
   }
