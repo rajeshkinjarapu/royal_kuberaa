@@ -69,9 +69,8 @@ class ProfileScreen extends StatelessWidget {
           _buildSettingsSection(
             title: 'Account Settings',
             children: [
-              _buildSettingsTile(context, Icons.person_outline, 'Personal Details', () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Personal Details are shown above.')));
-              }),
+              _buildSettingsTile(context, Icons.person_outline, 'Personal Details', () => _showPersonalDetails(context, user)),
+              _buildSettingsTile(context, Icons.badge_outlined, 'KYC Verification', () => context.push('/kyc')),
               _buildSettingsTile(context, Icons.qr_code_2_rounded, 'Payment QR Settings', () => context.push('/payment-settings')),
             ],
           ),
@@ -116,6 +115,76 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  void _showPersonalDetails(BuildContext context, Map<String, dynamic>? user) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Personal Profile Details',
+                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 16),
+              _buildDetailRow('Member ID', user?['memberId'] ?? 'N/A'),
+              _buildDetailRow('Full Name', user?['fullName'] ?? user?['name'] ?? 'N/A'),
+              _buildDetailRow('Mobile Number', user?['mobile'] ?? user?['phone'] ?? 'N/A'),
+              _buildDetailRow('Email Address', user?['email'] ?? 'Not Provided'),
+              _buildDetailRow('Sponsor ID', user?['sponsorId'] ?? 'Top Sponsor'),
+              _buildDetailRow('Account Status', user?['isActive'] == true ? 'Active (₹1500 Paid)' : 'Pending Activation'),
+              _buildDetailRow('Current Rank', user?['rank'] ?? 'STARTER'),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text('Close', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+          Text(value, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         ],
       ),
     );

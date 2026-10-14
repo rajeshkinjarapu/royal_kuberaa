@@ -115,6 +115,7 @@ class AppDrawer extends StatelessWidget {
                     _buildMenuItem(context, '➕', 'Add Member', '/add-member'),
                     _buildMenuItem(context, '🕸️', 'Team Network', '/team-network'),
                     _buildMenuItem(context, '👤', 'Profile', '/profile'),
+                    _buildMenuItem(context, '🆔', 'KYC Verification', '/kyc'),
                     _buildMenuItem(context, '🏦', 'Payment Settings', '/payment-settings'),
                     _buildMenuItem(context, '🔒', 'Transaction PIN', '/tpin'),
                     _buildMenuItem(context, '🔑', 'Change Password', '/change-password'),

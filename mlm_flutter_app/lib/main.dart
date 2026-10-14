@@ -166,7 +166,7 @@ class RoyalKuberaaApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/kyc',
-          builder: (context, state) => const PaymentSettingsScreen(),
+          builder: (context, state) => const KycScreen(),
         ),
         GoRoute(
           path: '/change-password',
