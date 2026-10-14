@@ -39,7 +39,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: '3.29.0'
           cache: true
 
       - name: Setup Shorebird
@@ -63,7 +63,7 @@ jobs:
       - name: Run Shorebird Release (APK)
         if: ${{ github.event.inputs.action_type == 'release' }}
         working-directory: ./mlm_flutter_app
-        run: shorebird release android --artifact=apk --no-confirm
+        run: shorebird release android --artifact=apk --no-confirm --flutter-version=3.29.0
 
       - name: Upload Shorebird Release APK
         if: ${{ github.event.inputs.action_type == 'release' }}
@@ -78,7 +78,7 @@ jobs:
         working-directory: ./mlm_flutter_app
         run: |
           echo "Attempting Shorebird OTA Patch..."
-          shorebird patch android --release-version=latest --no-confirm --allow-asset-diffs --allow-native-diffs --verbose || {
+          shorebird patch android --release-version=latest --no-confirm --allow-asset-diffs --allow-native-diffs --flutter-version=3.29.0 --verbose || {
             echo "⚠️ Shorebird patch could not be applied automatically."
             echo "ℹ️ Note: If you bumped version or added native plugins (like share_plus/image_picker), please create a new base release first via 'workflow_dispatch -> release' or install the fresh APK from the 'Build & Release APK' workflow."
             exit 0
