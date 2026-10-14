@@ -87,59 +87,68 @@ class _PinInputBoxesState extends State<PinInputBoxes> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(widget.length, (index) {
-        return SizedBox(
-          width: 44,
-          height: 48,
-          child: Focus(
-            onKeyEvent: (node, event) {
-              if (event is KeyDownEvent &&
-                  event.logicalKey == LogicalKeyboardKey.backspace &&
-                  _boxControllers[index].text.isEmpty &&
-                  index > 0) {
-                _focusNodes[index - 1].requestFocus();
-                _boxControllers[index - 1].text = '';
-                _syncMainController();
-                return KeyEventResult.handled;
-              }
-              return KeyEventResult.ignored;
-            },
-            child: TextField(
-              controller: _boxControllers[index],
-              focusNode: _focusNodes[index],
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              obscureText: widget.obscureText,
-              maxLength: 1,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: InputDecoration(
-                counterText: '',
-                contentPadding: EdgeInsets.zero,
-                filled: true,
-                fillColor: const Color(0xFFFAFAFA),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalSpacing = (widget.length - 1) * 6.0;
+        final availableWidth = constraints.maxWidth - totalSpacing;
+        final calculatedWidth = (availableWidth / widget.length).clamp(34.0, 48.0);
+        final boxHeight = calculatedWidth * 1.15;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(widget.length, (index) {
+            return SizedBox(
+              width: calculatedWidth,
+              height: boxHeight,
+              child: Focus(
+                onKeyEvent: (node, event) {
+                  if (event is KeyDownEvent &&
+                      event.logicalKey == LogicalKeyboardKey.backspace &&
+                      _boxControllers[index].text.isEmpty &&
+                      index > 0) {
+                    _focusNodes[index - 1].requestFocus();
+                    _boxControllers[index - 1].text = '';
+                    _syncMainController();
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: TextField(
+                  controller: _boxControllers[index],
+                  focusNode: _focusNodes[index],
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  obscureText: widget.obscureText,
+                  maxLength: 1,
+                  style: TextStyle(
+                    fontSize: calculatedWidth * 0.46,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF0F172A),
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  decoration: InputDecoration(
+                    counterText: '',
+                    contentPadding: EdgeInsets.zero,
+                    filled: true,
+                    fillColor: const Color(0xFFFAFAFA),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFDC2626), width: 2),
+                    ),
+                  ),
+                  onChanged: (val) => _onDigitChanged(index, val),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFDC2626), width: 2),
-                ),
               ),
-              onChanged: (val) => _onDigitChanged(index, val),
-            ),
-          ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }
