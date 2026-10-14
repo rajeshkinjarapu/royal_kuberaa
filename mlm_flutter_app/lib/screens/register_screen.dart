@@ -145,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

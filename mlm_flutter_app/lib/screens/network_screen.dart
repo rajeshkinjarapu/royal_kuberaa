@@ -64,7 +64,7 @@ class _DirectsViewState extends State<_DirectsView> {
       onRefresh: () => context.read<NetworkProvider>().fetchDirects(),
       color: AppColors.primary,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -534,7 +534,7 @@ class _RebirthsViewState extends State<_RebirthsView> {
       onRefresh: () => context.read<NetworkProvider>().fetchRebirths(),
       color: AppColors.primary,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

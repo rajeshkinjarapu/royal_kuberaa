@@ -96,7 +96,7 @@ class _KycScreenState extends State<KycScreen> {
       body: provider.isLoading && provider.profileData == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
               child: Form(
                 key: _formKey,
                 child: Column(

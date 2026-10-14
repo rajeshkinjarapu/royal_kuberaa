@@ -49,7 +49,7 @@ class _AdminFundsScreenState extends State<AdminFundsScreen> {
                           margin: const EdgeInsets.only(bottom: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

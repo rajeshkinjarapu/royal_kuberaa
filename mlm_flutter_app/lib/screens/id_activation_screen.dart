@@ -96,7 +96,7 @@ class _IdActivationScreenState extends State<IdActivationScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
         child: Column(
           children: [
             Container(

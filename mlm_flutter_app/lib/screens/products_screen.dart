@@ -97,7 +97,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           : RefreshIndicator(
               onRefresh: _fetchProducts,
               child: ListView(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
                 children: [
                   Text(
                     'Select your preferred tangible welcome kit (Included with ₹1500 Joining)',

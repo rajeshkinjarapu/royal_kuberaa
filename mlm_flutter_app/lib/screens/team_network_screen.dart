@@ -75,7 +75,7 @@ class _TeamNetworkScreenState extends State<TeamNetworkScreen> {
         color: AppColors.primary,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 40.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

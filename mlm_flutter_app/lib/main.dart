@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -45,6 +46,19 @@ import 'screens/legal_policy_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Fix edge-to-edge display — prevent system nav bar from overlapping content
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   runApp(
     MultiProvider(
       providers: [
@@ -256,6 +270,7 @@ class RoyalKuberaaApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         useMaterial3: true,
         fontFamily: GoogleFonts.inter().fontFamily,
+        scaffoldBackgroundColor: AppColors.background,
         appBarTheme: AppBarTheme(
           backgroundColor: AppColors.darkNavy,
           foregroundColor: Colors.white,
@@ -270,6 +285,11 @@ class RoyalKuberaaApp extends StatelessWidget {
             letterSpacing: 0.3,
           ),
           surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          elevation: 8,
         ),
       ),
       routerConfig: router,

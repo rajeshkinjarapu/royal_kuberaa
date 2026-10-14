@@ -128,7 +128,7 @@ class _RegistrationSuccessScreenState extends State<RegistrationSuccessScreen>
       backgroundColor: AppColors.primary,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 40.0),
           child: Column(
             children: [
               const SizedBox(height: 12),
