@@ -33,9 +33,9 @@ class FinanceScreen extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _buildWalletCard(
-                  title: 'Non-Working',
+                  title: 'Rebirth Wallet',
                   amount: '₹${(dashData?['rebirthWallet'] ?? 0).toStringAsFixed(2)}',
-                  icon: Icons.monetization_on,
+                  icon: Icons.restart_alt_rounded,
                   color: AppColors.secondary,
                 ),
               ),
