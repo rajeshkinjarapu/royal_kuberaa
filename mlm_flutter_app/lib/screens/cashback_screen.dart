@@ -66,6 +66,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
     final bool isInTop10 = _poolStatus?['isInTop10'] == true;
     final String status = _poolStatus?['status'] ?? (earnings >= 1500 ? 'COMPLETED' : 'ACTIVE_EARNING');
     final double progress = (earnings / 1500.0).clamp(0.0, 1.0);
+    final List top10List = (_poolStatus?['top10Members'] as List?) ?? [];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -329,6 +330,11 @@ class _CashbackScreenState extends State<CashbackScreen> {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // ── ACTIVE TOP 10 MEMBERS QUEUE (10 MEMBERS MEMBER IDS) ──
+            _buildTop10QueueSection(top10List),
+
             const SizedBox(height: 22),
 
             // ── FIFO AUTOPOOL RULES (100% Accurate & Updated) ──
@@ -475,6 +481,415 @@ class _CashbackScreenState extends State<CashbackScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTop10QueueSection(List top10List) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF059669), Color(0xFF10B981)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.leaderboard_rounded, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Active Top 10 Queue',
+                        style: GoogleFonts.inter(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        'లైవ్ టాప్ 10 సభ్యుల ఐడీలు',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFA7F3D0)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Text(
+                      '₹15 / Joining',
+                      style: TextStyle(
+                        color: Color(0xFF065F46),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Explanatory Subtitle Box
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline_rounded, size: 15, color: Color(0xFF64748B)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'కంపెనీలో ప్రతి కొత్త జాయినింగ్ నుండి ₹150 ఈ 10 మందికి ఒక్కొక్కరికీ ₹15 చొప్పున చేరుతుంది.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade700,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          if (_isLoadingStatus && top10List.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                ),
+              ),
+            )
+          else if (top10List.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.groups_outlined, color: Color(0xFF94A3B8), size: 32),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'టాప్ 10 సభ్యుల క్యూ సమాచారం లోడ్ అవుతోంది...',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF475569)),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'సభ్యులు జాయిన్ లేదా యాక్టివేట్ కాగానే FIFO ఆర్డర్‌లో ఇక్కడ 10 సభ్యుల ఐడీలు ప్రత్యక్షంగా కనిపిస్తాయి.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: _fetchAutopoolStatus,
+                    icon: const Icon(Icons.refresh_rounded, size: 15),
+                    label: const Text('Sync Queue', style: TextStyle(fontSize: 12)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      visualDensity: VisualDensity.compact,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: top10List.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final member = top10List[index] as Map<String, dynamic>;
+                final int rank = (member['rank'] as num?)?.toInt() ?? (index + 1);
+                final String memberId = (member['memberId'] ?? '---').toString();
+                final String name = (member['name'] ?? '').toString();
+                final double memEarnings = ((member['earnings'] ?? 0) as num).toDouble();
+                final int progressPct = ((member['progressPercent'] ?? 0) as num).toInt();
+                final bool isMe = member['isCurrentUser'] == true;
+
+                return _buildTop10MemberCard(
+                  rank: rank,
+                  memberId: memberId,
+                  name: name,
+                  earnings: memEarnings,
+                  progressPct: progressPct,
+                  isMe: isMe,
+                );
+              },
+            ),
+
+            if (top10List.length < 10) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.add_circle_outline_rounded, size: 16, color: Color(0xFF64748B)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'స్లాట్లు #${top10List.length + 1} నుండి #10 వరకు: తదుపరి ఐడీ యాక్టివేషన్లకు సిద్ధంగా ఉన్నాయి 🚀',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF475569),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTop10MemberCard({
+    required int rank,
+    required String memberId,
+    required String name,
+    required double earnings,
+    required int progressPct,
+    required bool isMe,
+  }) {
+    Color rankBg;
+    Color rankText;
+    Widget rankIcon;
+
+    if (rank == 1) {
+      rankBg = const Color(0xFFFEF3C7);
+      rankText = const Color(0xFFB45309);
+      rankIcon = const Text('🥇', style: TextStyle(fontSize: 14));
+    } else if (rank == 2) {
+      rankBg = const Color(0xFFF1F5F9);
+      rankText = const Color(0xFF475569);
+      rankIcon = const Text('🥈', style: TextStyle(fontSize: 14));
+    } else if (rank == 3) {
+      rankBg = const Color(0xFFFFEDD5);
+      rankText = const Color(0xFFC2410C);
+      rankIcon = const Text('🥉', style: TextStyle(fontSize: 14));
+    } else {
+      rankBg = const Color(0xFFF1F5F9);
+      rankText = const Color(0xFF64748B);
+      rankIcon = Text(
+        '#$rank',
+        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: rankText),
+      );
+    }
+
+    final double cappedProgress = (earnings / 1500.0).clamp(0.0, 1.0);
+    final double remaining = (1500.0 - earnings).clamp(0.0, 1500.0);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isMe ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isMe ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+          width: isMe ? 1.5 : 1.0,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Rank Badge
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: rankBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: rankText.withOpacity(0.2)),
+                ),
+                alignment: Alignment.center,
+                child: rankIcon,
+              ),
+              const SizedBox(width: 10),
+
+              // Member ID & Name
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          memberId,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: isMe ? const Color(0xFF065F46) : const Color(0xFF0F172A),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        if (isMe) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF059669),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'YOU (మీరు)',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (name.isNotEmpty && name != memberId) ...[
+                      const SizedBox(height: 1),
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // Earnings & Remaining
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '₹${earnings.toStringAsFixed(0)} / 1500',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF059669),
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    '₹${remaining.toStringAsFixed(0)} మిగిలింది',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Mini Progress Bar
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: cappedProgress,
+                    backgroundColor: const Color(0xFFE2E8F0),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isMe ? const Color(0xFF059669) : const Color(0xFF10B981),
+                    ),
+                    minHeight: 5,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$progressPct%',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF059669),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

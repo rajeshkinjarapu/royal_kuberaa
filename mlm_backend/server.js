@@ -61,10 +61,17 @@ mongoose.connect(MONGO_URI)
         console.log('✅ Connected to MongoDB Database');
         
         // Ensure all active members have activatedAt populated for FIFO Autopool queue
-        await User.updateMany(
-            { isActive: true, activatedAt: null },
-            [{ $set: { activatedAt: '$createdAt' } }]
-        );
+        try {
+            const unmigrated = await User.find({ isActive: true, activatedAt: null }).select('_id createdAt');
+            if (unmigrated.length > 0) {
+                console.log(`[FIFO Migration] Setting activatedAt for ${unmigrated.length} active members...`);
+                for (const u of unmigrated) {
+                    await User.updateOne({ _id: u._id }, { $set: { activatedAt: u.createdAt || new Date() } });
+                }
+            }
+        } catch (migErr) {
+            console.error('[FIFO Migration Error]:', migErr.message);
+        }
 
         // Initialize or Update Default Admin
         let adminUser = await User.findOne({ role: 'admin' });
@@ -1835,6 +1842,26 @@ app.get('/api/user/autopool-status', authMiddleware, async (req, res) => {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
+        // Fetch current active Top 10 members in FIFO queue
+        const top10 = await User.find({
+            isActive: true,
+            role: { $ne: 'admin' },
+            isRebirth: { $ne: true },
+            isAutopoolCompleted: { $ne: true }
+        })
+        .sort({ activatedAt: 1, createdAt: 1 })
+        .limit(10)
+        .select('memberId name autopoolEarnings activatedAt');
+
+        const top10Members = top10.map((m, idx) => ({
+            rank: idx + 1,
+            memberId: m.memberId,
+            name: m.name || m.memberId,
+            earnings: Number((m.autopoolEarnings || 0).toFixed(2)),
+            progressPercent: Math.min(100, Math.round(((m.autopoolEarnings || 0) / 1500) * 100)),
+            isCurrentUser: m.memberId === user.memberId
+        }));
+
         if (user.isAutopoolCompleted) {
             return res.json({
                 success: true,
@@ -1844,6 +1871,7 @@ app.get('/api/user/autopool-status', authMiddleware, async (req, res) => {
                     capping: 1500,
                     queuePosition: 0,
                     isInTop10: false,
+                    top10Members,
                     message: '100% Autopool Cashback Completed (₹1,500 received)'
                 }
             });
@@ -1858,6 +1886,7 @@ app.get('/api/user/autopool-status', authMiddleware, async (req, res) => {
                     capping: 1500,
                     queuePosition: null,
                     isInTop10: false,
+                    top10Members,
                     message: 'Activate your ID to enter the FIFO Autopool Queue'
                 }
             });
@@ -1886,6 +1915,7 @@ app.get('/api/user/autopool-status', authMiddleware, async (req, res) => {
                 capping: 1500,
                 queuePosition,
                 isInTop10,
+                top10Members,
                 message: isInTop10
                     ? `Rank #${queuePosition} in Active Top 10 (Receiving ₹15 per joining)`
                     : `Rank #${queuePosition} in Waiting Queue (Advances as earlier members complete)`

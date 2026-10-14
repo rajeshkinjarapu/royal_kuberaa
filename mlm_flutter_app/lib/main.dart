@@ -161,6 +161,10 @@ class RoyalKuberaaApp extends StatelessWidget {
           builder: (context, state) => const CashbackScreen(),
         ),
         GoRoute(
+          path: '/autopool',
+          builder: (context, state) => const CashbackScreen(),
+        ),
+        GoRoute(
           path: '/kyc',
           builder: (context, state) => const PaymentSettingsScreen(),
         ),
