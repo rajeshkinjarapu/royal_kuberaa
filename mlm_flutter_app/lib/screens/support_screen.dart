@@ -176,8 +176,8 @@ class _SupportScreenState extends State<SupportScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Customer Support'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading && _tickets.isEmpty

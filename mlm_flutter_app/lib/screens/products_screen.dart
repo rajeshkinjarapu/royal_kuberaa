@@ -88,8 +88,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Product Welcome Kits'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading

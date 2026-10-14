@@ -52,8 +52,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Notifications'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading && _notifications.isEmpty

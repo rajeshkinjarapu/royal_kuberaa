@@ -60,8 +60,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Change Password'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -71,10 +71,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Security Settings', style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              const Text('Please ensure your new password is secure and not used elsewhere.', style: TextStyle(color: AppColors.textSecondary)),
-              const SizedBox(height: 32),
 
               _buildPasswordField(_currentController, 'Current Password', _obscureCurrent, () => setState(() => _obscureCurrent = !_obscureCurrent)),
               const SizedBox(height: 16),

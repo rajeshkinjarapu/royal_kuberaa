@@ -91,8 +91,8 @@ class _IdActivationScreenState extends State<IdActivationScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('ID Activation'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(

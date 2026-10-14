@@ -81,8 +81,8 @@ class _PassbookScreenState extends State<PassbookScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Passbook'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(

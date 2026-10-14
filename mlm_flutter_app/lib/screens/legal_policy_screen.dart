@@ -15,9 +15,9 @@ class LegalPolicyScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: Text('Legal & Compliance', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18)),
-          backgroundColor: Colors.white,
-          foregroundColor: AppColors.textPrimary,
+          title: const Text('Legal & Compliance'),
+          backgroundColor: AppColors.darkNavy,
+          foregroundColor: Colors.white,
           elevation: 0,
           bottom: const TabBar(
             isScrollable: true,

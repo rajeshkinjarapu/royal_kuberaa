@@ -131,8 +131,8 @@ class _P2PTransferScreenState extends State<P2PTransferScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('P2P Transfer'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(

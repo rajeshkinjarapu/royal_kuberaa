@@ -17,13 +17,7 @@ class FinanceScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Finance & Wallets',
-            style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 4),
-          const Text('Manage your funds and transactions.', style: TextStyle(color: AppColors.textSecondary)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
 
           // Wallets Summary
           Row(
@@ -47,7 +41,7 @@ class FinanceScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           Text('Financial Services', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           const SizedBox(height: 16),

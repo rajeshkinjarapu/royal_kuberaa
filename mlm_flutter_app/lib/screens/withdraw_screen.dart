@@ -126,8 +126,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Bank Withdrawal'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
