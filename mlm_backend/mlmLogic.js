@@ -26,12 +26,25 @@ const MAX_CAPS = {
 async function addIncome(user, amount, type, desc) {
     if (amount <= 0) return;
     
-    const mainAmount = amount * 0.9;
-    const rebirthAmount = amount * 0.1;
+    // Strict 2-decimal arithmetic to eliminate floating-point drift
+    const cleanAmount = Math.round(Number(amount) * 100) / 100;
+    const mainAmount = Math.round(cleanAmount * 0.9 * 100) / 100;
+    const rebirthAmount = Math.round((cleanAmount - mainAmount) * 100) / 100;
 
-    user.mainWallet += mainAmount;
-    user.rebirthWallet += rebirthAmount;
-    user.totalEarnings += amount;
+    user.mainWallet = Math.round(((user.mainWallet || 0) + mainAmount) * 100) / 100;
+    user.rebirthWallet = Math.round(((user.rebirthWallet || 0) + rebirthAmount) * 100) / 100;
+    user.totalEarnings = Math.round(((user.totalEarnings || 0) + cleanAmount) * 100) / 100;
+
+    // If wallet values are within 0.05 of an integer, snap to exact integer
+    if (Math.abs(Math.round(user.mainWallet) - user.mainWallet) < 0.05) {
+        user.mainWallet = Math.round(user.mainWallet);
+    }
+    if (Math.abs(Math.round(user.rebirthWallet) - user.rebirthWallet) < 0.05) {
+        user.rebirthWallet = Math.round(user.rebirthWallet);
+    }
+    if (Math.abs(Math.round(user.totalEarnings) - user.totalEarnings) < 0.05) {
+        user.totalEarnings = Math.round(user.totalEarnings);
+    }
 
     await Transaction.create({
         userId: user._id,
@@ -137,7 +150,7 @@ async function distributeFifoAutopool(newMember) {
     }
 
     const memberCount = activeQueue.length;
-    const sharePerSlot = Math.floor((TOTAL_POOL_AMOUNT / memberCount) * 100) / 100;
+    const sharePerSlot = Math.round((TOTAL_POOL_AMOUNT / memberCount) * 100) / 100;
 
     for (const member of activeQueue) {
         const currentEarnings = member.autopoolEarnings || 0;
@@ -146,6 +159,9 @@ async function distributeFifoAutopool(newMember) {
 
         if (amountToGive > 0) {
             member.autopoolEarnings = Math.round((currentEarnings + amountToGive) * 100) / 100;
+            if (Math.abs(Math.round(member.autopoolEarnings) - member.autopoolEarnings) < 0.05) {
+                member.autopoolEarnings = Math.round(member.autopoolEarnings);
+            }
             if (member.autopoolEarnings >= CAPPING) {
                 member.isAutopoolCompleted = true;
                 console.log(`[FIFO Autopool] Member ${member.memberId} reached ₹${CAPPING} capping! Graduated from queue.`);
@@ -306,7 +322,7 @@ async function processDailyPools() {
         const queue = globalPool.activeQueue;
         if (queue.length === 0) continue;
 
-        const amountPerUser = globalPool.totalFund / queue.length;
+        const amountPerUser = Math.round((globalPool.totalFund / queue.length) * 100) / 100;
         const membersToRemove = [];
 
         for (const item of queue) {

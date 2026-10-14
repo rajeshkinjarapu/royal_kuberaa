@@ -22,6 +22,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  String _formatAmount(dynamic val) {
+    if (val == null) return '0';
+    final n = double.tryParse(val.toString()) ?? 0.0;
+    if ((n - n.round()).abs() < 0.05) {
+      return n.round().toString();
+    }
+    return n.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
@@ -177,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '₹${(dashData?['mainWallet'] ?? 0).toStringAsFixed(2)}',
+                      '₹${_formatAmount(dashData?['mainWallet'])}',
                       style: GoogleFonts.inter(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                     ),
                     const SizedBox(height: 12),
@@ -218,42 +227,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _buildStatCard(
                     title: 'Total Earning',
-                    value: '₹${(dashData?['totalEarnings'] ?? 0).toStringAsFixed(2)}',
+                    value: '₹${_formatAmount(dashData?['totalEarnings'])}',
                     icon: Icons.account_balance_wallet_rounded,
                     color: const Color(0xFF059669),
                     onTap: () => context.push('/finance'),
                   ),
                   _buildStatCard(
                     title: 'Direct Income',
-                    value: '₹${dashData?['directIncome'] ?? 0}',
+                    value: '₹${_formatAmount(dashData?['directIncome'])}',
                     icon: Icons.person_add_alt_1_rounded,
                     color: const Color(0xFF2563EB),
                     onTap: () => context.push('/network'),
                   ),
                   _buildStatCard(
                     title: 'Team Level Income',
-                    value: '₹${dashData?['levelIncome'] ?? dashData?['teamLevelIncome'] ?? 0}',
+                    value: '₹${_formatAmount(dashData?['levelIncome'] ?? dashData?['teamLevelIncome'])}',
                     icon: Icons.groups_rounded,
                     color: const Color(0xFF7C3AED),
                     onTap: () => context.push('/network'),
                   ),
                   _buildStatCard(
                     title: 'Royalty Income',
-                    value: '₹${dashData?['royaltyIncome'] ?? 0}',
+                    value: '₹${_formatAmount(dashData?['royaltyIncome'])}',
                     icon: Icons.workspace_premium_rounded,
                     color: const Color(0xFFD97706),
                     onTap: () => context.push('/royalty'),
                   ),
                   _buildStatCard(
                     title: 'Autopool Income',
-                    value: '₹${dashData?['cashbackIncome'] ?? dashData?['autopoolIncome'] ?? 0}',
+                    value: '₹${_formatAmount(dashData?['cashbackIncome'] ?? dashData?['autopoolIncome'])}',
                     icon: Icons.sync_rounded,
                     color: const Color(0xFF0D9488),
                     onTap: () => context.push('/cashback'),
                   ),
                   _buildStatCard(
                     title: 'Rebirth Wallet',
-                    value: '₹${dashData?['rebirthWallet'] ?? 0}',
+                    value: '₹${_formatAmount(dashData?['rebirthWallet'])}',
                     icon: Icons.restart_alt_rounded,
                     color: const Color(0xFFE11D48),
                     onTap: () => context.push('/rebirth'),

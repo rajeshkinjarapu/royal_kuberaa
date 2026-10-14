@@ -497,6 +497,18 @@ function App() {
 
   const activeMenuItems = userRole === 'admin' ? adminMenu : menuItems;
 
+  const formatCurrency = (val) => {
+    if (val === null || val === undefined || isNaN(val)) return '0';
+    const num = Number(val);
+    if (Math.abs(Math.round(num) - num) < 0.05) {
+      return Math.round(num).toLocaleString('en-IN');
+    }
+    return (Math.round(num * 100) / 100).toLocaleString('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+  };
+
   const PageHeader = ({ title, subtitle }) => {
     if (!subtitle) return null;
     return (
@@ -571,7 +583,7 @@ function App() {
                 <span style={{ fontSize: '24px' }}>⚠️</span>
                 <div>
                    <h3 style={{ margin: '0 0 2px 0', color: '#B91C1C', fontSize: '15px', fontWeight: '700' }}>Account Not Activated</h3>
-                   <span style={{ fontSize: '13px', color: '#991B1B', fontWeight: '600' }}>Wallet: ₹{(dashboardData?.mainWallet || 0).toLocaleString()}</span>
+                   <span style={{ fontSize: '13px', color: '#991B1B', fontWeight: '600' }}>Wallet: ₹{formatCurrency(dashboardData?.mainWallet)}</span>
                 </div>
             </div>
             <button 
@@ -608,7 +620,7 @@ function App() {
               </div>
               <div className="card-content">
                 <div className="card-title" style={{ color: '#64748B', fontWeight: '700', fontSize: '11px', letterSpacing: '0.5px', marginBottom: '4px' }}>{card.title.toUpperCase()}</div>
-                <div className="card-amount" style={{ color: '#0F172A', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : '₹ ')} {card.amount.toLocaleString()}</div>
+                <div className="card-amount" style={{ color: '#0F172A', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px' }}>{userRole==='admin'&&card.id===1?'': (card.isCount ? '' : '₹ ')} {card.isCount ? card.amount.toLocaleString() : formatCurrency(card.amount)}</div>
               </div>
             </div>
           ))}
@@ -824,7 +836,7 @@ function App() {
         <div className="wallet-cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)', boxShadow: '0 10px 25px -5px rgba(37,99,235,0.4)' }}>
               <h3 className="wallet-card-title">Main Wallet</h3>
-              <h1 className="wallet-card-amount">₹ {(dashboardData?.mainWallet || 0).toLocaleString()}</h1>
+              <h1 className="wallet-card-amount">₹ {formatCurrency(dashboardData?.mainWallet)}</h1>
               <div className="wallet-card-icon">💳</div>
               <div className="wallet-card-action">
                  <button className="wallet-btn wallet-btn-primary" onClick={() => setActiveMenu('P2P Transfer')} style={{ marginRight: '8px' }}>Transfer (P2P)</button>
@@ -833,10 +845,10 @@ function App() {
            </div>
            <div className="wallet-card" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
               <h3 className="wallet-card-title">Rebirth Wallet</h3>
-              <h1 className="wallet-card-amount">₹ {(dashboardData?.rebirthWallet || 0).toLocaleString()}</h1>
+              <h1 className="wallet-card-amount">₹ {formatCurrency(dashboardData?.rebirthWallet)}</h1>
               <div className="wallet-card-icon">🌱</div>
               <div className="wallet-card-action" style={{ opacity: 0.8, fontSize: '12px', color: '#FFF', fontWeight: '500' }}>
-                 Auto-creates ID at ₹1,000
+                 Auto-creates ID at ₹1,500
               </div>
            </div>
         </div>
@@ -851,7 +863,7 @@ function App() {
               <td style={{ padding: '16px', color: '#334155', fontWeight: '500' }}>{txn.remark}</td>
               <td style={{ padding: '16px', color: '#64748B', fontWeight: '500', fontSize: '13px' }}>{txn.category}</td>
               <td style={{ padding: '16px', color: txn.type==='Credit'?'#10B981':'#EF4444', fontWeight: '800', fontSize: '16px' }}>
-                {txn.type==='Credit'?'+':'-'} ₹{Math.abs(txn.amount).toLocaleString()}
+                {txn.type==='Credit'?'+':'-'} ₹{formatCurrency(Math.abs(txn.amount))}
               </td>
             </tr>
           ))}
@@ -1191,7 +1203,7 @@ function App() {
               <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.id}</td>
               <td style={{ padding: '15px', fontWeight: 'bold' }}>{user.name}</td>
               <td style={{ padding: '15px' }}>{user.mobile || 'N/A'}</td>
-              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{user.wallet.toLocaleString()}</td>
+              <td style={{ padding: '15px', color: '#10B981', fontWeight: 'bold' }}>₹{formatCurrency(user.wallet)}</td>
               <td style={{ padding: '15px' }}>
                 <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: user.status==='Active'?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)', color: user.status==='Active'?'#10B981':'#EF4444' }}>{user.status}</span>
               </td>
@@ -1593,7 +1605,7 @@ function App() {
           <div style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: '#FFF', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(15,23,42,0.15)' }}>
             <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total System Liability</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#38BDF8' }}>
-              ₹ {(stats?.totalSystemLiability || 0).toLocaleString()}
+              ₹ {formatCurrency(stats?.totalSystemLiability)}
             </div>
             <span style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '4px', display: 'block' }}>Main + Rebirth Wallets combined</span>
           </div>
@@ -1601,7 +1613,7 @@ function App() {
           <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#166534', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Main Wallets</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#15803D' }}>
-              ₹ {(stats?.totalMainWallet || 0).toLocaleString()}
+              ₹ {formatCurrency(stats?.totalMainWallet)}
             </div>
             <span style={{ fontSize: '11px', color: '#16A34A', marginTop: '4px', display: 'block' }}>Available for Payouts / P2P</span>
           </div>
@@ -1609,7 +1621,7 @@ function App() {
           <div style={{ background: '#FDF4FF', border: '1px solid #F5D0FE', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#86198F', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rebirth Engine Wallet</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#A21CAF' }}>
-              ₹ {(stats?.totalRebirthWallet || 0).toLocaleString()}
+              ₹ {formatCurrency(stats?.totalRebirthWallet)}
             </div>
             <span style={{ fontSize: '11px', color: '#C026D3', marginTop: '4px', display: 'block' }}>Locked for auto ID generation</span>
           </div>
@@ -1617,7 +1629,7 @@ function App() {
           <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#9F1239', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending Payouts Queue</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#BE123C' }}>
-              ₹ {(stats?.pendingWithdrawalsAmount || 0).toLocaleString()}
+              ₹ {formatCurrency(stats?.pendingWithdrawalsAmount)}
             </div>
             <span style={{ fontSize: '11px', color: '#E11D48', marginTop: '4px', display: 'block' }}>{stats?.pendingWithdrawalsCount || 0} requests awaiting transfer</span>
           </div>
@@ -1625,7 +1637,7 @@ function App() {
           <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '20px', borderRadius: '16px' }}>
             <span style={{ fontSize: '11px', color: '#1E40AF', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pending UPI Deposits</span>
             <div style={{ fontSize: '24px', fontWeight: '900', marginTop: '6px', color: '#2563EB' }}>
-              ₹ {(stats?.pendingFundRequestsAmount || 0).toLocaleString()}
+              ₹ {formatCurrency(stats?.pendingFundRequestsAmount)}
             </div>
             <span style={{ fontSize: '11px', color: '#3B82F6', marginTop: '4px', display: 'block' }}>{stats?.pendingFundRequestsCount || 0} UTR verification requests</span>
           </div>
@@ -1769,7 +1781,7 @@ function App() {
                     </span>
                   </td>
                   <td style={{ padding: '14px', fontWeight: 'bold', color: tx.type === 'Credit' ? '#10B981' : '#EF4444' }}>
-                    {tx.type === 'Credit' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                    {tx.type === 'Credit' ? '+' : '-'} ₹{formatCurrency(tx.amount)}
                   </td>
                   <td style={{ padding: '14px', fontSize: '13px', color: '#334155' }}>
                     {tx.remark || 'Manual Admin Action'}
@@ -2081,7 +2093,7 @@ function App() {
                   </h3>
                   <div style={{ marginBottom: '12px' }}>
                      <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Total Fund Collected</span>
-                     <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>₹ {pool.totalFund.toLocaleString()}</span>
+                     <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>₹ {formatCurrency(pool.totalFund)}</span>
                   </div>
                   <div>
                      <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Active Qualifiers</span>
@@ -2456,7 +2468,7 @@ function App() {
                         <span style={{ fontSize: '24px' }}>💰</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Total Income Generated</h4>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>₹{reports.totalIncomeGenerated.toLocaleString()}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>₹{formatCurrency(reports.totalIncomeGenerated)}</div>
                     <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Direct, Level & Royalty</div>
                 </div>
 
@@ -2465,8 +2477,8 @@ function App() {
                         <span style={{ fontSize: '24px' }}>🏦</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Approved Payouts</h4>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0EA5E9' }}>₹{reports.approvedWithdrawals.netPaid.toLocaleString()}</div>
-                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Gross: ₹{reports.approvedWithdrawals.gross.toLocaleString()}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0EA5E9' }}>₹{formatCurrency(reports.approvedWithdrawals.netPaid)}</div>
+                    <div style={{ fontSize: '13px', color: '#64748B', marginTop: '8px' }}>Gross: ₹{formatCurrency(reports.approvedWithdrawals.gross)}</div>
                 </div>
                 
                 <div style={{ background: '#FFF', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
@@ -2474,7 +2486,7 @@ function App() {
                         <span style={{ fontSize: '24px' }}>⏳</span>
                         <h4 style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>Pending Payouts</h4>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#F59E0B' }}>₹{reports.pendingWithdrawals.netPaid.toLocaleString()}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#F59E0B' }}>₹{formatCurrency(reports.pendingWithdrawals.netPaid)}</div>
                     <div style={{ fontSize: '13px', color: '#EF4444', marginTop: '8px', fontWeight: 'bold' }}>{reports.pendingWithdrawals.count} Requests</div>
                 </div>
             </div>
@@ -2484,11 +2496,11 @@ function App() {
                 <div style={{ display: 'flex', gap: '40px' }}>
                    <div>
                        <span style={{ color: '#64748B', fontSize: '13px', display: 'block', marginBottom: '4px' }}>Total TDS Collected (5%)</span>
-                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{reports.approvedWithdrawals.tds.toLocaleString()}</span>
+                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{formatCurrency(reports.approvedWithdrawals.tds)}</span>
                    </div>
                    <div>
                        <span style={{ color: '#64748B', fontSize: '13px', display: 'block', marginBottom: '4px' }}>Admin Charges Collected (5%)</span>
-                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{reports.approvedWithdrawals.adminCharge.toLocaleString()}</span>
+                       <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#0F172A' }}>₹{formatCurrency(reports.approvedWithdrawals.adminCharge)}</span>
                    </div>
                 </div>
             </div>
@@ -2507,7 +2519,7 @@ function App() {
            
            <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '16px', marginBottom: '24px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <span style={{ color: '#475569', fontWeight: '600', fontSize: '14px' }}>Main Wallet Balance:</span>
-               <span style={{ color: '#10B981', fontWeight: '900', fontSize: '18px' }}>₹{(userData?.mainWallet || 0).toLocaleString()}</span>
+               <span style={{ color: '#10B981', fontWeight: '900', fontSize: '18px' }}>₹{formatCurrency(userData?.mainWallet || dashboardData?.mainWallet)}</span>
            </div>
 
            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -3275,7 +3287,7 @@ function App() {
               </span>
             </div>
             <h1 style={{ fontSize: '38px', margin: '4px 0 8px 0', fontWeight: '900', letterSpacing: '-0.5px' }}>
-              ₹ {earnings.toLocaleString()}
+              ₹ {formatCurrency(earnings)}
             </h1>
             <div style={{ fontSize: '12px', opacity: 0.9, marginBottom: '16px' }}>
               100% Joining Fee Recovery Target: <strong>₹1,500.00</strong>
@@ -3285,7 +3297,7 @@ function App() {
               <div style={{ width: `${progress}%`, height: '100%', background: '#FFF', transition: 'width 0.5s' }}></div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', opacity: 0.95 }}>
-              <span>₹{earnings} / ₹1500 Received</span>
+              <span>₹{formatCurrency(earnings)} / ₹1500 Received</span>
               <span>{Math.round(progress)}% Completed</span>
             </div>
           </div>
@@ -3421,7 +3433,7 @@ function App() {
                           {mem.name || mem.memberId}
                         </td>
                         <td style={{ padding: '12px 16px', fontWeight: 'bold', color: '#059669' }}>
-                          ₹ {memEarnings.toLocaleString()} / ₹1,500
+                          ₹ {formatCurrency(memEarnings)} / ₹1,500
                         </td>
                         <td style={{ padding: '12px 16px', minWidth: '140px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -3432,7 +3444,7 @@ function App() {
                           </div>
                         </td>
                         <td style={{ padding: '12px 16px', color: '#64748B', fontSize: '12px' }}>
-                          ₹ {remaining.toLocaleString()} మిగిలింది
+                          ₹ {formatCurrency(remaining)} మిగిలింది
                         </td>
                       </tr>
                     );
@@ -3554,7 +3566,7 @@ function App() {
           <div style={{ padding: '20px', background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(217,119,6,0.3)' }}>
             <h3 style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Total Royalty Earned</h3>
             <h1 style={{ fontSize: '32px', margin: '8px 0 0' }}>
-              ₹ {history.reduce((sum, tx) => sum + tx.amount, 0).toLocaleString()}
+              ₹ {formatCurrency(history.reduce((sum, tx) => sum + (tx.amount || 0), 0))}
             </h1>
           </div>
         </div>
@@ -3583,8 +3595,8 @@ function App() {
                 </div>
                 <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '10px' }}>Req: {pool.req}</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
-                  <span style={{ color: '#059669' }}>₹{pool.earned.toLocaleString()}</span>
-                  <span style={{ color: '#94A3B8' }}>Cap: ₹{pool.cap.toLocaleString()}</span>
+                  <span style={{ color: '#059669' }}>₹{formatCurrency(pool.earned)}</span>
+                  <span style={{ color: '#94A3B8' }}>Cap: ₹{formatCurrency(pool.cap)}</span>
                 </div>
                 <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ width: `${progress}%`, height: '100%', background: pool.color }}></div>
@@ -3647,7 +3659,7 @@ function App() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '28px' }}>
              <div style={{ padding: '24px', background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', borderRadius: '16px', color: '#FFF', boxShadow: '0 10px 25px -5px rgba(139,92,246,0.4)' }}>
                 <div style={{ fontSize: '13px', opacity: 0.9, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Current Rebirth Wallet</div>
-                <h1 style={{ fontSize: '36px', margin: '8px 0 12px 0' }}>₹ {currentRebirthBal.toLocaleString()}</h1>
+                <h1 style={{ fontSize: '36px', margin: '8px 0 12px 0' }}>₹ {formatCurrency(currentRebirthBal)}</h1>
                 <div style={{ fontSize: '13px', opacity: 0.95 }}>Total Rebirth IDs Generated: <strong>{rebirthData.length} IDs</strong></div>
              </div>
 
@@ -3660,7 +3672,7 @@ function App() {
                    <div style={{ width: `${progressToNext}%`, height: '100%', background: 'linear-gradient(90deg, #8B5CF6 0%, #A855F7 100%)', transition: 'width 0.5s' }}></div>
                 </div>
                 <div style={{ fontSize: '12px', color: '#64748B' }}>
-                   ₹{amountNeeded.toLocaleString()} more needed to automatically generate your next Rebirth ID.
+                   ₹{formatCurrency(amountNeeded)} more needed to automatically generate your next Rebirth ID.
                 </div>
              </div>
           </div>

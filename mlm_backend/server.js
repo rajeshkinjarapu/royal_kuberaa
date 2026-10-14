@@ -56,6 +56,14 @@ const productUpload = multer({ storage: productStorage });
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/royalkuberaa';
 const JWT_SECRET = process.env.JWT_SECRET || 'royal_kuberaa_super_secret_key';
 
+// Clean figure helper to eliminate floating point drift (e.g. .999, .991)
+const cleanFigure = (val) => {
+    if (val === null || val === undefined || isNaN(val)) return 0;
+    const num = Number(val);
+    if (Math.abs(Math.round(num) - num) < 0.05) return Math.round(num);
+    return Math.round(num * 100) / 100;
+};
+
 mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log('✅ Connected to MongoDB Database');
@@ -71,6 +79,31 @@ mongoose.connect(MONGO_URI)
             }
         } catch (migErr) {
             console.error('[FIFO Migration Error]:', migErr.message);
+        }
+
+        // Sanitize all wallet balances to eliminate floating-point drift (e.g. .999, .991)
+        try {
+            const allUsers = await User.find({
+                $or: [
+                    { mainWallet: { $gt: 0 } },
+                    { rebirthWallet: { $gt: 0 } },
+                    { totalEarnings: { $gt: 0 } }
+                ]
+            });
+            for (const u of allUsers) {
+                const cleanMain = cleanFigure(u.mainWallet);
+                const cleanRebirth = cleanFigure(u.rebirthWallet);
+                const cleanTotal = cleanFigure(u.totalEarnings);
+                if (u.mainWallet !== cleanMain || u.rebirthWallet !== cleanRebirth || u.totalEarnings !== cleanTotal) {
+                    u.mainWallet = cleanMain;
+                    u.rebirthWallet = cleanRebirth;
+                    u.totalEarnings = cleanTotal;
+                    await u.save();
+                }
+            }
+            console.log('✅ Sanitized all user wallets to clean exact numbers');
+        } catch (cleanErr) {
+            console.error('[Wallet Sanitize Error]:', cleanErr.message);
         }
 
         // Initialize or Update Default Admin
@@ -371,25 +404,25 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         res.json({
             success: true,
             data: {
-                totalEarnings: user.totalEarnings,
-                mainWallet: user.mainWallet,
-                rebirthWallet: user.rebirthWallet,
-                directIncome: direct,
-                levelIncome: level,
-                royaltyIncome: royalty,
-                cashbackIncome: user.autopoolEarnings || cashback,
-                autopoolIncome: user.autopoolEarnings || cashback,
-                autopoolEarnings: user.autopoolEarnings || 0,
+                totalEarnings: cleanFigure(user.totalEarnings),
+                mainWallet: cleanFigure(user.mainWallet),
+                rebirthWallet: cleanFigure(user.rebirthWallet),
+                directIncome: cleanFigure(direct),
+                levelIncome: cleanFigure(level),
+                royaltyIncome: cleanFigure(royalty),
+                cashbackIncome: cleanFigure(user.autopoolEarnings || cashback),
+                autopoolIncome: cleanFigure(user.autopoolEarnings || cashback),
+                autopoolEarnings: cleanFigure(user.autopoolEarnings || 0),
                 isAutopoolCompleted: user.isAutopoolCompleted || false,
-                withdrawFund: withdraw, 
-                allRanks: (user.goldEarnings || 0) + (user.platinumEarnings || 0) + (user.rubyEarnings || 0) + (user.diamondEarnings || 0),
+                withdrawFund: cleanFigure(withdraw), 
+                allRanks: cleanFigure((user.goldEarnings || 0) + (user.platinumEarnings || 0) + (user.rubyEarnings || 0) + (user.diamondEarnings || 0)),
                 royaltyStats: {
                     rank: user.rank || (user.isDiamond ? 'DIAMOND' : user.isRuby ? 'RUBY' : user.isPlatinum ? 'PLATINUM' : user.isGold ? 'GOLD' : 'STARTER'),
-                    goldEarnings: user.goldEarnings || 0,
-                    platinumEarnings: user.platinumEarnings || 0,
-                    rubyEarnings: user.rubyEarnings || 0,
-                    diamondEarnings: user.diamondEarnings || 0,
-                    cashbackEarnings: user.cashbackEarnings || 0,
+                    goldEarnings: cleanFigure(user.goldEarnings || 0),
+                    platinumEarnings: cleanFigure(user.platinumEarnings || 0),
+                    rubyEarnings: cleanFigure(user.rubyEarnings || 0),
+                    diamondEarnings: cleanFigure(user.diamondEarnings || 0),
+                    cashbackEarnings: cleanFigure(user.cashbackEarnings || 0),
                     caps: { GOLD: 20000, PLATINUM: 100000, RUBY: 500000, DIAMOND: 2500000, CASHBACK: 1500 }
                 },
                 networkStats: { 
@@ -565,7 +598,7 @@ app.get('/api/admin/users', authMiddleware, async (req, res) => {
         const users = await User.find({ role: { $ne: 'admin' } }).select('-password').sort({ createdAt: -1 });
         res.json({ 
             success: true, 
-            data: users.map(u => ({ _id: u._id, id: u.memberId, name: u.name, mobile: u.mobile, wallet: u.mainWallet, status: u.isBlocked ? "Blocked" : (u.isActive ? "Active" : "Unactivated") })) 
+            data: users.map(u => ({ _id: u._id, id: u.memberId, name: u.name, mobile: u.mobile, wallet: cleanFigure(u.mainWallet), status: u.isBlocked ? "Blocked" : (u.isActive ? "Active" : "Unactivated") })) 
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error" });
@@ -2008,18 +2041,28 @@ app.get('/api/admin/fund-stats', authMiddleware, async (req, res) => {
             category: { $in: ['ADMIN_CREDIT', 'ADMIN_DEBIT'] }
         }).sort({ createdAt: -1 }).limit(20);
 
+        const cleanTotalMain = Math.abs(Math.round(stats.totalMainWallet || 0) - (stats.totalMainWallet || 0)) < 0.05
+            ? Math.round(stats.totalMainWallet || 0)
+            : Math.round((stats.totalMainWallet || 0) * 100) / 100;
+
+        const cleanTotalRebirth = Math.abs(Math.round(stats.totalRebirthWallet || 0) - (stats.totalRebirthWallet || 0)) < 0.05
+            ? Math.round(stats.totalRebirthWallet || 0)
+            : Math.round((stats.totalRebirthWallet || 0) * 100) / 100;
+
+        const cleanTotalLiability = cleanTotalMain + cleanTotalRebirth;
+
         res.json({
             success: true,
             data: {
-                totalMainWallet: stats.totalMainWallet,
-                totalRebirthWallet: stats.totalRebirthWallet,
-                totalSystemLiability: stats.totalMainWallet + stats.totalRebirthWallet,
-                totalEarnings: stats.totalEarnings,
+                totalMainWallet: cleanTotalMain,
+                totalRebirthWallet: cleanTotalRebirth,
+                totalSystemLiability: cleanTotalLiability,
+                totalEarnings: Math.round((stats.totalEarnings || 0) * 100) / 100,
                 totalMembers: stats.totalMembers,
                 activeMembers: stats.activeMembers,
-                pendingWithdrawalsAmount: pendingWithdrawals.totalPending,
+                pendingWithdrawalsAmount: Math.round((pendingWithdrawals.totalPending || 0) * 100) / 100,
                 pendingWithdrawalsCount: pendingWithdrawals.count,
-                pendingFundRequestsAmount: pendingFundRequests.totalPending,
+                pendingFundRequestsAmount: Math.round((pendingFundRequests.totalPending || 0) * 100) / 100,
                 pendingFundRequestsCount: pendingFundRequests.count,
                 recentAdminTransactions
             }
@@ -2059,7 +2102,7 @@ app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
             if (user[walletField] < numAmount) {
                 return res.status(400).json({
                     success: false, 
-                    message: `Insufficient ${isRebirth ? 'Rebirth' : 'Main'} Wallet balance! User only has ₹${user[walletField].toLocaleString()}`
+                    message: `Insufficient ${isRebirth ? 'Rebirth' : 'Main'} Wallet balance! User only has ₹${cleanFigure(user[walletField]).toLocaleString()}`
                 });
             }
             user[walletField] -= numAmount;
@@ -2067,6 +2110,7 @@ app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
             user[walletField] += numAmount;
         }
 
+        user[walletField] = cleanFigure(user[walletField]);
         await user.save();
 
         const category = isCredit ? 'ADMIN_CREDIT' : 'ADMIN_DEBIT';
@@ -2086,12 +2130,12 @@ app.post('/api/admin/fund-action', authMiddleware, async (req, res) => {
 
         res.json({
             success: true,
-            message: `Successfully ${actionWord.toLowerCase()} ₹${numAmount.toLocaleString()} ${isCredit ? 'to' : 'from'} ${user.name} (${user.memberId})'s ${walletName}. New Balance: ₹${user[walletField].toLocaleString()}`,
+            message: `Successfully ${actionWord.toLowerCase()} ₹${numAmount.toLocaleString()} ${isCredit ? 'to' : 'from'} ${user.name} (${user.memberId})'s ${walletName}. New Balance: ₹${cleanFigure(user[walletField]).toLocaleString()}`,
             data: {
                 memberId: user.memberId,
                 name: user.name,
-                mainWallet: user.mainWallet,
-                rebirthWallet: user.rebirthWallet
+                mainWallet: cleanFigure(user.mainWallet),
+                rebirthWallet: cleanFigure(user.rebirthWallet)
             }
         });
     } catch (err) {
