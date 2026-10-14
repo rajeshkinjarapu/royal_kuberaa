@@ -9,8 +9,8 @@ const LEVEL_INCOMES = {
     1: 100, 2: 50, 3: 40, 4: 30, 5: 20, 6: 15, 7: 15, 8: 10, 9: 10, 10: 10
 };
 
-const NORMAL_POOLS = { GOLD: 120, PLATINUM: 60, RUBY: 60, DIAMOND: 60 };
-const REBIRTH_POOLS = { GOLD: 440, PLATINUM: 220, RUBY: 220, DIAMOND: 220 };
+const NORMAL_POOLS = { GOLD: 120, PLATINUM: 60, RUBY: 70, DIAMOND: 150 };
+const REBIRTH_POOLS = { GOLD: 330, PLATINUM: 165, RUBY: 192.5, DIAMOND: 412.5 };
 const NON_WORKING_FUND_AMOUNT = 150; // ₹100 base + ₹50 from Company Profit
 const FIFO_AUTOPOOL_CAP = 1500;
 
@@ -108,7 +108,7 @@ async function checkAndTriggerRebirth(user) {
                 }
             }
 
-            // ₹1100 to Daily Royalty Pools (Gold-440, Platinum-220, Ruby-220, Diamond-220)
+            // ₹1100 to Daily Royalty Pools (Gold-330, Platinum-165, Ruby-192.5, Diamond-412.5)
             for (const [pool, amount] of Object.entries(REBIRTH_POOLS)) {
                 await GlobalPool.findOneAndUpdate(
                     { poolName: pool },
@@ -229,7 +229,7 @@ async function activateUser(user, sponsor) {
         }
     }
 
-    // 4. Daily Royalty Pools Fund Contribution (₹300)
+    // 4. Daily Royalty Pools Fund Contribution (₹400: Gold-120, Platinum-60, Ruby-70, Diamond-150)
     for (const [pool, amount] of Object.entries(NORMAL_POOLS)) {
         await GlobalPool.findOneAndUpdate(
             { poolName: pool },
@@ -241,7 +241,7 @@ async function activateUser(user, sponsor) {
     // 5. Global FIFO Autopool Instant Distribution (₹150: ₹100 base + ₹50 from Company Profit)
     await distributeFifoAutopool(user);
 
-    // 6. Remaining ₹350 = ₹250 Product Cost + ₹100 Company Net Profit per ₹1500 Joining
+    // 6. Remaining ₹250 = ₹250 Product Cost (₹400 Direct + ₹300 Level + ₹400 Royalty + ₹150 FIFO + ₹250 Product = ₹1500)
 }
 
 // Helper: Add user to Global Pool with duplicate check

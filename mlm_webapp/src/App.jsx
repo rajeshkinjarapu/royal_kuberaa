@@ -2846,7 +2846,7 @@ function App() {
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>4. Daily Royalty Pools & Lifetime Limits</h4>
         <p style={{ marginBottom: '16px' }}>
-          Royalty pools (Gold, Platinum, Ruby, Diamond) require active direct referrals and carry defined lifetime payout caps: Gold (₹20,000), Platinum (₹1,00,000), Ruby (₹5,00,000), and Diamond (₹25,00,000). Once the lifetime cap is reached, pool distributions for that tier cease.
+          Royalty pools (Gold, Platinum, Ruby, Diamond) require active direct referrals and carry defined lifetime payout caps: Gold (₹20,000), Platinum (₹1,00,000), Ruby (₹5,00,000), and Diamond (₹25,00,000). Every joining contributes ₹400 across the four pools (Gold ₹120, Platinum ₹60, Ruby ₹70, Diamond ₹150). Once the lifetime cap is reached, pool distributions for that tier cease.
         </p>
 
         <h4 style={{ color: '#0F172A', fontSize: '16px', fontWeight: '800', marginBottom: '8px' }}>5. FIFO Autopool Income (100% Cashback Recovery)</h4>
@@ -3573,10 +3573,10 @@ function App() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '30px' }}>
           {[
-            { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: '🥇', req: '2 Active Directs', color: '#F59E0B' },
-            { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: '🥈', req: '2 Gold Directs', color: '#3B82F6' },
-            { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: '🔴', req: '5 Platinum Directs', color: '#EF4444' },
-            { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: '💎', req: '5 Ruby Directs', color: '#8B5CF6' }
+            { name: 'GOLD', cap: 20000, earned: dashboardData?.royaltyStats?.goldEarnings || 0, icon: '🥇', req: '2 Active Directs (₹120/join)', color: '#F59E0B' },
+            { name: 'PLATINUM', cap: 100000, earned: dashboardData?.royaltyStats?.platinumEarnings || 0, icon: '🥈', req: '2 Gold Directs (₹60/join)', color: '#3B82F6' },
+            { name: 'RUBY', cap: 500000, earned: dashboardData?.royaltyStats?.rubyEarnings || 0, icon: '🔴', req: '5 Platinum Directs (₹70/join)', color: '#EF4444' },
+            { name: 'DIAMOND', cap: 2500000, earned: dashboardData?.royaltyStats?.diamondEarnings || 0, icon: '💎', req: '5 Ruby Directs (₹150/join)', color: '#8B5CF6' }
           ].map(pool => {
             const userRank = dashboardData?.royaltyStats?.rank || 'STARTER';
             const ranksOrder = ['STARTER', 'GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'OWNER'];
@@ -3678,7 +3678,7 @@ function App() {
           </div>
 
           <div style={{ background: '#EFF6FF', padding: '16px 20px', borderRadius: '12px', borderLeft: '4px solid #3B82F6', marginBottom: '24px', fontSize: '13px', color: '#1E40AF', lineHeight: '1.5' }}>
-             💡 <strong>100% Distribution per Rebirth ID (₹1,500):</strong> ₹400 goes to your Direct Sponsor (Passive Sponsor Bonus), and ₹1,100 goes into Daily Royalty Pools (Gold-₹440, Platinum-₹220, Ruby-₹220, Diamond-₹220).
+             💡 <strong>100% Distribution per Rebirth ID (₹1,500):</strong> ₹400 goes to your Direct Sponsor (Passive Sponsor Bonus), and ₹1,100 goes into Daily Royalty Pools (Gold-₹330, Platinum-₹165, Ruby-₹192.5, Diamond-₹412.5).
           </div>
           
           {loading ? (

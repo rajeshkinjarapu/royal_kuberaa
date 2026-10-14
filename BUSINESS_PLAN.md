@@ -5,10 +5,10 @@
 ## Fund Distribution (₹1500 Breakdown):
 1. **Direct Referral Income:** ₹400
 2. **Team Level Income (10 Levels):** ₹300
-3. **Daily Royalty Pools:** ₹300
+3. **Daily Royalty Pools:** ₹400 (Gold ₹120, Platinum ₹60, Ruby ₹70, Diamond ₹150)
 4. **Global FIFO Autopool / Non-Working Fund:** ₹150
 5. **Product Cost (Kit + Courier/Delivery):** ₹250
-6. **Company Net Profit / Margin:** ₹100 (Direct net profit per joining + 5% Admin Charges, Flush Outs, and Top Admin ID)
+6. **Company Net Profit / Margin:** ₹0 (100% Joining Fund Distribution; Company revenue generated from 5% Admin Charges, Flush Outs, and Top Admin ID)
 
 ---
 
@@ -31,12 +31,12 @@ Instead of binary matching, you earn income up to 10 levels deep from your entir
 
 *(Note: For your direct referrals, you will receive both Direct Referral Income (₹400) + Level 1 Income (₹100) = ₹500 total!)*
 
-## 3. Daily Royalty Pools (₹300 Fund)
-Instead of a slow matrix, we use **Daily Profit Sharing**. The ₹300 from every joining is split into 4 Global Pools:
-- **Gold Pool:** ₹120 (40%)
-- **Platinum Pool:** ₹60 (20%)
-- **Ruby Pool:** ₹60 (20%)
-- **Diamond Pool:** ₹60 (20%)
+## 3. Daily Royalty Pools (₹400 Fund)
+Instead of a slow matrix, we use **Daily Profit Sharing**. The ₹400 from every joining is split into 4 Global Pools:
+- **Gold Pool:** ₹120 (30%)
+- **Platinum Pool:** ₹60 (15%)
+- **Ruby Pool:** ₹70 (17.5%)
+- **Diamond Pool:** ₹150 (37.5%)
 
 At midnight (12:00 AM), the funds collected that day are distributed **EQUALLY** among all qualified members in each pool.
 
@@ -66,7 +66,7 @@ This is a revolutionary 100% cashback guarantee for every member who joins Royal
 - When the Rebirth Wallet reaches ₹1500, a new **Rebirth ID** is automatically generated.
 - **Rebirth ID Distribution (₹1500):**
   - **₹400** goes to the Direct Sponsor (Passive Sponsor Income).
-  - **₹1100** goes into the Daily Royalty Pools (Gold-₹440, Platinum-₹220, Ruby-₹220, Diamond-₹220).
+  - **₹1100** goes into the Daily Royalty Pools (Gold-₹330, Platinum-₹165, Ruby-₹192.5, Diamond-₹412.5).
   - *(Note: Rebirth IDs DO NOT generate Binary Matching, and there is no direct company profit from the rebirth allocation itself).*
 
 

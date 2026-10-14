@@ -73,13 +73,13 @@ class RoyaltyScreen extends StatelessWidget {
               color: Colors.blueGrey,
             ),
             _buildInfoCard(
-              title: 'Ruby Pool (₹60 / joining)',
+              title: 'Ruby Pool (₹70 / joining)',
               desc: 'Requirement: 5 of your Directs must become Platinum. Max Limit: ₹5,00,000',
               icon: Icons.diamond,
               color: Colors.redAccent,
             ),
             _buildInfoCard(
-              title: 'Diamond Pool (₹60 / joining)',
+              title: 'Diamond Pool (₹150 / joining)',
               desc: 'Requirement: 5 of your Directs must become Ruby. Max Limit: ₹25,00,000',
               icon: Icons.diamond_outlined,
               color: Colors.blueAccent,
