@@ -88,7 +88,19 @@ class RoyalKuberaaApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/dashboard',
-          builder: (context, state) => const MainLayout(),
+          builder: (context, state) => const MainLayout(initialIndex: 0),
+        ),
+        GoRoute(
+          path: '/network',
+          builder: (context, state) => const MainLayout(initialIndex: 1),
+        ),
+        GoRoute(
+          path: '/finance',
+          builder: (context, state) => const MainLayout(initialIndex: 2),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const MainLayout(initialIndex: 3),
         ),
         GoRoute(
           path: '/deposit',
@@ -96,6 +108,10 @@ class RoyalKuberaaApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/activate',
+          builder: (context, state) => const IdActivationScreen(),
+        ),
+        GoRoute(
+          path: '/activation',
           builder: (context, state) => const IdActivationScreen(),
         ),
         GoRoute(
@@ -108,6 +124,10 @@ class RoyalKuberaaApp extends StatelessWidget {
         ),
         GoRoute(
           path: '/transfer',
+          builder: (context, state) => const P2PTransferScreen(),
+        ),
+        GoRoute(
+          path: '/p2p',
           builder: (context, state) => const P2PTransferScreen(),
         ),
         GoRoute(

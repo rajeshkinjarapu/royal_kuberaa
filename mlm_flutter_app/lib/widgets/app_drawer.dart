@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
 import 'app_logo.dart';
@@ -11,273 +12,203 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final isAdmin = user?['role'] == 'admin';
 
     return Drawer(
       backgroundColor: Colors.white,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.darkNavy, Color(0xFF1E293B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // --- Exact Webapp Sidebar Header ---
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1.5)),
+              ),
+              child: Column(
+                children: [
+                  const AppLogo(size: 70, showBorder: true),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Royal Kuberaa',
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF0F172A),
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${user?['memberId'] ?? 'N/A'} • ${user?['name'] ?? user?['fullName'] ?? 'Member'}',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
-            accountName: Text(
-              user?['fullName'] ?? user?['name'] ?? 'Royal Member',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.white),
-            ),
-            accountEmail: Text(
-              'ID: ${user?['memberId'] ?? 'N/A'}',
-              style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 13, fontWeight: FontWeight.bold),
-            ),
-            currentAccountPicture: const AppLogo(size: 64, showBorder: true),
-          ),
 
-          // --- NETWORK & TEAM ---
-          _buildSectionHeader('NETWORK & GROWTH'),
-          _buildDrawerItem(
-            icon: Icons.person_add_alt_1_outlined,
-            title: 'Add New Member',
-            iconColor: Colors.blue,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/add-member');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.account_tree_outlined,
-            title: 'Team Network',
-            iconColor: Colors.teal,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/team-network');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.all_inclusive,
-            title: 'Rebirth IDs',
-            iconColor: Colors.purple,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/rebirth');
-            },
-          ),
+            // --- Scrollable Menu Items Matching Webapp Exactly ---
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                children: [
+                  // ===== MAIN MENU =====
+                  _buildSectionHeader('MAIN MENU'),
+                  _buildMenuItem(context, '📊', 'Dashboard', '/dashboard'),
+                  _buildMenuItem(context, '⚡', 'ID Activation', '/activation'),
+                  _buildMenuItem(context, '💸', 'Non-Working Cashback', '/cashback'),
+                  _buildMenuItem(context, '👑', 'Royalty Pools', '/royalty'),
+                  _buildMenuItem(context, '♾️', 'Rebirth ID', '/rebirth'),
+                  _buildMenuItem(context, '🛍️', 'Products', '/products'),
 
-          const Divider(),
+                  const SizedBox(height: 8),
 
-          // --- EARNINGS & POOLS ---
-          _buildSectionHeader('EARNINGS & POOLS'),
-          _buildDrawerItem(
-            icon: Icons.workspace_premium_outlined,
-            title: 'Royalty Pools',
-            iconColor: Colors.amber.shade800,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/royalty');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.monetization_on_outlined,
-            title: 'Non-Working Cashback',
-            iconColor: Colors.green,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/cashback');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.shopping_bag_outlined,
-            title: 'Welcome Products',
-            iconColor: Colors.deepOrange,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/products');
-            },
-          ),
+                  // ===== FINANCE =====
+                  _buildSectionHeader('FINANCE'),
+                  _buildMenuItem(context, '💳', 'Deposit Funds', '/deposit'),
+                  _buildMenuItem(context, '📒', 'Passbook', '/passbook'),
+                  _buildMenuItem(context, '🏦', 'Bank Withdrawal', '/withdraw'),
+                  _buildMenuItem(context, '💸', 'P2P Transfer', '/p2p'),
 
-          const Divider(),
+                  const SizedBox(height: 8),
 
-          // --- ACCOUNT & PAYMENTS ---
-          _buildSectionHeader('ACCOUNT & SETTINGS'),
-          _buildDrawerItem(
-            icon: Icons.qr_code_2_rounded,
-            title: 'Payment QR Settings',
-            iconColor: AppColors.primary,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/payment-settings');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.pin_outlined,
-            title: 'Transaction PIN (TPIN)',
-            iconColor: Colors.blueGrey,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/tpin');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.lock_outline,
-            title: 'Change Password',
-            iconColor: Colors.blueGrey,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/change-password');
-            },
-          ),
+                  // ===== ACCOUNT =====
+                  _buildSectionHeader('ACCOUNT'),
+                  _buildMenuItem(context, '👥', 'My Network', '/network'),
+                  _buildMenuItem(context, '➕', 'Add Member', '/add-member'),
+                  _buildMenuItem(context, '🕸️', 'Team Network', '/team-network'),
+                  _buildMenuItem(context, '👤', 'Profile', '/profile'),
+                  _buildMenuItem(context, '🏦', 'Payment Settings', '/payment-settings'),
+                  _buildMenuItem(context, '🔒', 'Transaction PIN', '/tpin'),
+                  _buildMenuItem(context, '🔑', 'Change Password', '/change-password'),
+                  _buildMenuItem(context, '🎧', 'Support', '/support'),
 
-          const Divider(),
+                  const SizedBox(height: 8),
 
-          // --- SUPPORT & INFO ---
-          _buildSectionHeader('SUPPORT & INFO'),
-          _buildDrawerItem(
-            icon: Icons.headset_mic_outlined,
-            title: 'Customer Support',
-            iconColor: Colors.purple,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/support');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.notifications_none,
-            title: 'Notifications',
-            iconColor: Colors.orange,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/notifications');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.info_outline,
-            title: 'About Royal Kuberaa',
-            onTap: () {
-              Navigator.pop(context);
-              showDialog(
-                context: context,
-                builder: (c) => AlertDialog(
-                  title: const Text('About Royal Kuberaa'),
-                  content: const Text(
-                    'Royal Kuberaa is an innovative hybrid unilevel & royalty profit-sharing business model designed to provide sustainable growth, daily profit sharing, and zero-risk cashback guaranteed for all members.\n\nPackage: ₹1500 (Includes Welcome Kit)\nVersion: 1.0.0 (Production Release)',
-                    style: TextStyle(height: 1.4),
-                  ),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(c), child: const Text('Close')),
+                  // ===== INFORMATION =====
+                  _buildSectionHeader('INFORMATION'),
+                  _buildMenuItem(context, 'ℹ️', 'About Us', '/legal'),
+                  _buildMenuItem(context, '📄', 'Terms & Conditions', '/terms'),
+                  _buildMenuItem(context, '🛡️', 'Privacy Policy', '/privacy'),
+                  _buildMenuItem(context, '↩️', 'Return & Refund', '/refund'),
+                  _buildMenuItem(context, '⚠️', 'Disclaimer', '/disclaimer'),
+
+                  // ===== ADMIN PANEL (if admin) =====
+                  if (isAdmin) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFFE2E8F0)),
+                    _buildSectionHeader('ADMIN PANEL', color: const Color(0xFF7C3AED)),
+                    _buildMenuItem(context, '👑', 'Admin Dashboard', '/admin'),
+                    _buildMenuItem(context, '👥', 'Member Management', '/admin/members'),
+                    _buildMenuItem(context, '💰', 'Fund Management', '/admin/funds'),
+                    _buildMenuItem(context, '💳', 'Fund Requests', '/admin/fund-management'),
+                    _buildMenuItem(context, '💸', 'Payouts & TDS', '/admin/payouts'),
+                    _buildMenuItem(context, '🔄', 'Pool Distributions', '/admin/pools'),
+                    _buildMenuItem(context, '🛍️', 'Manage Products', '/admin/products'),
+                    _buildMenuItem(context, '🎧', 'Support Tickets', '/admin/support'),
+                    _buildMenuItem(context, '⚙️', 'System Settings', '/admin/settings'),
+                    _buildMenuItem(context, '📱', 'App Upload', '/admin/app-upload'),
+                    _buildMenuItem(context, '📊', 'System Reports', '/admin/reports'),
                   ],
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+
+            // --- Logout Button matching Webapp Style ---
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1.5)),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await context.read<AuthProvider>().logout();
+                    if (context.mounted) {
+                      context.go('/login');
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE11D48).withOpacity(0.08),
+                    foregroundColor: const Color(0xFFE11D48),
+                    side: BorderSide(color: const Color(0xFFE11D48).withOpacity(0.25), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('🚪', style: TextStyle(fontSize: 16)),
+                      SizedBox(width: 8),
+                      Text('Logout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ],
+                  ),
                 ),
-              );
-            },
-          ),
-
-          const Divider(),
-
-          // --- LEGAL & POLICIES ---
-          _buildSectionHeader('LEGAL & POLICIES'),
-          _buildDrawerItem(
-            icon: Icons.description_outlined,
-            title: 'Terms & Conditions',
-            iconColor: Colors.blueGrey,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/terms');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.privacy_tip_outlined,
-            title: 'Privacy Policy',
-            iconColor: Colors.blueGrey,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/privacy');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.assignment_return_outlined,
-            title: 'Return & Refund Policy',
-            iconColor: Colors.blueGrey,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/refund');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.gavel_outlined,
-            title: 'Disclaimer & Compliance',
-            iconColor: Colors.blueGrey,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/disclaimer');
-            },
-          ),
-
-          // Admin Menu
-          if (user?['role'] == 'admin') ...[
-            const Divider(),
-            _buildSectionHeader('ADMINISTRATION'),
-            _buildDrawerItem(
-              icon: Icons.admin_panel_settings,
-              title: 'Admin Panel',
-              iconColor: Colors.purple,
-              textColor: Colors.purple,
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/admin');
-              },
+              ),
             ),
           ],
-
-          const Divider(),
-          _buildDrawerItem(
-            icon: Icons.logout,
-            title: 'Logout',
-            iconColor: AppColors.error,
-            textColor: AppColors.error,
-            onTap: () async {
-              await context.read<AuthProvider>().logout();
-              if (context.mounted) context.go('/login');
-            },
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 12, bottom: 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
         ),
       ),
     );
   }
 
-  Widget _buildDrawerItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? iconColor,
-    Color? textColor,
-  }) {
-    return ListTile(
-      dense: true,
-      visualDensity: const VisualDensity(vertical: -1),
-      leading: Icon(icon, color: iconColor ?? AppColors.textSecondary, size: 20),
-      title: Text(
+  Widget _buildSectionHeader(String title, {Color color = const Color(0xFF94A3B8)}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
+      child: Text(
         title,
-        style: TextStyle(color: textColor ?? AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          color: color,
+          letterSpacing: 0.8,
+        ),
       ),
-      onTap: onTap,
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context, String emoji, String title, String route) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        if (route == '/dashboard' || route == '/network' || route == '/finance' || route == '/profile') {
+          context.go(route);
+        } else {
+          context.push(route);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        child: Row(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF334155),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

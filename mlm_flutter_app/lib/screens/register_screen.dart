@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import '../utils/constants.dart';
 import '../widgets/app_logo.dart';
+import '../widgets/pin_input_boxes.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -206,23 +207,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 16),
             
-            const Text('Security PIN / Password (6 Digits)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _passwordController,
-              hint: '6-digit Password (PIN)',
-              icon: Icons.lock_outline,
-              keyboardType: TextInputType.number,
-              obscureText: _obscurePassword,
-              maxLength: 6,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Password (6 Digits)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF64748B))),
+                GestureDetector(
+                  onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                  child: Row(
+                    children: [
+                      Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 15, color: const Color(0xFF64748B)),
+                      const SizedBox(width: 4),
+                      Text(_obscurePassword ? 'Show' : 'Hide', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
               ],
-              suffixIcon: IconButton(
-                icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-              ),
+            ),
+            const SizedBox(height: 8),
+            PinInputBoxes(
+              length: 6,
+              controller: _passwordController,
+              obscureText: _obscurePassword,
             ),
             const SizedBox(height: 32),
             
