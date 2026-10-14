@@ -118,6 +118,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   Widget build(BuildContext context) {
     final dashData = context.watch<DashboardProvider>().dashboardData;
     final mainWallet = dashData?['mainWallet'] ?? 0.0;
+    final bool hasQrCode = (_bankDetails != null &&
+        _bankDetails!['paymentQrCode'] != null &&
+        _bankDetails!['paymentQrCode'].toString().trim().isNotEmpty);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -214,17 +217,17 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: (_bankDetails?['paymentQrCode'] != null && _bankDetails?['paymentQrCode'].toString().isNotEmpty)
+                      color: hasQrCode
                           ? Colors.green.withOpacity(0.08)
                           : Colors.amber.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: (_bankDetails?['paymentQrCode'] != null && _bankDetails?['paymentQrCode'].toString().isNotEmpty)
+                        color: hasQrCode
                             ? Colors.green.withOpacity(0.3)
                             : Colors.amber.withOpacity(0.4),
                       ),
                     ),
-                    child: (_bankDetails?['paymentQrCode'] != null && _bankDetails?['paymentQrCode'].toString().isNotEmpty)
+                    child: hasQrCode
                         ? Row(
                             children: [
                               const Icon(Icons.qr_code_2_rounded, color: Colors.green, size: 36),
