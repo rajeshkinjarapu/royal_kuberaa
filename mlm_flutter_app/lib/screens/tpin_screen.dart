@@ -90,19 +90,19 @@ class _TpinScreenState extends State<TpinScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(hasTpin ? 'Change your T-PIN' : 'Create your T-PIN', style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    Text(hasTpin ? 'Change 4-Digit T-PIN' : 'Create 4-Digit T-PIN', style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
-                    const Text('T-PIN is required for all financial transactions including withdrawals and P2P transfers.', style: TextStyle(color: AppColors.textSecondary, height: 1.5)),
+                    const Text('T-PIN is a 4-digit security PIN required for all financial transactions including withdrawals and P2P transfers.', style: TextStyle(color: AppColors.textSecondary, height: 1.5)),
                     const SizedBox(height: 32),
 
                     if (hasTpin) ...[
-                      _buildPasswordField(_currentController, 'Current T-PIN', _obscureCurrent, () => setState(() => _obscureCurrent = !_obscureCurrent)),
+                      _buildPasswordField(_currentController, 'Current 4-Digit T-PIN', _obscureCurrent, () => setState(() => _obscureCurrent = !_obscureCurrent)),
                       const SizedBox(height: 16),
                     ],
                     
-                    _buildPasswordField(_newController, 'New T-PIN', _obscureNew, () => setState(() => _obscureNew = !_obscureNew)),
+                    _buildPasswordField(_newController, 'New 4-Digit T-PIN', _obscureNew, () => setState(() => _obscureNew = !_obscureNew)),
                     const SizedBox(height: 16),
-                    _buildPasswordField(_confirmController, 'Confirm New T-PIN', _obscureConfirm, () => setState(() => _obscureConfirm = !_obscureConfirm)),
+                    _buildPasswordField(_confirmController, 'Confirm New 4-Digit T-PIN', _obscureConfirm, () => setState(() => _obscureConfirm = !_obscureConfirm)),
                     
                     const SizedBox(height: 40),
                     SizedBox(
@@ -130,11 +130,11 @@ class _TpinScreenState extends State<TpinScreen> {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
-      maxLength: 6,
+      maxLength: 4,
       keyboardType: TextInputType.number,
       validator: (value) {
         if (value == null || value.isEmpty) return 'Required';
-        if (value.length < 4) return 'PIN must be at least 4 digits';
+        if (value.trim().length != 4) return 'T-PIN must be exactly 4 digits';
         return null;
       },
       decoration: InputDecoration(

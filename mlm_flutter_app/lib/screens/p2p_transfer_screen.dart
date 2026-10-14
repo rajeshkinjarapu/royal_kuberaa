@@ -78,8 +78,8 @@ class _P2PTransferScreenState extends State<P2PTransferScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount')));
       return;
     }
-    if (_tpinController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your T-PIN')));
+    if (_tpinController.text.trim().length != 4) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your 4-digit T-PIN')));
       return;
     }
 
