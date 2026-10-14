@@ -21,3 +21,8 @@ mlm_flutter_app/.flutter-plugins-dependencies
 # OS generated
 .DS_Store
 Thumbs.db
+
+# Live Uploads & Downloadable Builds
+mlm_backend/uploads/
+mlm_backend/public/app/
+
