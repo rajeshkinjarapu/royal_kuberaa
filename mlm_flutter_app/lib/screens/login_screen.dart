@@ -75,37 +75,43 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         child: SafeArea(
+          bottom: false,
           child: LayoutBuilder(
             builder: (context, constraints) {
+              final bottomPadding = MediaQuery.of(context).padding.bottom;
               return SingleChildScrollView(
                 physics: const ClampingScrollPhysics(),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // ── TOP HEADER: Logo & Branding ──
-                          Column(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ── TOP HEADER: Logo & Branding ──
+                        Padding(
+                          padding: const EdgeInsets.only(top: 14, bottom: 20, left: 20, right: 20),
+                          child: Column(
                             children: [
-                              const SizedBox(height: 6),
                               Container(
-                                width: 72,
-                                height: 72,
+                                width: 80,
+                                height: 80,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFFD4AF37), width: 2.5),
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37), Color(0xFF996515)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
                                       color: const Color(0xFFDC2626).withOpacity(0.35),
-                                      blurRadius: 22,
+                                      blurRadius: 24,
                                       spreadRadius: 2,
-                                      offset: const Offset(0, 5),
+                                      offset: const Offset(0, 6),
                                     ),
                                   ],
                                 ),
+                                padding: const EdgeInsets.all(2.5),
                                 child: ClipOval(
                                   child: Image.asset(
                                     'assets/images/logo.jpg',
@@ -119,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             style: TextStyle(
                                               color: Color(0xFFD4AF37),
                                               fontWeight: FontWeight.w900,
-                                              fontSize: 26,
+                                              fontSize: 28,
                                             ),
                                           ),
                                         ),
@@ -138,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   'ROYAL KUBERAA',
                                   style: GoogleFonts.inter(
-                                    fontSize: 22,
+                                    fontSize: 23,
                                     fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                     letterSpacing: 1.2,
@@ -149,87 +155,104 @@ class _LoginScreenState extends State<LoginScreen> {
                               Text(
                                 'Smart MLM & Wealth Creation Platform',
                                 style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: Colors.white.withOpacity(0.65),
+                                  fontSize: 12.5,
+                                  color: Colors.white.withOpacity(0.7),
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              const SizedBox(height: 12),
                             ],
                           ),
+                        ),
 
-                          // ── MAIN FORM CARD (Fits screen cleanly) ──
-                          Container(
+                        // ── MAIN FORM CONTAINER (Stretches down to bottom cleanly) ──
+                        Expanded(
+                          child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 22),
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.25),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 10),
+                                  color: Colors.black26,
+                                  blurRadius: 25,
+                                  offset: Offset(0, -6),
                                 ),
                               ],
                             ),
+                            padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding > 0 ? bottomPadding + 14 : 24),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Center accent grabber line
+                                Center(
+                                  child: Container(
+                                    width: 40,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE2E8F0),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+
                                 Text(
                                   'Sign In',
                                   style: GoogleFonts.inter(
-                                    fontSize: 21,
+                                    fontSize: 23,
                                     fontWeight: FontWeight.w800,
                                     color: const Color(0xFF0F172A),
                                   ),
                                 ),
-                                const SizedBox(height: 3),
+                                const SizedBox(height: 4),
                                 Text(
                                   'Enter your credentials to access your account',
                                   style: GoogleFonts.inter(
-                                    fontSize: 12,
+                                    fontSize: 12.5,
                                     color: const Color(0xFF64748B),
                                   ),
                                 ),
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 22),
 
                                 // Field 1: User ID
                                 Text(
                                   'User ID / Mobile Number',
                                   style: GoogleFonts.inter(
-                                    fontSize: 12,
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF334155),
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 TextField(
                                   controller: _idController,
                                   textCapitalization: TextCapitalization.characters,
                                   style: const TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 14.5,
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xFF0F172A),
                                   ),
                                   decoration: InputDecoration(
                                     hintText: 'Enter your ID or Mobile',
-                                    hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                                    hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5),
                                     filled: true,
                                     fillColor: const Color(0xFFF8FAFC),
-                                    prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF94A3B8), size: 19),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF94A3B8), size: 20),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                     enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                       borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.2),
                                     ),
                                     focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                       borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.8),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 18),
 
                                 // Field 2: Password
                                 Row(
@@ -238,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Text(
                                       'Password (6 Digits)',
                                       style: GoogleFonts.inter(
-                                        fontSize: 12,
+                                        fontSize: 12.5,
                                         fontWeight: FontWeight.w600,
                                         color: const Color(0xFF334155),
                                       ),
@@ -249,14 +272,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                         children: [
                                           Icon(
                                             _obscurePin ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                            size: 14,
+                                            size: 15,
                                             color: const Color(0xFF64748B),
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
                                             _obscurePin ? 'Show' : 'Hide',
                                             style: const TextStyle(
-                                              fontSize: 11,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w600,
                                               color: Color(0xFF64748B),
                                             ),
@@ -266,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 10),
 
                                 // Responsive PIN boxes
                                 PinInputBoxes(
@@ -275,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   obscureText: _obscurePin,
                                   onCompleted: (_) => _handleLogin(),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 14),
 
                                 // Remember Me & Forgot Password
                                 Row(
@@ -295,10 +318,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                               onChanged: (v) => setState(() => _rememberMe = v ?? true),
                                             ),
                                           ),
-                                          const SizedBox(width: 7),
+                                          const SizedBox(width: 8),
                                           const Text(
                                             'Remember me',
-                                            style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                                            style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                                           ),
                                         ],
                                       ),
@@ -314,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: const Text(
                                         'Forgot password?',
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 12.5,
                                           color: Color(0xFFDC2626),
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -325,25 +348,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                 // Error message banner
                                 if (_errorMessage.isNotEmpty) ...[
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 12),
                                   Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFEE2E2),
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(color: const Color(0xFFFCA5A5)),
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 16),
+                                        const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 18),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             _errorMessage,
                                             style: const TextStyle(
                                               color: Color(0xFFB91C1C),
-                                              fontSize: 12,
+                                              fontSize: 12.5,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -353,12 +376,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ],
 
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 22),
 
                                 // Login Button
                                 SizedBox(
                                   width: double.infinity,
-                                  height: 48,
+                                  height: 52,
                                   child: DecoratedBox(
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
@@ -366,11 +389,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                       boxShadow: [
                                         BoxShadow(
                                           color: const Color(0xFFDC2626).withOpacity(0.35),
-                                          blurRadius: 16,
+                                          blurRadius: 18,
                                           offset: const Offset(0, 6),
                                         ),
                                       ],
@@ -380,12 +403,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                       ),
                                       child: auth.isLoading
                                           ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
+                                              width: 22,
+                                              height: 22,
                                               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                                             )
                                           : Row(
@@ -394,21 +417,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 Text(
                                                   'Login',
                                                   style: GoogleFonts.inter(
-                                                    fontSize: 15,
+                                                    fontSize: 16,
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.white,
                                                     letterSpacing: 0.6,
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
-                                                const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                                                const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
                                               ],
                                             ),
                                     ),
                                   ),
                                 ),
 
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 18),
 
                                 // Register link
                                 Row(
@@ -416,14 +439,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   children: [
                                     const Text(
                                       "Don't have an account? ",
-                                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                                     ),
                                     GestureDetector(
                                       onTap: () => context.push('/register'),
                                       child: Text(
                                         'Register Now',
                                         style: GoogleFonts.inter(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: const Color(0xFFDC2626),
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -431,27 +454,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
 
-                          // ── BOTTOM FOOTER: Security Badge ──
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10, bottom: 4),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.lock_outline_rounded, size: 12, color: Colors.white.withOpacity(0.4)),
-                                const SizedBox(width: 5),
-                                Text(
-                                  '256-Bit SSL Encrypted & Secure System',
-                                  style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.4)),
+                                const SizedBox(height: 22),
+
+                                // Bottom Security Badge inside the card
+                                Center(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.lock_outline_rounded, size: 13, color: Color(0xFF94A3B8)),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        '256-Bit SSL Encrypted & Secure System',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          color: const Color(0xFF94A3B8).withOpacity(0.9),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
