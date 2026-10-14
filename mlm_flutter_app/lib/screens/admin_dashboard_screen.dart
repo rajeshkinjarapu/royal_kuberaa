@@ -12,8 +12,6 @@ class AdminDashboardScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Admin Panel'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: SingleChildScrollView(

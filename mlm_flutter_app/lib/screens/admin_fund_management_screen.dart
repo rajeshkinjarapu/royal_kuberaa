@@ -132,8 +132,6 @@ class _AdminFundManagementScreenState extends State<AdminFundManagementScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Fund Management'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: SingleChildScrollView(

@@ -30,8 +30,6 @@ class _AdminPayoutsScreenState extends State<AdminPayoutsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Payout Approvals'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: provider.isLoading && requests.isEmpty

@@ -57,8 +57,6 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('System Reports', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _fetchReports),

@@ -129,8 +129,6 @@ class _AdminPoolsScreenState extends State<AdminPoolsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Pool Distributions', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _fetchPools),

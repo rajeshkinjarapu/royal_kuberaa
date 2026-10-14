@@ -40,8 +40,6 @@ class _AdminAppUploadScreenState extends State<AdminAppUploadScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('App Version & Release', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: SingleChildScrollView(

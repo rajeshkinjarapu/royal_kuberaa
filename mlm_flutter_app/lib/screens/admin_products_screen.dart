@@ -112,8 +112,6 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Product Management'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         actions: [
           IconButton(

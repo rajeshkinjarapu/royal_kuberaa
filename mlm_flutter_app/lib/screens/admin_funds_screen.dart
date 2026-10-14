@@ -30,8 +30,6 @@ class _AdminFundsScreenState extends State<AdminFundsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Fund Requests'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: provider.isLoading && requests.isEmpty

@@ -29,8 +29,6 @@ class _AdminKycScreenState extends State<AdminKycScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('KYC Approvals'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: provider.isLoading && requests.isEmpty

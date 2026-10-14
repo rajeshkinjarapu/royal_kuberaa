@@ -81,8 +81,6 @@ class _AdminSupportScreenState extends State<AdminSupportScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Support Tickets'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: provider.isLoading && tickets.isEmpty

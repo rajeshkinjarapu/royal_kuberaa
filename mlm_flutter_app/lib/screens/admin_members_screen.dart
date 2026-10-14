@@ -29,8 +29,6 @@ class _AdminMembersScreenState extends State<AdminMembersScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Member Management'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: provider.isLoading && users.isEmpty

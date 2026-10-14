@@ -101,8 +101,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('System Settings'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: provider.isLoading && provider.settings == null
