@@ -42,14 +42,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: AppColors.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16.0, 14.0, 16.0, 90.0),
+        padding: const EdgeInsets.fromLTRB(14.0, 10.0, 14.0, 80.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppColors.darkNavy, Color(0xFF1E293B)],
@@ -68,12 +68,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${user?['fullName'] ?? user?['name'] ?? 'Member'} 👋',
-                          style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                          user?['fullName'] ?? user?['name'] ?? 'Member',
+                          style: GoogleFonts.inter(fontSize: 16.5, fontWeight: FontWeight.bold, color: Colors.white),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Text(
                           'Member ID: ${user?['memberId'] ?? 'N/A'}',
                           style: const TextStyle(fontSize: 12, color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
@@ -142,16 +142,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // Main Wallet Card (Optimized Height & Sleek Finish)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 6)),
+                    BoxShadow(color: AppColors.primary.withOpacity(0.25), blurRadius: 10, offset: const Offset(0, 4)),
                   ],
                 ),
                 child: Column(
@@ -162,9 +162,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.account_balance_wallet, color: Colors.white70, size: 16),
+                            Icon(Icons.account_balance_wallet, color: Colors.white70, size: 15),
                             SizedBox(width: 6),
-                            Text('Main Wallet Balance', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500)),
+                            Text('Main Wallet Balance', style: TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500)),
                           ],
                         ),
                         Container(
@@ -184,86 +184,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       '₹${_formatAmount(dashData?['mainWallet'])}',
-                      style: GoogleFonts.inter(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                      style: GoogleFonts.inter(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         _buildWalletAction(Icons.add, 'Deposit', () => context.push('/deposit')),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         _buildWalletAction(Icons.arrow_upward, 'Withdraw', () => context.push('/withdraw')),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         _buildWalletAction(Icons.swap_horiz, 'Transfer', () => context.push('/transfer')),
                       ],
                     )
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
               
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Income Overview', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  Text('Income Overview', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   InkWell(
                     onTap: () => context.push('/finance'),
                     child: const Text('View All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               
-              // 6 Income Overview Cards in a 2x3 Grid (Taller, spacious cards)
+              // 6 Income Overview Cards in a 2x3 Grid
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.30,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.48,
                 children: [
                   _buildStatCard(
                     title: 'Total Earning',
                     value: '₹${_formatAmount(dashData?['totalEarnings'])}',
-                    icon: Icons.account_balance_wallet_rounded,
+                    icon: Icons.account_balance_wallet,
                     color: const Color(0xFF059669),
                     onTap: () => context.push('/finance'),
                   ),
                   _buildStatCard(
                     title: 'Direct Income',
                     value: '₹${_formatAmount(dashData?['directIncome'])}',
-                    icon: Icons.person_add_alt_1_rounded,
+                    icon: Icons.person_add_alt_1,
                     color: const Color(0xFF2563EB),
                     onTap: () => context.push('/network'),
                   ),
                   _buildStatCard(
                     title: 'Team Level Income',
                     value: '₹${_formatAmount(dashData?['levelIncome'] ?? dashData?['teamLevelIncome'])}',
-                    icon: Icons.groups_rounded,
+                    icon: Icons.people,
                     color: const Color(0xFF7C3AED),
                     onTap: () => context.push('/network'),
                   ),
                   _buildStatCard(
                     title: 'Royalty Income',
                     value: '₹${_formatAmount(dashData?['royaltyIncome'])}',
-                    icon: Icons.workspace_premium_rounded,
+                    icon: Icons.star,
                     color: const Color(0xFFD97706),
                     onTap: () => context.push('/royalty'),
                   ),
                   _buildStatCard(
                     title: 'Autopool Income',
                     value: '₹${_formatAmount(dashData?['cashbackIncome'] ?? dashData?['autopoolIncome'])}',
-                    icon: Icons.sync_rounded,
+                    icon: Icons.all_inclusive,
                     color: const Color(0xFF0D9488),
                     onTap: () => context.push('/cashback'),
                   ),
                   _buildStatCard(
                     title: 'Rebirth Wallet',
                     value: '₹${_formatAmount(dashData?['rebirthWallet'])}',
-                    icon: Icons.restart_alt_rounded,
+                    icon: Icons.monetization_on,
                     color: const Color(0xFFE11D48),
                     onTap: () => context.push('/rebirth'),
                   ),
@@ -315,35 +315,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: const Color(0xFFE2E8F0)),
             boxShadow: [
-              BoxShadow(color: color.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4)),
+              BoxShadow(color: color.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3)),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, size: 20, color: color),
-                  ),
-                  if (onTap != null)
-                    Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey.shade400),
-                ],
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 18, color: color),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,20 +345,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     title,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF64748B),
-                      fontSize: 12.5,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
                       value,
                       style: GoogleFonts.inter(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF0F172A),
                         letterSpacing: -0.3,
