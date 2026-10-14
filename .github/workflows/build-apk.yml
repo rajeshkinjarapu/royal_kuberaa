@@ -1,15 +1,16 @@
-name: Run Shorebird (release)
+name: Build & Release APK
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+    paths:
+      - 'mlm_flutter_app/**'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Run Shorebird Release (APK)
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -42,20 +43,14 @@ jobs:
         working-directory: ./mlm_flutter_app
         run: flutter pub get
 
-      - name: Setup Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
-        with:
-          cache: true
-
-      - name: Run Shorebird Patch (OTA)
+      - name: Build Flutter Release APK
         working-directory: ./mlm_flutter_app
-        run: shorebird patch android --no-confirm --allow-asset-diffs
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: flutter build apk --release
 
-      - name: Upload Shorebird Release APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: RoyalKuberaa-Shorebird-APK
+          name: RoyalKuberaa-Release-APK
           path: mlm_flutter_app/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: warn
+          if-no-files-found: error
+

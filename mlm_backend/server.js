@@ -93,6 +93,12 @@ mongoose.connect(MONGO_URI)
             console.error('[FIFO Migration Error]:', migErr.message);
         }
 
+        // Allow multiple IDs per mobile number: drop legacy unique index on mobile_1 if present
+        try {
+            await User.collection.dropIndex('mobile_1');
+            console.log('✅ Dropped unique index on mobile_1 (allowing multiple IDs per mobile)');
+        } catch (_) {}
+
         // Sanitize all wallet balances to eliminate floating-point drift (e.g. .999, .991)
         try {
             const allUsers = await User.find({
@@ -277,17 +283,24 @@ app.get('/api/app/download', (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { memberId, password } = req.body;
+        if (!memberId || !password) {
+            return res.status(400).json({ success: false, message: 'Member ID or Mobile Number and Password are required.' });
+        }
         
-        // First try to find by exactly matching memberId
-        let user = await User.findOne({ memberId: memberId.toUpperCase() });
+        const searchInput = memberId.toString().trim();
+        let user = null;
+
+        // 1. Try to find by exact matching memberId first (case-insensitive)
+        user = await User.findOne({ memberId: searchInput.toUpperCase() });
         
-        // If not found, try to find by mobile number
+        // 2. If not found by Member ID, search by mobile number.
+        // As per business rule: Mobile number login logs into the FIRST generated ID (oldest ID)
         if (!user) {
-            user = await User.findOne({ mobile: memberId });
+            user = await User.findOne({ mobile: searchInput }).sort({ createdAt: 1, joinDate: 1, _id: 1 });
         }
 
         if (!user) {
-            return res.status(401).json({ success: false, message: 'Invalid Login ID! Account does not exist.' });
+            return res.status(401).json({ success: false, message: 'Invalid Login ID or Mobile Number! Account does not exist.' });
         }
 
         if (user.isBlocked) {
@@ -334,6 +347,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // --- Register / Activate Route ---
+// Allows unlimited IDs per mobile number. First ID can be logged into via mobile, subsequent IDs log in via their Member ID.
 app.post('/api/register', async (req, res) => {
     try {
         const { name, mobile, password, sponsorId } = req.body;
@@ -343,27 +357,25 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Name, Mobile, and Password are required.' });
         }
 
-        const existingUser = await User.findOne({ mobile });
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: 'Mobile number is already registered.' });
-        }
+        const cleanMobile = mobile.toString().trim();
 
         let sponsor = null;
         if (sponsorId) {
-            sponsor = await User.findOne({ memberId: sponsorId.toUpperCase() });
+            sponsor = await User.findOne({ memberId: sponsorId.toString().trim().toUpperCase() });
             if (!sponsor) {
                 return res.status(400).json({ success: false, message: 'Invalid Sponsor ID.' });
             }
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password.toString().trim(), 10);
         
         // Generate Unique Member ID
         let newMemberId;
-        if (mobile === '9502924437') {
+        const generateId = () => 'RK' + Math.floor(100000 + Math.random() * 900000);
+
+        if (cleanMobile === '9502924437' && !(await User.findOne({ memberId: 'RK201996' }))) {
             newMemberId = 'RK201996';
         } else {
-            const generateId = () => 'RK' + Math.floor(100000 + Math.random() * 900000);
             newMemberId = generateId();
             while (await User.findOne({ memberId: newMemberId })) {
                 newMemberId = generateId();
@@ -372,8 +384,8 @@ app.post('/api/register', async (req, res) => {
         
         const newUser = new User({
             memberId: newMemberId,
-            name,
-            mobile,
+            name: name.toString().trim().toUpperCase(),
+            mobile: cleanMobile,
             password: hashedPassword,
             sponsorId: sponsor ? sponsor.memberId : null,
             role: 'member',
@@ -382,7 +394,11 @@ app.post('/api/register', async (req, res) => {
 
         await newUser.save();
 
-        res.status(201).json({ success: true, message: 'Registration successful! Please login and activate your ID.', user: newUser });
+        res.status(201).json({ 
+            success: true, 
+            message: `Registration successful! Your Member ID is ${newMemberId}. Please login and activate.`, 
+            user: newUser 
+        });
     } catch (error) {
         console.error("Register Error:", error);
         res.status(500).json({ success: false, message: "Server error during registration" });
@@ -392,13 +408,11 @@ app.post('/api/register', async (req, res) => {
 // --- Fetch Sponsor Name ---
 app.get('/api/sponsor/:id', async (req, res) => {
     try {
-        const searchParam = req.params.id.toUpperCase();
-        const sponsor = await User.findOne({
-            $or: [
-                { memberId: searchParam },
-                { mobile: searchParam }
-            ]
-        });
+        const searchParam = req.params.id.toString().trim().toUpperCase();
+        let sponsor = await User.findOne({ memberId: searchParam });
+        if (!sponsor) {
+            sponsor = await User.findOne({ mobile: req.params.id.toString().trim() }).sort({ createdAt: 1, joinDate: 1, _id: 1 });
+        }
         if (sponsor) {
             res.json({ success: true, name: sponsor.name });
         } else {
@@ -1473,12 +1487,15 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
         let targetUser = payer;
         if (targetMemberId && targetMemberId.trim() !== '') {
             const searchVal = targetMemberId.trim().toUpperCase();
-            targetUser = await User.findOne({
-                $or: [
-                    { memberId: searchVal },
-                    { mobile: searchVal } // Mobile is usually stored exactly as input, so uppercase is fine if it's numbers
-                ]
-            });
+            targetUser = await User.findOne({ memberId: searchVal });
+            if (!targetUser) {
+                targetUser = await User.findOne({ mobile: targetMemberId.trim(), isActive: false })
+                    .sort({ createdAt: 1, joinDate: 1, _id: 1 });
+                if (!targetUser) {
+                    targetUser = await User.findOne({ mobile: targetMemberId.trim() })
+                        .sort({ createdAt: 1, joinDate: 1, _id: 1 });
+                }
+            }
             if (!targetUser) return res.status(404).json({ success: false, message: 'Target Member ID or Mobile not found' });
         }
         
