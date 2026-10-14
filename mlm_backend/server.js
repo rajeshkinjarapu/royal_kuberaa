@@ -60,6 +60,12 @@ mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log('✅ Connected to MongoDB Database');
         
+        // Ensure all active members have activatedAt populated for FIFO Autopool queue
+        await User.updateMany(
+            { isActive: true, activatedAt: null },
+            [{ $set: { activatedAt: '$createdAt' } }]
+        );
+
         // Initialize or Update Default Admin
         let adminUser = await User.findOne({ role: 'admin' });
         const hashedAdminPassword = await bcrypt.hash('030507', 10);
@@ -1231,6 +1237,7 @@ app.post('/api/user/activate', authMiddleware, async (req, res) => {
         }
         
         targetUser.isActive = true;
+        targetUser.activatedAt = targetUser.activatedAt || new Date();
         if (targetUser._id.toString() !== payer._id.toString()) {
             await targetUser.save();
             await payer.save();
@@ -1787,7 +1794,7 @@ app.post('/api/admin/fund-requests/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// --- Royalty & Non-Working Pools API ---
+// --- Royalty & Non-Working / FIFO Autopool Pools API ---
 app.get('/api/admin/pools', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
     try {
@@ -1798,13 +1805,12 @@ app.get('/api/admin/pools', authMiddleware, async (req, res) => {
             let membersList = [];
             if (pool.poolName === 'NON_WORKING') {
                 const users = await User.find({
-                    directReferralsCount: 0,
-                    totalPairsMatched: 0,
-                    cashbackEarnings: { $lt: 1500 },
                     isActive: true,
-                    isRebirth: false
-                }).select('memberId');
-                membersList = users.map(u => u.memberId);
+                    role: { $ne: 'admin' },
+                    isRebirth: { $ne: true },
+                    isAutopoolCompleted: { $ne: true }
+                }).sort({ activatedAt: 1, createdAt: 1 }).limit(10).select('memberId autopoolEarnings');
+                membersList = users.map(u => `${u.memberId} (₹${(u.autopoolEarnings || 0).toFixed(0)}/1500)`);
             } else {
                 membersList = pool.activeQueue ? pool.activeQueue.map(q => q.memberId) : [];
             }
@@ -1818,6 +1824,74 @@ app.get('/api/admin/pools', authMiddleware, async (req, res) => {
         }));
         res.json({ success: true, data: poolStats });
     } catch (err) { res.status(500).json({ success: false, message: "Error fetching pools" }); }
+});
+
+// --- User FIFO Autopool Status API ---
+app.get('/api/user/autopool-status', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        if (user.isAutopoolCompleted) {
+            return res.json({
+                success: true,
+                data: {
+                    status: 'COMPLETED',
+                    autopoolEarnings: user.autopoolEarnings || 1500,
+                    capping: 1500,
+                    queuePosition: 0,
+                    isInTop10: false,
+                    message: '100% Autopool Cashback Completed (₹1,500 received)'
+                }
+            });
+        }
+
+        if (!user.isActive) {
+            return res.json({
+                success: true,
+                data: {
+                    status: 'INACTIVE',
+                    autopoolEarnings: 0,
+                    capping: 1500,
+                    queuePosition: null,
+                    isInTop10: false,
+                    message: 'Activate your ID to enter the FIFO Autopool Queue'
+                }
+            });
+        }
+
+        const userActivatedTime = user.activatedAt || user.createdAt;
+        const usersAhead = await User.countDocuments({
+            isActive: true,
+            role: { $ne: 'admin' },
+            isRebirth: { $ne: true },
+            isAutopoolCompleted: { $ne: true },
+            $or: [
+                { activatedAt: { $lt: userActivatedTime } },
+                { activatedAt: userActivatedTime, createdAt: { $lt: user.createdAt } }
+            ]
+        });
+
+        const queuePosition = usersAhead + 1;
+        const isInTop10 = queuePosition <= 10;
+
+        res.json({
+            success: true,
+            data: {
+                status: isInTop10 ? 'ACTIVE_EARNING' : 'WAITING_IN_QUEUE',
+                autopoolEarnings: user.autopoolEarnings || 0,
+                capping: 1500,
+                queuePosition,
+                isInTop10,
+                message: isInTop10
+                    ? `Rank #${queuePosition} in Active Top 10 (Receiving ₹15 per joining)`
+                    : `Rank #${queuePosition} in Waiting Queue (Advances as earlier members complete)`
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Error fetching autopool status' });
+    }
 });
 
 // --- Support Tickets API ---

@@ -69,7 +69,10 @@ const UserSchema = new mongoose.Schema({
     // Autopool & Cashback Status
     autopoolLevel: { type: Number, default: 1 }, // 1 to 5
     autopoolBalance: { type: Number, default: 0 },
-    cashbackEarnings: { type: Number, default: 0 }, // Tracks non-working cashback received towards ₹1000 recovery
+    cashbackEarnings: { type: Number, default: 0 }, // legacy tracker
+    autopoolEarnings: { type: Number, default: 0 }, // Tracks FIFO Autopool received towards ₹1500 capping
+    isAutopoolCompleted: { type: Boolean, default: false }, // true once ₹1500 is reached
+    activatedAt: { type: Date, default: null }, // Timestamp when member was activated (for strict FIFO order)
 
     isActive: {
         type: Boolean,
@@ -99,5 +102,7 @@ const UserSchema = new mongoose.Schema({
         dispatchedAt: Date
     }]
 }, { timestamps: true });
+
+UserSchema.index({ isAutopoolCompleted: 1, activatedAt: 1, createdAt: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

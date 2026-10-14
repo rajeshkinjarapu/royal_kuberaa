@@ -11,7 +11,8 @@ const LEVEL_INCOMES = {
 
 const NORMAL_POOLS = { GOLD: 120, PLATINUM: 60, RUBY: 60, DIAMOND: 60 };
 const REBIRTH_POOLS = { GOLD: 440, PLATINUM: 220, RUBY: 220, DIAMOND: 220 };
-const NON_WORKING_FUND_AMOUNT = 100;
+const NON_WORKING_FUND_AMOUNT = 150; // ₹100 base + ₹50 from Company Profit
+const FIFO_AUTOPOOL_CAP = 1500;
 
 // Caps
 const MAX_CAPS = {
@@ -108,8 +109,67 @@ async function checkAndTriggerRebirth(user) {
 
 
 
+// FIFO Autopool Distribution Logic (₹150 split equally among the active Top 10 members until ₹1500 capping)
+async function distributeFifoAutopool(newMember) {
+    const TOTAL_POOL_AMOUNT = NON_WORKING_FUND_AMOUNT; // ₹150
+    const CAPPING = FIFO_AUTOPOOL_CAP; // ₹1500
+
+    // Record cumulative pool contribution in GlobalPool for admin analytics
+    await GlobalPool.findOneAndUpdate(
+        { poolName: 'NON_WORKING' },
+        { $inc: { totalFund: TOTAL_POOL_AMOUNT } },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    // Find top 10 active, uncompleted members in strict FIFO order
+    // Exclude current new member, admin, and rebirth virtual IDs
+    const activeQueue = await User.find({
+        isActive: true,
+        role: { $ne: 'admin' },
+        isRebirth: { $ne: true },
+        isAutopoolCompleted: { $ne: true },
+        _id: { $ne: newMember._id }
+    }).sort({ activatedAt: 1, createdAt: 1 }).limit(10);
+
+    if (!activeQueue || activeQueue.length === 0) {
+        console.log(`[FIFO Autopool] No eligible members in queue yet. Fund ₹${TOTAL_POOL_AMOUNT} recorded in GlobalPool.`);
+        return;
+    }
+
+    const memberCount = activeQueue.length;
+    const sharePerSlot = Math.floor((TOTAL_POOL_AMOUNT / memberCount) * 100) / 100;
+
+    for (const member of activeQueue) {
+        const currentEarnings = member.autopoolEarnings || 0;
+        const maxAllowed = Math.max(0, CAPPING - currentEarnings);
+        const amountToGive = Math.min(sharePerSlot, maxAllowed);
+
+        if (amountToGive > 0) {
+            member.autopoolEarnings = Math.round((currentEarnings + amountToGive) * 100) / 100;
+            if (member.autopoolEarnings >= CAPPING) {
+                member.isAutopoolCompleted = true;
+                console.log(`[FIFO Autopool] Member ${member.memberId} reached ₹${CAPPING} capping! Graduated from queue.`);
+            }
+            await member.save();
+
+            await addIncome(
+                member,
+                amountToGive,
+                'AUTOPOOL',
+                `FIFO Autopool Share from ${newMember.memberId} (Progress: ₹${member.autopoolEarnings.toFixed(2)}/${CAPPING})`
+            );
+        }
+    }
+}
+
 // Main Activation Logic
 async function activateUser(user, sponsor) {
+    // Ensure activatedAt is stamped for FIFO order
+    if (!user.activatedAt) {
+        user.activatedAt = new Date();
+        await user.save();
+    }
+
     // 1. Direct Income (400)
     if (sponsor) {
         await addIncome(sponsor, DIRECT_INCOME, 'DIRECT', `Direct Referral Bonus from ${user.memberId}`);
@@ -162,14 +222,10 @@ async function activateUser(user, sponsor) {
         );
     }
 
-    // 5. Global Non-Working Cashback Fund (₹100)
-    await GlobalPool.findOneAndUpdate(
-        { poolName: 'NON_WORKING' },
-        { $inc: { totalFund: NON_WORKING_FUND_AMOUNT } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    // 5. Global FIFO Autopool Instant Distribution (₹150: ₹100 base + ₹50 from Company Profit)
+    await distributeFifoAutopool(user);
 
-    // 6. Remaining ₹400 = ₹250 Product Cost + ₹150 Company Net Profit per ₹1500 Joining
+    // 6. Remaining ₹350 = ₹250 Product Cost + ₹100 Company Net Profit per ₹1500 Joining
 }
 
 // Helper: Add user to Global Pool with duplicate check
@@ -279,45 +335,12 @@ async function processDailyPools() {
         await globalPool.save();
     }
 
-    // 2. Global Non-Working Cashback Distribution
+    // 2. Global Non-Working / FIFO Autopool Pool Monitoring
+    // Note: FIFO Autopool (₹150) is distributed instantly on every user activation to the active Top 10 members.
     const nwPool = await GlobalPool.findOne({ poolName: 'NON_WORKING' });
-    if (nwPool && nwPool.totalFund > 0) {
-        // Business Plan Rule: Equal distribution ONLY among active non-working members (0 Directs & 0 Binary Pairs)
-        // until ₹1500 joining fee is recovered. If a user makes even 1 direct referral, they stop receiving cashback permanently!
-        const eligibleCashbackUsers = await User.find({ 
-            directReferralsCount: 0,
-            cashbackEarnings: { $lt: 1500 },
-            isActive: true, 
-            isRebirth: false 
-        });
-
-        if (eligibleCashbackUsers.length > 0) {
-            const rawShare = Math.floor((nwPool.totalFund / eligibleCashbackUsers.length) * 100) / 100;
-            let totalDistributed = 0;
-
-            for (const user of eligibleCashbackUsers) {
-                // Double check they haven't sponsored anyone
-                if (user.directReferralsCount > 0 || (user.directs && user.directs.length > 0)) {
-                    continue;
-                }
-
-                const currentEarnings = user.cashbackEarnings || 0;
-                const maxAllowed = 1500 - currentEarnings;
-                const amountToGive = Math.min(rawShare, maxAllowed);
-                
-                if (amountToGive > 0) {
-                    user.cashbackEarnings = currentEarnings + amountToGive;
-                    await user.save();
-                    await addIncome(user, amountToGive, 'CASHBACK', `Daily Non-Working Cashback (Recovered: ₹${user.cashbackEarnings}/1500)`);
-                    totalDistributed += amountToGive;
-                }
-            }
-            
-            // Retain any leftover funds in the pool (e.g., from users capped at ₹1500) for tomorrow's distribution
-            nwPool.totalFund = Math.max(0, nwPool.totalFund - totalDistributed);
-            await nwPool.save();
-        }
+    if (nwPool) {
+        console.log(`[Daily Cron] FIFO Autopool cumulative activity pool status: Total Fund logged = ₹${nwPool.totalFund}`);
     }
 }
 
-module.exports = { activateUser, addIncome, processDailyPools };
+module.exports = { activateUser, addIncome, processDailyPools, distributeFifoAutopool };

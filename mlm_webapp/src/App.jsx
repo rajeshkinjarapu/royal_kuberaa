@@ -2075,8 +2075,8 @@ function App() {
              {pools.length === 0 ? <p style={{ color: '#64748B' }}>No pools active yet.</p> : pools.map(pool => (
                <div key={pool._id} style={{ padding: '24px', background: '#FFF', border: '1px solid #E2E8F0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s' }} onClick={() => setSelectedPoolMembers(pool)} onMouseEnter={e => e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
                   <h3 style={{ marginBottom: '16px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                     <span style={{ fontSize: '24px' }}>{pool.poolName === 'GOLD' ? '🥇' : pool.poolName === 'PLATINUM' ? '🥈' : pool.poolName === 'RUBY' ? '🔴' : '💎'}</span>
-                     {pool.poolName} POOL
+                     <span style={{ fontSize: '24px' }}>{pool.poolName === 'GOLD' ? '🥇' : pool.poolName === 'PLATINUM' ? '🥈' : pool.poolName === 'RUBY' ? '🔴' : pool.poolName === 'DIAMOND' ? '💎' : '⚡'}</span>
+                     {pool.poolName.replace('_', ' ')} POOL
                   </h3>
                   <div style={{ marginBottom: '12px' }}>
                      <span style={{ display: 'block', fontSize: '13px', color: '#64748B', fontWeight: 'bold', marginBottom: '4px' }}>Total Fund Collected</span>
