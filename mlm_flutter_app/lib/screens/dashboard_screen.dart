@@ -207,14 +207,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 12),
               
-              // 6 Income Overview Cards in a 2x3 Grid
+              // 6 Income Overview Cards in a 2x3 Grid (Taller, spacious cards)
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.85,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.30,
                 children: [
                   _buildStatCard(
                     title: 'Total Earning',
@@ -238,7 +238,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: () => context.push('/network'),
                   ),
                   _buildStatCard(
-                    title: 'Royality Income',
+                    title: 'Royalty Income',
                     value: '₹${dashData?['royaltyIncome'] ?? 0}',
                     icon: Icons.workspace_premium_rounded,
                     color: const Color(0xFFD97706),
@@ -259,47 +259,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: () => context.push('/rebirth'),
                   ),
                 ],
-              ),
-              
-              const SizedBox(height: 18),
-              
-              // Quick Actions
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 3)),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Activate ID Instantly', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          SizedBox(height: 3),
-                          Text('Use wallet funds to activate instantly.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () => context.push('/activate'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: const Text('Activate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                    ),
-                  ],
-                ),
               ),
             ]
           ],
@@ -347,15 +306,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border.withOpacity(0.8)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
             boxShadow: [
-              BoxShadow(color: color.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3)),
+              BoxShadow(color: color.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4)),
             ],
           ),
           child: Column(
@@ -363,35 +322,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(icon, size: 15, color: color),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    child: Icon(icon, size: 20, color: color),
                   ),
                   if (onTap != null)
-                    Icon(Icons.chevron_right_rounded, size: 13, color: Colors.grey.shade400),
+                    Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey.shade400),
                 ],
               ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  value,
-                  style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF64748B),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
