@@ -65,7 +65,7 @@ class AppDrawer extends StatelessWidget {
                   _buildSectionHeader('MAIN MENU'),
                   _buildMenuItem(context, '📊', 'Dashboard', '/dashboard'),
                   _buildMenuItem(context, '⚡', 'ID Activation', '/activation'),
-                  _buildMenuItem(context, '💸', 'Non-Working Cashback', '/cashback'),
+                  _buildMenuItem(context, '🌊', 'Autopool Income', '/cashback'),
                   _buildMenuItem(context, '👑', 'Royalty Pools', '/royalty'),
                   _buildMenuItem(context, '♾️', 'Rebirth ID', '/rebirth'),
                   _buildMenuItem(context, '🛍️', 'Products', '/products'),

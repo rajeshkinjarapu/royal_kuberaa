@@ -338,7 +338,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
             if (tx.category === 'DIRECT') direct += tx.amount;
             if (tx.category === 'LEVEL') level += tx.amount;
             if (tx.category === 'ROYALTY') royalty += tx.amount;
-            if (tx.category === 'CASHBACK') cashback += tx.amount;
+            if (tx.category === 'CASHBACK' || tx.category === 'AUTOPOOL') cashback += tx.amount;
             if (tx.category === 'Withdrawal') withdraw += tx.amount;
         });
 
@@ -370,7 +370,10 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 directIncome: direct,
                 levelIncome: level,
                 royaltyIncome: royalty,
-                cashbackIncome: cashback,
+                cashbackIncome: user.autopoolEarnings || cashback,
+                autopoolIncome: user.autopoolEarnings || cashback,
+                autopoolEarnings: user.autopoolEarnings || 0,
+                isAutopoolCompleted: user.isAutopoolCompleted || false,
                 withdrawFund: withdraw, 
                 allRanks: (user.goldEarnings || 0) + (user.platinumEarnings || 0) + (user.rubyEarnings || 0) + (user.diamondEarnings || 0),
                 royaltyStats: {
