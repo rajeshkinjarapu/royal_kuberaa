@@ -42,6 +42,30 @@ class NetworkScreen extends StatelessWidget {
   }
 }
 
+String _formatJoinDate(dynamic dateVal) {
+  if (dateVal == null) return 'Recent';
+  if (dateVal is int) {
+    final dt = DateTime.fromMillisecondsSinceEpoch(dateVal > 100000000000 ? dateVal : dateVal * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${dt.day.toString().padLeft(2, '0')} ${months[dt.month - 1]} ${dt.year}';
+  }
+  final str = dateVal.toString().trim();
+  if (str.isEmpty || str.toLowerCase().contains('invalid') || str.toLowerCase() == 'null' || str.toLowerCase() == 'undefined') {
+    return 'Recent';
+  }
+  
+  final parsed = DateTime.tryParse(str);
+  if (parsed != null) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final day = parsed.day.toString().padLeft(2, '0');
+    final month = months[parsed.month - 1];
+    final year = parsed.year;
+    return '$day $month $year';
+  }
+  
+  return str;
+}
+
 class _DirectsView extends StatefulWidget {
   const _DirectsView();
   @override
@@ -120,7 +144,7 @@ class _DirectsViewState extends State<_DirectsView> {
                             children: [
                               Text(member['rank'] ?? 'USER', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
                               const SizedBox(height: 4),
-                              Text(member['joinDate'] ?? '', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                              Text(_formatJoinDate(member['joinDate']), style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
                             ],
                           ),
                         ],
@@ -568,7 +592,7 @@ class _RebirthsViewState extends State<_RebirthsView> {
                             children: [
                               Text(member['memberId'] ?? member['id'] ?? 'N/A', style: const TextStyle(fontSize: 16, color: AppColors.primary, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
-                              Text('Created: ${member['createdDate'] ?? member['createdAt'] ?? 'Recently'}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text('Created: ${_formatJoinDate(member['createdDate'] ?? member['createdAt'])}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             ],
                           ),
                           Container(

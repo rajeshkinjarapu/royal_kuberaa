@@ -54,8 +54,8 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
       );
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
-        if (data['success'] == true && data['data'] != null) {
-          final u = data['data'];
+        final u = data['user'] ?? data['data'];
+        if (data['success'] == true && u != null) {
           if (mounted) {
             setState(() {
               _userWalletBalance = ((u['mainWallet'] ?? 0) as num).toDouble();

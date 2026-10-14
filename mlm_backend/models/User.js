@@ -73,6 +73,7 @@ const UserSchema = new mongoose.Schema({
     autopoolEarnings: { type: Number, default: 0 }, // Tracks FIFO Autopool received towards ₹1500 capping
     isAutopoolCompleted: { type: Boolean, default: false }, // true once ₹1500 is reached
     activatedAt: { type: Date, default: null }, // Timestamp when member was activated (for strict FIFO order)
+    joinDate: { type: Date, default: Date.now },
 
     isActive: {
         type: Boolean,

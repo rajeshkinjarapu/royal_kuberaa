@@ -64,6 +64,18 @@ const cleanFigure = (val) => {
     return Math.round(num * 100) / 100;
 };
 
+// Safe date formatter for member joins
+const formatDisplayDate = (dateVal) => {
+    if (!dateVal) return 'Recent';
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return 'Recent';
+    const day = String(d.getDate()).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+};
+
 mongoose.connect(MONGO_URI)
     .then(async () => {
         console.log('✅ Connected to MongoDB Database');
@@ -570,71 +582,6 @@ app.get('/api/transactions', authMiddleware, async (req, res) => {
     }
 });
 
-// Withdrawal Request Route
-app.post('/api/withdraw', authMiddleware, async (req, res) => {
-    try {
-        const { amount } = req.body;
-        const withdrawAmount = Number(amount);
-        const Withdrawal = require('./models/Withdrawal');
-
-        if (!withdrawAmount || withdrawAmount < 500) {
-            return res.status(400).json({ success: false, message: 'Minimum withdrawal amount is ₹500.' });
-        }
-
-        const user = await User.findById(req.user.id);
-        if (user.mainWallet < withdrawAmount) {
-            return res.status(400).json({ success: false, message: 'Insufficient main wallet balance.' });
-        }
-
-        // Calculate Deductions (10% total charges)
-        const tdsAmount = withdrawAmount * 0.05;
-        const adminChargeAmount = withdrawAmount * 0.05;
-        const netAmount = withdrawAmount - tdsAmount - adminChargeAmount;
-
-        // Deduct from User Wallet
-        user.mainWallet -= withdrawAmount;
-        await user.save();
-
-        // Record Withdrawal Request (Automatic Approval)
-        await Withdrawal.create({
-            userId: user._id,
-            memberId: user.memberId,
-            grossAmount: withdrawAmount,
-            tdsAmount,
-            adminChargeAmount,
-            netAmount,
-            status: 'Approved'
-        });
-
-        // Also record a transaction debit for withdrawal request
-        const Transaction = require('./models/Transaction');
-        await Transaction.create({
-            userId: user._id,
-            memberId: user.memberId,
-            amount: withdrawAmount,
-            type: 'Debit',
-            category: 'Withdrawal',
-            remark: `Withdrawal request initiated (Net: ₹${netAmount})`
-        });
-
-        res.json({ success: true, message: 'Withdrawal Request Submitted Successfully!', newBalance: user.mainWallet });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error during withdrawal" });
-    }
-});
-
-// Admin: Fetch all withdrawals
-app.get('/api/admin/withdrawals', authMiddleware, async (req, res) => {
-    try {
-        if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
-        const Withdrawal = require('./models/Withdrawal');
-        const withdrawals = await Withdrawal.find().sort({ createdAt: -1 });
-        res.json({ success: true, data: withdrawals });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-});
-
 // Admin Users List Route
 app.get('/api/admin/users', authMiddleware, async (req, res) => {
     try {
@@ -826,12 +773,12 @@ app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
         async function fetchNode(memberId, depth = 1) {
             if (!memberId || depth > 3) return null;
             const user = await User.findOne({ memberId: memberId.toUpperCase() })
-                                   .select('memberId name rank isGold isActive joinDate');
+                                   .select('memberId name rank isGold isActive joinDate createdAt activatedAt');
             if (!user) return null;
             
             // Find direct members sponsored by this user
             const directs = await User.find({ sponsorId: user.memberId })
-                                      .select('memberId name rank isGold isActive joinDate')
+                                      .select('memberId name rank isGold isActive joinDate createdAt activatedAt')
                                       .sort({ createdAt: -1 });
 
             const children = [];
@@ -849,7 +796,7 @@ app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
                         name: d.name,
                         rank: d.rank || (d.isGold ? 'Gold' : 'Starter'),
                         isActive: d.isActive,
-                        joinDate: d.joinDate ? new Date(d.joinDate).toLocaleDateString() : '',
+                        joinDate: formatDisplayDate(d.createdAt || d.joinDate || d.activatedAt),
                         totalDirects: downlineCount,
                         children: []
                     });
@@ -865,7 +812,7 @@ app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
                 name: user.name,
                 rank: user.rank || (user.isGold ? 'Gold' : 'Starter'),
                 isActive: user.isActive,
-                joinDate: user.joinDate ? new Date(user.joinDate).toLocaleDateString() : '',
+                joinDate: formatDisplayDate(user.createdAt || user.joinDate || user.activatedAt),
                 totalDirects,
                 activeDirects,
                 children
@@ -888,14 +835,14 @@ app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
 app.get('/api/network/directs', authMiddleware, async (req, res) => {
     try {
         const directs = await User.find({ sponsorId: req.user.memberId })
-                                  .select('memberId name mobile joinDate isActive isGold')
-                                  .sort({ joinDate: -1 });
+                                  .select('memberId name mobile joinDate createdAt activatedAt isActive isGold isBlocked')
+                                  .sort({ createdAt: -1 });
         
         const data = directs.map(user => ({
             id: user.memberId,
             name: user.name,
             mobile: user.mobile,
-            joinDate: new Date(user.joinDate).toLocaleDateString(),
+            joinDate: formatDisplayDate(user.createdAt || user.joinDate || user.activatedAt),
             status: user.isBlocked ? 'Blocked' : (user.isActive ? 'Active' : 'Unactivated'),
             rank: user.isGold ? 'Gold' : 'Starter'
         }));
@@ -910,7 +857,7 @@ app.get('/api/network/directs', authMiddleware, async (req, res) => {
 app.get('/api/network/rebirths', authMiddleware, async (req, res) => {
     try {
         const rebirths = await User.find({ mainUserId: req.user.id, isRebirth: true })
-                                   .select('memberId name createdAt joinDate')
+                                   .select('memberId name createdAt joinDate activatedAt')
                                    .sort({ createdAt: -1 });
         
         const data = rebirths.map(user => ({
@@ -918,7 +865,7 @@ app.get('/api/network/rebirths', authMiddleware, async (req, res) => {
             name: user.name,
             sponsorBonus: 400,
             poolContribution: 1100,
-            createdDate: new Date(user.createdAt || user.joinDate || Date.now()).toLocaleDateString(),
+            createdDate: formatDisplayDate(user.createdAt || user.joinDate || user.activatedAt),
             status: 'Active Rebirth Node'
         }));
 
@@ -1984,19 +1931,20 @@ app.post('/api/p2p', authMiddleware, async (req, res) => {
     try {
         const { receiverId, amount, tpin } = req.body;
         const transferAmount = Number(amount);
+        const cleanReceiverId = (receiverId || '').toString().trim().toUpperCase();
 
-        if (!receiverId || transferAmount <= 0) {
+        if (!cleanReceiverId || transferAmount <= 0) {
             return res.status(400).json({ success: false, message: "Invalid amount or receiver ID" });
         }
 
         const sender = await User.findById(req.user.id);
         if (!sender) return res.status(404).json({ success: false, message: "Sender not found" });
 
-        if (!sender.tpin || sender.tpin !== tpin) {
-            return res.status(400).json({ success: false, message: "Invalid Transaction PIN (T-PIN)." });
+        if (!sender.tpin || sender.tpin !== (tpin || '').toString().trim()) {
+            return res.status(400).json({ success: false, message: "Invalid 4-digit Transaction PIN (T-PIN)." });
         }
 
-        if (sender.memberId === receiverId) {
+        if (sender.memberId === cleanReceiverId) {
             return res.status(400).json({ success: false, message: "You cannot transfer to yourself" });
         }
 
@@ -2004,7 +1952,7 @@ app.post('/api/p2p', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: "Insufficient balance for transfer" });
         }
 
-        const receiver = await User.findOne({ memberId: receiverId, isRebirth: false });
+        const receiver = await User.findOne({ memberId: cleanReceiverId, isRebirth: false });
         if (!receiver) {
             return res.status(404).json({ success: false, message: "Receiver not found or is a Rebirth ID" });
         }
