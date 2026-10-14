@@ -725,26 +725,57 @@ app.post('/api/admin/withdrawals/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Binary Tree API
+// Team Network Tree API (Unilevel Generation Hierarchy)
 app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
     try {
         const rootMemberId = req.params.memberId || req.user.memberId;
         
-        // Fetch up to 3 levels deep recursively
-        async function fetchNode(memberId, level) {
-            if (!memberId || level > 3) return null;
-            const user = await User.findOne({ memberId: memberId.toUpperCase() });
+        async function fetchNode(memberId, depth = 1) {
+            if (!memberId || depth > 3) return null;
+            const user = await User.findOne({ memberId: memberId.toUpperCase() })
+                                   .select('memberId name rank isGold isActive joinDate');
             if (!user) return null;
             
+            // Find direct members sponsored by this user
+            const directs = await User.find({ sponsorId: user.memberId })
+                                      .select('memberId name rank isGold isActive joinDate')
+                                      .sort({ createdAt: -1 });
+
+            const children = [];
+            if (depth < 3) {
+                for (const d of directs) {
+                    const childTree = await fetchNode(d.memberId, depth + 1);
+                    if (childTree) children.push(childTree);
+                }
+            } else {
+                for (const d of directs) {
+                    const downlineCount = await User.countDocuments({ sponsorId: d.memberId });
+                    children.push({
+                        id: d.memberId,
+                        memberId: d.memberId,
+                        name: d.name,
+                        rank: d.rank || (d.isGold ? 'Gold' : 'Starter'),
+                        isActive: d.isActive,
+                        joinDate: d.joinDate ? new Date(d.joinDate).toLocaleDateString() : '',
+                        totalDirects: downlineCount,
+                        children: []
+                    });
+                }
+            }
+
+            const totalDirects = directs.length;
+            const activeDirects = directs.filter(d => d.isActive).length;
+
             return {
                 id: user.memberId,
+                memberId: user.memberId,
                 name: user.name,
-                rank: user.rank || (user.isGold ? 'GOLD' : 'STARTER'),
+                rank: user.rank || (user.isGold ? 'Gold' : 'Starter'),
                 isActive: user.isActive,
-                leftTeamCount: user.leftTeamCount,
-                rightTeamCount: user.rightTeamCount,
-                left: await fetchNode(user.leftUpline, level + 1),
-                right: await fetchNode(user.rightUpline, level + 1)
+                joinDate: user.joinDate ? new Date(user.joinDate).toLocaleDateString() : '',
+                totalDirects,
+                activeDirects,
+                children
             };
         }
 
@@ -755,6 +786,7 @@ app.get('/api/network/tree/:memberId?', authMiddleware, async (req, res) => {
 
         res.json({ success: true, data: treeData });
     } catch (error) {
+        console.error("Tree error:", error);
         res.status(500).json({ success: false, message: "Server error fetching tree" });
     }
 });
@@ -1270,30 +1302,50 @@ app.post('/api/user/tpin', authMiddleware, async (req, res) => {
     }
 });
 
-// Update User KYC
+// Upload User Payment QR Code API
+app.post('/api/user/upload-qr', authMiddleware, qrUpload.single('qrImage'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Please select an image file to upload.' });
+        }
+        const qrUrl = `/uploads/qr_codes/${req.file.filename}`;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        user.paymentQrCode = qrUrl;
+        await user.save();
+        
+        res.json({ success: true, message: 'Payment QR code uploaded successfully!', qrUrl, user });
+    } catch (error) {
+        console.error("QR upload error:", error);
+        res.status(500).json({ success: false, message: 'Server error uploading QR code: ' + error.message });
+    }
+});
+
+// Update User KYC / Payment QR
 app.post('/api/user/kyc', authMiddleware, async (req, res) => {
     try {
-        const { panNumber, aadharNumber, bankName, accountNumber, ifscCode } = req.body;
+        const { panNumber, aadharNumber, bankName, accountNumber, ifscCode, paymentQrCode } = req.body;
         const user = await User.findById(req.user.id);
         
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-        
-        // Cannot edit if already approved
-        if (user.kycStatus === 'Approved') {
-            return res.status(400).json({ success: false, message: 'KYC is already approved and cannot be edited.' });
-        }
 
+        if (paymentQrCode !== undefined) {
+            user.paymentQrCode = paymentQrCode;
+        }
         user.panNumber = panNumber || user.panNumber;
         user.aadharNumber = aadharNumber || user.aadharNumber;
         user.bankName = bankName || user.bankName;
         user.accountNumber = accountNumber || user.accountNumber;
         user.ifscCode = ifscCode || user.ifscCode;
-        user.kycStatus = 'Submitted'; // Mark as submitted for admin review
+        if (panNumber || aadharNumber) {
+            user.kycStatus = 'Submitted';
+        }
 
         await user.save();
-        res.json({ success: true, message: 'KYC Details Submitted Successfully!', user });
+        res.json({ success: true, message: 'Payment Details Saved Successfully!', user });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server error updating KYC" });
+        res.status(500).json({ success: false, message: "Server error updating details" });
     }
 });
 

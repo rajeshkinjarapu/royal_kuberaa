@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_logo.dart';
 import 'dashboard_screen.dart';
 import 'network_screen.dart';
 import 'finance_screen.dart';
@@ -32,29 +33,27 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        backgroundColor: AppColors.darkNavy,
+        elevation: 2,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text('RK', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
-            const SizedBox(width: 8),
+            const AppLogo(size: 34, showBorder: false),
+            const SizedBox(width: 10),
             Text(
               'Royal Kuberaa',
-              style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                letterSpacing: 0.5,
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_outlined),
+            icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
             onPressed: () => context.push('/notifications'),
           ),
         ],

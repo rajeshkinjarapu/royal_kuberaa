@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/profile_provider.dart';
 import '../utils/constants.dart';
 
@@ -12,17 +14,10 @@ class PaymentSettingsScreen extends StatefulWidget {
 }
 
 class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  final _holderNameController = TextEditingController();
-  final _bankNameController = TextEditingController();
-  final _accountController = TextEditingController();
-  final _confirmAccountController = TextEditingController();
-  final _ifscController = TextEditingController();
   final _upiController = TextEditingController();
-
+  File? _selectedImage;
   bool _isLoading = false;
-  bool _isApproved = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -41,70 +36,81 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     final data = provider.profileData;
     if (data != null && mounted) {
       setState(() {
-        _holderNameController.text = data['fullName'] ?? data['name'] ?? '';
-        _bankNameController.text = data['bankName'] ?? '';
-        _accountController.text = data['accountNumber'] ?? '';
-        _confirmAccountController.text = data['accountNumber'] ?? '';
-        _ifscController.text = data['ifscCode'] ?? '';
-        _upiController.text = data['upiId'] ?? data['paymentQrCode'] ?? '';
-        _isApproved = (data['kycStatus'] ?? '') == 'Approved';
+        _upiController.text = data['paymentQrCode'] ?? '';
       });
     }
   }
 
   @override
   void dispose() {
-    _holderNameController.dispose();
-    _bankNameController.dispose();
-    _accountController.dispose();
-    _confirmAccountController.dispose();
-    _ifscController.dispose();
     _upiController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveSettings() async {
-    if (_isApproved) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bank details are verified and locked. Contact Support for changes.'), backgroundColor: Colors.amber),
+  Future<void> _pickImage() async {
+    try {
+      final XFile? picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
-      return;
+      if (picked != null) {
+        setState(() {
+          _selectedImage = File(picked.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e'), backgroundColor: AppColors.error),
+        );
+      }
     }
+  }
 
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_accountController.text.trim() != _confirmAccountController.text.trim()) {
+  Future<void> _saveQrSettings() async {
+    if (_selectedImage == null && _upiController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account numbers do not match!'), backgroundColor: AppColors.error),
+        const SnackBar(content: Text('Please select a QR code image or enter UPI ID.')),
       );
       return;
     }
 
     setState(() => _isLoading = true);
-
     final provider = context.read<ProfileProvider>();
-    final currentData = provider.profileData ?? {};
+    bool success = false;
 
-    final success = await provider.updateKyc({
-      'panNumber': currentData['panNumber'] ?? '',
-      'aadharNumber': currentData['aadharNumber'] ?? '',
-      'bankName': _bankNameController.text.trim().toUpperCase(),
-      'accountNumber': _accountController.text.trim(),
-      'ifscCode': _ifscController.text.trim().toUpperCase(),
-      'paymentQrCode': _upiController.text.trim(),
-    });
+    // 1. Upload QR image file if chosen
+    if (_selectedImage != null) {
+      success = await provider.uploadPaymentQr(_selectedImage!);
+    } else if (_upiController.text.trim().isNotEmpty) {
+      success = await provider.updatePaymentQr(_upiController.text.trim());
+    }
 
     setState(() => _isLoading = false);
 
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bank & Payment settings saved successfully!'), backgroundColor: AppColors.secondary),
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text('Payment QR Code Saved Successfully!'),
+              ],
+            ),
+            backgroundColor: AppColors.secondary,
+          ),
         );
-        Navigator.pop(context);
+        setState(() => _selectedImage = null);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Failed to update payment settings'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(provider.errorMessage.isNotEmpty ? provider.errorMessage : 'Failed to save QR code.'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -112,188 +118,234 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<ProfileProvider>().profileData;
+    final currentQr = profile?['paymentQrCode'] ?? '';
+    final hasExistingQr = currentQr.toString().isNotEmpty;
+
+    String qrImageUrl = '';
+    if (hasExistingQr && currentQr.toString().startsWith('/uploads')) {
+      final base = AppConstants.apiBaseUrl.replaceAll('/api', '');
+      qrImageUrl = '$base$currentQr';
+    } else if (hasExistingQr && (currentQr.toString().startsWith('http://') || currentQr.toString().startsWith('https://'))) {
+      qrImageUrl = currentQr.toString();
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Payment Settings', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text('Payment QR Settings', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+        backgroundColor: AppColors.darkNavy,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Notice banner
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: _isApproved ? Colors.green.shade50 : const Color(0xFFEEF2FF),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _isApproved ? Colors.green.shade200 : const Color(0xFFC7D2FE)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Info Card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.darkNavy, Color(0xFF1E293B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isApproved ? Icons.verified : Icons.account_balance,
-                      color: _isApproved ? Colors.green : AppColors.primary,
-                      size: 28,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: AppColors.darkNavy.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withOpacity(0.15),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _isApproved ? 'Bank Details Verified' : 'Bank Payout Configuration',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: _isApproved ? Colors.green.shade800 : AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            _isApproved
-                                ? 'Your account details are approved for payouts and locked for security.'
-                                : 'All withdrawal payouts will be credited directly to this bank account.',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: _isApproved ? Colors.green.shade700 : AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
+                    child: const Icon(Icons.qr_code_2_rounded, color: Color(0xFFD4AF37), size: 32),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Direct QR Code Payouts',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Upload PhonePe, GooglePay, or Paytm QR to receive direct payouts without bank forms.',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // QR Code Upload Box
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Upload Payment QR Code',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Screenshot from PhonePe / GooglePay / Paytm',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Image Display Area
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 220,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: _selectedImage != null ? AppColors.secondary : AppColors.primary.withOpacity(0.4),
+                          width: 2,
+                          style: BorderStyle.solid,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: _selectedImage != null
+                            ? Image.file(_selectedImage!, fit: BoxFit.contain)
+                            : qrImageUrl.isNotEmpty
+                                ? Image.network(
+                                    qrImageUrl,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (ctx, err, stack) => _buildPlaceholder(),
+                                  )
+                                : _buildPlaceholder(),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Account Holder Name
-              const Text('Account Holder Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _holderNameController,
-                readOnly: _isApproved,
-                textCapitalization: TextCapitalization.characters,
-                decoration: _inputDecoration('Name as per Bank Passbook', Icons.person_outline),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Account holder name is required' : null,
-              ),
-
-              const SizedBox(height: 18),
-
-              // Bank Name
-              const Text('Bank Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _bankNameController,
-                readOnly: _isApproved,
-                textCapitalization: TextCapitalization.characters,
-                decoration: _inputDecoration('e.g. STATE BANK OF INDIA, HDFC BANK', Icons.account_balance_outlined),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Bank name is required' : null,
-              ),
-
-              const SizedBox(height: 18),
-
-              // Account Number
-              const Text('Bank Account Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _accountController,
-                readOnly: _isApproved,
-                keyboardType: TextInputType.number,
-                obscureText: _isApproved,
-                decoration: _inputDecoration('Enter your bank account number', Icons.numbers_outlined),
-                validator: (val) {
-                  if (val == null || val.trim().length < 8) return 'Enter a valid account number';
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 18),
-
-              // Confirm Account Number
-              if (!_isApproved) ...[
-                const Text('Confirm Account Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _confirmAccountController,
-                  keyboardType: TextInputType.number,
-                  decoration: _inputDecoration('Re-enter bank account number', Icons.lock_outline),
-                  validator: (val) {
-                    if (val != _accountController.text.trim()) return 'Account numbers do not match';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 18),
-              ],
-
-              // IFSC Code
-              const Text('IFSC Code', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _ifscController,
-                readOnly: _isApproved,
-                textCapitalization: TextCapitalization.characters,
-                maxLength: 11,
-                decoration: _inputDecoration('11-character IFSC (e.g. SBIN0001234)', Icons.qr_code_outlined).copyWith(counterText: ''),
-                validator: (val) {
-                  if (val == null || val.trim().length != 11) return 'IFSC must be exactly 11 characters';
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 18),
-
-              // UPI ID / VPA
-              const Text('UPI ID (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _upiController,
-                readOnly: _isApproved,
-                decoration: _inputDecoration('e.g. yourname@okhdfcbank, mobile@upi', Icons.alternate_email),
-              ),
-
-              const SizedBox(height: 32),
-
-              if (!_isApproved)
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _saveSettings,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text('Save Payment Settings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
+                  const SizedBox(height: 16),
+
+                  // Choose Image Button
+                  OutlinedButton.icon(
+                    onPressed: _pickImage,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    ),
+                    icon: const Icon(Icons.photo_library_outlined, size: 20),
+                    label: Text(_selectedImage != null ? 'Change Selected Image' : 'Select QR from Gallery'),
+                  ),
+
+                  if (_selectedImage != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle, color: AppColors.secondary, size: 16),
+                        const SizedBox(width: 6),
+                        Text('Image ready to upload', style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Optional UPI ID
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'UPI ID (Optional)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _upiController,
+                    decoration: InputDecoration(
+                      hintText: 'e.g. 9876543210@paytm / name@upi',
+                      prefixIcon: const Icon(Icons.alternate_email, color: AppColors.primary),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // Submit Button
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton.icon(
+                onPressed: _isLoading ? null : _saveQrSettings,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 2,
                 ),
-            ],
-          ),
+                icon: _isLoading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.cloud_upload_outlined),
+                label: Text(
+                  _isLoading ? 'Uploading...' : 'SAVE PAYMENT QR CODE',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(icon, color: AppColors.textSecondary),
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+  Widget _buildPlaceholder() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.qr_code_scanner, size: 48, color: Colors.grey.shade400),
+        const SizedBox(height: 8),
+        Text('No QR Code Uploaded', style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        Text('Tap to select image', style: TextStyle(color: AppColors.primary.withOpacity(0.8), fontSize: 11, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }

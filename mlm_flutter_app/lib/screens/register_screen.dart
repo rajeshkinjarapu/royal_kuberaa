@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import '../utils/constants.dart';
+import '../widgets/app_logo.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,11 +19,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _mobileController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   
   bool _isLoading = false;
   bool _isSponsorValidating = false;
+  bool _obscurePassword = false;
   String _sponsorName = '';
   String _sponsorError = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Default 6-digit initial PIN for convenience
+    _passwordController.text = (100000 + Random().nextInt(900000)).toString();
+  }
 
   @override
   void dispose() {
@@ -29,6 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nameController.dispose();
     _mobileController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -78,10 +90,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    final chosenPassword = _passwordController.text.trim();
+    if (chosenPassword.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password must be exactly 6 digits'), backgroundColor: AppColors.error));
+      return;
+    }
 
-    // Generate automatic 6-digit password
-    final String generatedPassword = (100000 + Random().nextInt(900000)).toString();
+    setState(() => _isLoading = true);
 
     try {
       final response = await http.post(
@@ -90,7 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: jsonEncode({
           'name': _nameController.text.toUpperCase(),
           'mobile': _mobileController.text,
-          'password': generatedPassword,
+          'password': chosenPassword,
           'sponsorId': _sponsorController.text.trim().toUpperCase(),
         }),
       );
@@ -103,7 +118,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Go to success screen, passing credentials
           context.go('/register_success', extra: {
             'memberId': registeredUser['memberId'] ?? '',
-            'password': generatedPassword,
+            'password': chosenPassword,
             'fullName': _nameController.text.toUpperCase(),
             'mobile': _mobileController.text,
           });
@@ -189,6 +204,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16),
+            
+            const Text('Security PIN / Password (6 Digits)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+            const SizedBox(height: 8),
+            _buildTextField(
+              controller: _passwordController,
+              hint: '6-digit Password (PIN)',
+              icon: Icons.lock_outline,
+              keyboardType: TextInputType.number,
+              obscureText: _obscurePassword,
+              maxLength: 6,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(6),
+              ],
+              suffixIcon: IconButton(
+                icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              ),
+            ),
             const SizedBox(height: 32),
             
             SizedBox(
@@ -238,6 +273,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     Function(String)? onChanged,
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
+    bool obscureText = false,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
+    Widget? suffixIcon,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -250,9 +289,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onChanged: onChanged,
         keyboardType: keyboardType,
         textCapitalization: textCapitalization,
+        obscureText: obscureText,
+        maxLength: maxLength,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
+          counterText: '',
           hintText: hint,
           prefixIcon: Icon(icon, color: AppColors.textSecondary),
+          suffixIcon: suffixIcon,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
           filled: true,
           fillColor: Colors.white,

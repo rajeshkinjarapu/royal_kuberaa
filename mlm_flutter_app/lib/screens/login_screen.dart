@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
+import '../widgets/app_logo.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,16 +20,26 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
 
   void _handleLogin() async {
-    if (_idController.text.trim().isEmpty || _passwordController.text.isEmpty) {
+    final memberId = _idController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (memberId.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter Member ID and Password')),
+        const SnackBar(content: Text('Please enter Member ID and 6-digit Password')),
+      );
+      return;
+    }
+
+    if (password.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be exactly 6 digits'), backgroundColor: AppColors.error),
       );
       return;
     }
 
     final success = await context.read<AuthProvider>().login(
-      _idController.text.trim(),
-      _passwordController.text,
+      memberId,
+      password,
     );
 
     if (success && mounted) {
@@ -52,44 +64,28 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo placeholder
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text('RK', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                // App Logo with Gold Accent
+                const AppLogo(size: 100),
+                const SizedBox(height: 20),
                 
                 Text(
-                  'Welcome Back',
+                  'Royal Kuberaa',
                   style: GoogleFonts.inter(
-                    fontSize: 28,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: AppColors.darkNavy,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
-                  'Login to access your dashboard',
+                  'Enter your 6-digit password to access dashboard',
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 36),
 
                 // Member ID Field
                 Container(
@@ -122,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field
+                // 6-Digit Password Field
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -138,9 +134,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _passwordController,
                     obscureText: _obscureText,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(6),
+                    ],
+                    style: const TextStyle(letterSpacing: 4, fontWeight: FontWeight.bold, fontSize: 16),
                     decoration: InputDecoration(
-                      hintText: 'Password',
-                      hintStyle: const TextStyle(color: Colors.grey),
+                      counterText: '',
+                      hintText: '•••••• (6 Digits)',
+                      hintStyle: const TextStyle(color: Colors.grey, letterSpacing: 1),
                       prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
                       suffixIcon: IconButton(
                         icon: Icon(

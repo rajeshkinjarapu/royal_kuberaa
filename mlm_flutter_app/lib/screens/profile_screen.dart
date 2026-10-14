@@ -72,8 +72,7 @@ class ProfileScreen extends StatelessWidget {
               _buildSettingsTile(context, Icons.person_outline, 'Personal Details', () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Personal Details are shown above.')));
               }),
-              _buildSettingsTile(context, Icons.verified_user_outlined, 'KYC Verification', () => context.push('/kyc')),
-              _buildSettingsTile(context, Icons.account_balance_outlined, 'Payment / Bank Settings', () => context.push('/payment-settings')),
+              _buildSettingsTile(context, Icons.qr_code_2_rounded, 'Payment QR Settings', () => context.push('/payment-settings')),
             ],
           ),
           

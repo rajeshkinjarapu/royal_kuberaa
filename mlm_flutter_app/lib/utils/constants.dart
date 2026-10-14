@@ -10,6 +10,8 @@ class AppColors {
   static const Color textSecondary = Color(0xFF64748B);
   static const Color border = Color(0xFFE2E8F0);
   static const Color error = Color(0xFFEF4444);
+  static const Color darkNavy = Color(0xFF0A192F); // Royal Dark Blue
+  static const Color headerNavy = Color(0xFF0F172A); // Deep Slate Dark Blue
 }
 
 class AppConstants {

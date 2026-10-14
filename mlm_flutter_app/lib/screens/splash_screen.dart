@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
+import '../widgets/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,24 +40,29 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.darkNavy,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: const BoxDecoration(
+            const AppLogo(size: 120),
+            const SizedBox(height: 24),
+            Text(
+              AppConstants.appName,
+              style: const TextStyle(
                 color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('RK', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 8),
+            const Text(
+              'Digital Community Commerce',
+              style: TextStyle(color: Colors.white60, fontSize: 13),
+            ),
+            const SizedBox(height: 36),
+            const CircularProgressIndicator(color: Color(0xFFD4AF37)),
           ],
         ),
       ),

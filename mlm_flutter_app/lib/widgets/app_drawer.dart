@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../utils/constants.dart';
+import 'app_logo.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -19,26 +20,20 @@ class AppDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primaryDark],
+                colors: [AppColors.darkNavy, Color(0xFF1E293B)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
             accountName: Text(
               user?['fullName'] ?? user?['name'] ?? 'Royal Member',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.white),
             ),
             accountEmail: Text(
               'ID: ${user?['memberId'] ?? 'N/A'}',
-              style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
+              style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 13, fontWeight: FontWeight.bold),
             ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                (user?['fullName'] ?? user?['name'] ?? 'R')[0].toUpperCase(),
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary),
-              ),
-            ),
+            currentAccountPicture: const AppLogo(size: 64, showBorder: true),
           ),
 
           // --- NETWORK & TEAM ---
@@ -108,21 +103,12 @@ class AppDrawer extends StatelessWidget {
           // --- ACCOUNT & PAYMENTS ---
           _buildSectionHeader('ACCOUNT & SETTINGS'),
           _buildDrawerItem(
-            icon: Icons.account_balance_outlined,
-            title: 'Payment Settings',
+            icon: Icons.qr_code_2_rounded,
+            title: 'Payment QR Settings',
             iconColor: AppColors.primary,
             onTap: () {
               Navigator.pop(context);
               context.push('/payment-settings');
-            },
-          ),
-          _buildDrawerItem(
-            icon: Icons.verified_user_outlined,
-            title: 'KYC Verification',
-            iconColor: Colors.indigo,
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/kyc');
             },
           ),
           _buildDrawerItem(

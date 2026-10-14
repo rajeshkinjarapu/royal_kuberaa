@@ -214,37 +214,56 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: _kycStatus == 'Approved' ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                      color: (_bankDetails?['paymentQrCode'] != null && _bankDetails?['paymentQrCode'].toString().isNotEmpty)
+                          ? Colors.green.withOpacity(0.08)
+                          : Colors.amber.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _kycStatus == 'Approved' ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3)),
+                      border: Border.all(
+                        color: (_bankDetails?['paymentQrCode'] != null && _bankDetails?['paymentQrCode'].toString().isNotEmpty)
+                            ? Colors.green.withOpacity(0.3)
+                            : Colors.amber.withOpacity(0.4),
+                      ),
                     ),
-                    child: _kycStatus == 'Approved'
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    child: (_bankDetails?['paymentQrCode'] != null && _bankDetails?['paymentQrCode'].toString().isNotEmpty)
+                        ? Row(
                             children: [
-                              Text('Bank: ${_bankDetails?['bankName'] ?? 'N/A'}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 4),
-                              Text('A/C No: ${_bankDetails?['accountNumber'] ?? 'N/A'}', style: const TextStyle(color: AppColors.textSecondary)),
-                              const SizedBox(height: 4),
-                              Text('IFSC: ${_bankDetails?['ifscCode'] ?? 'N/A'}', style: const TextStyle(color: AppColors.textSecondary)),
-                              const SizedBox(height: 8),
-                              const Row(
-                                children: [
-                                  Icon(Icons.check_circle, color: Colors.green, size: 16),
-                                  SizedBox(width: 4),
-                                  Text('KYC Approved', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
-                                ],
+                              const Icon(Icons.qr_code_2_rounded, color: Colors.green, size: 36),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Payout Destination: Payment QR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green)),
+                                    const SizedBox(height: 2),
+                                    Text('UPI / QR Linked: ${_bankDetails?['paymentQrCode']}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => context.push('/payment-settings'),
+                                child: const Text('Change', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                               )
                             ],
                           )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        : Row(
                             children: [
-                              const Text('KYC Not Approved!', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 4),
-                              Text('Current Status: $_kycStatus', style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
-                              const SizedBox(height: 8),
-                              const Text('You must update your Bank details in the Profile section and wait for Admin approval before withdrawing.', style: TextStyle(fontSize: 12)),
+                              const Icon(Icons.qr_code_scanner, color: Colors.amber, size: 32),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Payment QR Not Uploaded', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.amber)),
+                                    const SizedBox(height: 2),
+                                    const Text('Upload your QR code to receive instant payouts.', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                  ],
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => context.push('/payment-settings'),
+                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
+                                child: const Text('Add QR', style: TextStyle(fontSize: 11)),
+                              )
                             ],
                           ),
                   ),
@@ -255,9 +274,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: (_isLoading || _kycStatus != 'Approved') ? null : _withdraw,
+                onPressed: _isLoading ? null : _withdraw,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),

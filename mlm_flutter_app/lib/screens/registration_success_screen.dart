@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/constants.dart';
+import '../widgets/app_logo.dart';
 
 class RegistrationSuccessScreen extends StatefulWidget {
   final Map<String, dynamic> credentials;
@@ -174,13 +175,9 @@ class _RegistrationSuccessScreenState extends State<RegistrationSuccessScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                            child: const Text('RK', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 18)),
-                          ),
+                          const AppLogo(size: 38, showBorder: false),
                           const SizedBox(width: 10),
-                          Text('ROYAL KUBERAA', style: GoogleFonts.inter(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.5)),
+                          Text('ROYAL KUBERAA', style: GoogleFonts.inter(color: AppColors.darkNavy, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.5)),
                         ],
                       ),
                       const SizedBox(height: 4),
