@@ -48,7 +48,15 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (success && mounted) {
-      context.go('/dashboard');
+      final user = context.read<AuthProvider>().user;
+      final isAdmin = user?['role'] == 'admin' || 
+                      user?['memberId']?.toString().toLowerCase() == 'kallu' ||
+                      memberId.toLowerCase() == 'kallu';
+      if (isAdmin) {
+        context.go('/admin');
+      } else {
+        context.go('/dashboard');
+      }
     } else if (mounted) {
       setState(() {
         _errorMessage = 'Invalid credentials. Please check your ID and 6-digit PIN.';

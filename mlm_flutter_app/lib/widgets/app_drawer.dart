@@ -12,7 +12,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
-    final isAdmin = user?['role'] == 'admin';
+    final isAdmin = user?['role'] == 'admin' || user?['memberId']?.toString().toLowerCase() == 'kallu';
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -42,12 +42,18 @@ class AppDrawer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: isAdmin ? const Color(0xFFEDE9FE) : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${user?['memberId'] ?? 'N/A'} • ${user?['name'] ?? user?['fullName'] ?? 'Member'}',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
+                      isAdmin
+                          ? '👑 SUPER ADMIN • ${user?['name'] ?? 'System Admin'}'
+                          : '${user?['memberId'] ?? 'N/A'} • ${user?['name'] ?? user?['fullName'] ?? 'Member'}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: isAdmin ? const Color(0xFF6D28D9) : const Color(0xFF64748B),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -56,68 +62,73 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
 
-            // --- Scrollable Menu Items Matching Webapp Exactly ---
+            // --- Scrollable Menu Items ---
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
-                  // ===== MAIN MENU =====
-                  _buildSectionHeader('MAIN MENU'),
-                  _buildMenuItem(context, '📊', 'Dashboard', '/dashboard'),
-                  _buildMenuItem(context, '⚡', 'ID Activation', '/activation'),
-                  _buildMenuItem(context, '🌊', 'Autopool Income', '/cashback'),
-                  _buildMenuItem(context, '👑', 'Royalty Pools', '/royalty'),
-                  _buildMenuItem(context, '♾️', 'Rebirth ID', '/rebirth'),
-                  _buildMenuItem(context, '🛍️', 'Products', '/products'),
-
-                  const SizedBox(height: 8),
-
-                  // ===== FINANCE =====
-                  _buildSectionHeader('FINANCE'),
-                  _buildMenuItem(context, '💳', 'Deposit Funds', '/deposit'),
-                  _buildMenuItem(context, '📒', 'Passbook', '/passbook'),
-                  _buildMenuItem(context, '🏦', 'Bank Withdrawal', '/withdraw'),
-                  _buildMenuItem(context, '💸', 'P2P Transfer', '/p2p'),
-
-                  const SizedBox(height: 8),
-
-                  // ===== ACCOUNT =====
-                  _buildSectionHeader('ACCOUNT'),
-                  _buildMenuItem(context, '👥', 'My Network', '/network'),
-                  _buildMenuItem(context, '➕', 'Add Member', '/add-member'),
-                  _buildMenuItem(context, '🕸️', 'Team Network', '/team-network'),
-                  _buildMenuItem(context, '👤', 'Profile', '/profile'),
-                  _buildMenuItem(context, '🏦', 'Payment Settings', '/payment-settings'),
-                  _buildMenuItem(context, '🔒', 'Transaction PIN', '/tpin'),
-                  _buildMenuItem(context, '🔑', 'Change Password', '/change-password'),
-                  _buildMenuItem(context, '🎧', 'Support', '/support'),
-
-                  const SizedBox(height: 8),
-
-                  // ===== INFORMATION =====
-                  _buildSectionHeader('INFORMATION'),
-                  _buildMenuItem(context, 'ℹ️', 'About Us', '/legal'),
-                  _buildMenuItem(context, '📄', 'Terms & Conditions', '/terms'),
-                  _buildMenuItem(context, '🛡️', 'Privacy Policy', '/privacy'),
-                  _buildMenuItem(context, '↩️', 'Return & Refund', '/refund'),
-                  _buildMenuItem(context, '⚠️', 'Disclaimer', '/disclaimer'),
-
-                  // ===== ADMIN PANEL (if admin) =====
                   if (isAdmin) ...[
-                    const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE2E8F0)),
-                    _buildSectionHeader('ADMIN PANEL', color: const Color(0xFF7C3AED)),
+                    // ===== EXCLUSIVE ADMIN MENU =====
+                    _buildSectionHeader('ADMIN CONSOLE', color: const Color(0xFF7C3AED)),
                     _buildMenuItem(context, '👑', 'Admin Dashboard', '/admin'),
                     _buildMenuItem(context, '👥', 'Member Management', '/admin/members'),
-                    _buildMenuItem(context, '💰', 'Fund Management', '/admin/funds'),
-                    _buildMenuItem(context, '💳', 'Fund Requests', '/admin/fund-management'),
-                    _buildMenuItem(context, '💸', 'Payouts & TDS', '/admin/payouts'),
+                    _buildMenuItem(context, '💰', 'Fund Management', '/admin/fund-management'),
+                    _buildMenuItem(context, '💳', 'Fund Requests', '/admin/funds'),
+                    _buildMenuItem(context, '💸', 'Payout Approvals', '/admin/payouts'),
                     _buildMenuItem(context, '🔄', 'Pool Distributions', '/admin/pools'),
                     _buildMenuItem(context, '🛍️', 'Manage Products', '/admin/products'),
+                    _buildMenuItem(context, '🆔', 'KYC Approvals', '/admin/kyc'),
                     _buildMenuItem(context, '🎧', 'Support Tickets', '/admin/support'),
                     _buildMenuItem(context, '⚙️', 'System Settings', '/admin/settings'),
-                    _buildMenuItem(context, '📱', 'App Upload', '/admin/app-upload'),
+                    _buildMenuItem(context, '📱', 'App Release & OTA', '/admin/app-upload'),
                     _buildMenuItem(context, '📊', 'System Reports', '/admin/reports'),
+
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFFE2E8F0)),
+                    _buildSectionHeader('POLICY & COMPLIANCE'),
+                    _buildMenuItem(context, '📄', 'Terms & Conditions', '/terms'),
+                    _buildMenuItem(context, '🛡️', 'Privacy Policy', '/privacy'),
+                  ] else ...[
+                    // ===== MEMBER MAIN MENU =====
+                    _buildSectionHeader('MAIN MENU'),
+                    _buildMenuItem(context, '📊', 'Dashboard', '/dashboard'),
+                    _buildMenuItem(context, '⚡', 'ID Activation', '/activation'),
+                    _buildMenuItem(context, '🌊', 'Autopool Income', '/cashback'),
+                    _buildMenuItem(context, '👑', 'Royalty Pools', '/royalty'),
+                    _buildMenuItem(context, '♾️', 'Rebirth ID', '/rebirth'),
+                    _buildMenuItem(context, '🛍️', 'Products', '/products'),
+
+                    const SizedBox(height: 8),
+
+                    // ===== MEMBER FINANCE =====
+                    _buildSectionHeader('FINANCE'),
+                    _buildMenuItem(context, '💳', 'Deposit Funds', '/deposit'),
+                    _buildMenuItem(context, '📒', 'Passbook', '/passbook'),
+                    _buildMenuItem(context, '🏦', 'Bank Withdrawal', '/withdraw'),
+                    _buildMenuItem(context, '💸', 'P2P Transfer', '/p2p'),
+
+                    const SizedBox(height: 8),
+
+                    // ===== MEMBER ACCOUNT =====
+                    _buildSectionHeader('ACCOUNT'),
+                    _buildMenuItem(context, '👥', 'My Network', '/network'),
+                    _buildMenuItem(context, '➕', 'Add Member', '/add-member'),
+                    _buildMenuItem(context, '🕸️', 'Team Network', '/team-network'),
+                    _buildMenuItem(context, '👤', 'Profile', '/profile'),
+                    _buildMenuItem(context, '🏦', 'Payment Settings', '/payment-settings'),
+                    _buildMenuItem(context, '🔒', 'Transaction PIN', '/tpin'),
+                    _buildMenuItem(context, '🔑', 'Change Password', '/change-password'),
+                    _buildMenuItem(context, '🎧', 'Support', '/support'),
+
+                    const SizedBox(height: 8),
+
+                    // ===== INFORMATION =====
+                    _buildSectionHeader('INFORMATION'),
+                    _buildMenuItem(context, 'ℹ️', 'About Us', '/legal'),
+                    _buildMenuItem(context, '📄', 'Terms & Conditions', '/terms'),
+                    _buildMenuItem(context, '🛡️', 'Privacy Policy', '/privacy'),
+                    _buildMenuItem(context, '↩️', 'Return & Refund', '/refund'),
+                    _buildMenuItem(context, '⚠️', 'Disclaimer', '/disclaimer'),
                   ],
 
                   const SizedBox(height: 16),

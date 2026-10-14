@@ -30,7 +30,13 @@ class _SplashScreenState extends State<SplashScreen> {
     
     if (mounted) {
       if (isLoggedIn) {
-        context.go('/dashboard');
+        final user = auth.user;
+        final isAdmin = user?['role'] == 'admin' || user?['memberId']?.toString().toLowerCase() == 'kallu';
+        if (isAdmin) {
+          context.go('/admin');
+        } else {
+          context.go('/dashboard');
+        }
       } else {
         context.go('/login');
       }

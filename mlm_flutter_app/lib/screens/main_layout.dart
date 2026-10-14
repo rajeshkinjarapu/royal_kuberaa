@@ -10,6 +10,7 @@ import 'dashboard_screen.dart';
 import 'network_screen.dart';
 import 'finance_screen.dart';
 import 'profile_screen.dart';
+import 'admin_dashboard_screen.dart';
 
 class MainLayout extends StatefulWidget {
   final int initialIndex;
@@ -37,6 +38,13 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+    final isAdmin = user?['role'] == 'admin' || user?['memberId']?.toString().toLowerCase() == 'kallu';
+
+    if (isAdmin) {
+      return const AdminDashboardScreen();
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
