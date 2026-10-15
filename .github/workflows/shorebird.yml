@@ -60,10 +60,14 @@ jobs:
             chmod +x mlm_flutter_app/android/gradlew
           fi
 
+      - name: Shorebird Doctor
+        working-directory: ./mlm_flutter_app
+        run: shorebird doctor -v
+
       - name: Run Shorebird Release (APK)
         if: ${{ github.event.inputs.action_type == 'release' }}
         working-directory: ./mlm_flutter_app
-        run: shorebird release android --artifact=apk --no-confirm --flutter-version=3.29.0
+        run: shorebird release android --artifact=apk --no-confirm --flutter-version=3.29.0 --verbose
 
       - name: Upload Shorebird Release APK
         if: ${{ github.event.inputs.action_type == 'release' }}
