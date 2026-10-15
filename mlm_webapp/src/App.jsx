@@ -208,9 +208,9 @@ function App() {
     { name: 'Change Password', icon: '🔑' },
     { name: 'Support', icon: '🎧' },
     { name: 'Download App', icon: '📱' },
-    { header: 'INFORMATION' },
-    { name: 'About Us', icon: 'ℹ️' },
-    { name: 'Terms & Conditions', icon: '📄' },
+
+
+
     { name: 'Privacy Policy', icon: '🛡️' },
     { name: 'Return & Refund', icon: '↩️' },
     { name: 'Disclaimer', icon: '⚠️' },
@@ -2707,17 +2707,21 @@ function App() {
             return;
         }
 
-        const productPrice = Number(orderingProduct.price) || 1500;
+        const isUserActive = Boolean(userData?.isActive);
+        const productPrice = isUserActive ? 0 : (Number(orderingProduct.price) || 1500);
         const deliveryCharge = Number(deliveryInfo.deliveryCharge) || 50;
         const totalAmount = productPrice + deliveryCharge;
         const availableBalance = Number(userData?.mainWallet) || 0;
 
         if (availableBalance < totalAmount) {
-            window.customAlert(`Insufficient Main Wallet balance!\nRequired: ₹${totalAmount} (Item: ₹${productPrice} + Delivery: ₹${deliveryCharge})\nAvailable: ₹${availableBalance}\nPlease deposit funds to proceed.`);
+            window.customAlert(`Insufficient Main Wallet balance!\nRequired: ₹${totalAmount} (${isUserActive ? 'Delivery: ₹' + deliveryCharge + ' (Product Free for Activated ID)' : 'Product: ₹' + productPrice + ' + Delivery: ₹' + deliveryCharge})\nAvailable: ₹${availableBalance}\nPlease deposit funds to proceed.`);
             return;
         }
 
-        const confirmPay = await window.customConfirm(`Confirm Order Placement:\n\nProduct: ${orderingProduct.name}\nItem Price: ₹${productPrice}\nDelivery Fee: ₹${deliveryCharge} (~${deliveryInfo.approxDistanceKm} km)\nTotal Deduction: ₹${totalAmount}\n\nAre you sure you want to deduct ₹${totalAmount} from your Main Wallet?`);
+        const confirmMsg = isUserActive
+            ? `Confirm Order Placement:\n\nProduct: ${orderingProduct.name}\nProduct Price: ₹0 (FREE - Activated ID)\nDelivery Fee: ₹${deliveryCharge} (~${deliveryInfo.approxDistanceKm} km)\nTotal Wallet Deduction: ₹${totalAmount}\n\nAre you sure you want to deduct ₹${totalAmount} from your Main Wallet?`
+            : `Confirm Order & ID Activation:\n\nProduct: ${orderingProduct.name}\nProduct & Activation: ₹${productPrice}\nDelivery Fee: ₹${deliveryCharge} (~${deliveryInfo.approxDistanceKm} km)\nTotal Wallet Deduction: ₹${totalAmount}\n\nAre you sure you want to deduct ₹${totalAmount} from your Main Wallet?`;
+        const confirmPay = await window.customConfirm(confirmMsg);
         if (!confirmPay) return;
 
         setSubmittingOrder(true);
@@ -2735,7 +2739,11 @@ function App() {
             if (result.success) {
                 window.customAlert(result.message);
                 if (result.newWalletBalance !== undefined) {
-                    setUserData(prev => ({ ...prev, mainWallet: result.newWalletBalance }));
+                    setUserData(prev => ({ 
+                        ...prev, 
+                        mainWallet: result.newWalletBalance,
+                        isActive: result.isActive !== undefined ? result.isActive : prev?.isActive
+                    }));
                 }
                 setOrderingProduct(null);
                 setActiveMenu('My Orders');
@@ -2884,7 +2892,13 @@ function App() {
                 </div>
                 <div>
                   <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#0F172A' }}>{orderingProduct.name}</div>
-                  <div style={{ color: '#059669', fontWeight: 'bold', fontSize: '13px' }}>Price: ₹{Number(orderingProduct.price).toLocaleString()}</div>
+                  <div style={{ color: '#059669', fontWeight: 'bold', fontSize: '13px' }}>
+                    {userData?.isActive ? (
+                      <span>Price: <span style={{ textDecoration: 'line-through', color: '#94A3B8' }}>₹{Number(orderingProduct.price).toLocaleString()}</span> <span style={{ color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>FREE (Activated Member)</span></span>
+                    ) : (
+                      <span>Price: ₹{Number(orderingProduct.price).toLocaleString()}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -2950,7 +2964,14 @@ function App() {
                 <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px', borderRadius: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '4px' }}>
                     <span style={{ color: '#64748B' }}>Product Price:</span>
-                    <strong>₹{Number(orderingProduct.price).toLocaleString()}</strong>
+                    {userData?.isActive ? (
+                      <span>
+                        <span style={{ textDecoration: 'line-through', color: '#94A3B8', marginRight: '6px' }}>₹{Number(orderingProduct.price).toLocaleString()}</span>
+                        <strong style={{ color: '#059669' }}>₹0 (Active ID Free)</strong>
+                      </span>
+                    ) : (
+                      <strong>₹{Number(orderingProduct.price).toLocaleString()}</strong>
+                    )}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
                     <span style={{ color: '#64748B' }}>Delivery Fee:</span>
@@ -2958,11 +2979,11 @@ function App() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid #E2E8F0', paddingTop: '8px', fontWeight: 'bold' }}>
                     <span>Total Amount:</span>
-                    <span style={{ color: '#0F172A', fontSize: '16px' }}>₹{(Number(orderingProduct.price) + Number(deliveryInfo.deliveryCharge)).toLocaleString()}</span>
+                    <span style={{ color: '#0F172A', fontSize: '16px' }}>₹{((userData?.isActive ? 0 : Number(orderingProduct.price)) + Number(deliveryInfo.deliveryCharge)).toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '6px' }}>
                     <span style={{ color: '#64748B' }}>Main Wallet Balance:</span>
-                    <strong style={{ color: Number(userData?.mainWallet) >= (Number(orderingProduct.price) + Number(deliveryInfo.deliveryCharge)) ? '#059669' : '#DC2626' }}>
+                    <strong style={{ color: Number(userData?.mainWallet) >= ((userData?.isActive ? 0 : Number(orderingProduct.price)) + Number(deliveryInfo.deliveryCharge)) ? '#059669' : '#DC2626' }}>
                       ₹{Number(userData?.mainWallet || 0).toLocaleString()}
                     </strong>
                   </div>
@@ -2970,7 +2991,7 @@ function App() {
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                   <button type="submit" disabled={submittingOrder} style={{ flex: 1, padding: '12px', background: '#059669', color: '#FFF', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}>
-                    {submittingOrder ? 'Placing Order...' : `Confirm & Deduct ₹${Number(orderingProduct.price) + Number(deliveryInfo.deliveryCharge)}`}
+                    {submittingOrder ? 'Placing Order...' : `Confirm & Deduct ₹${((userData?.isActive ? 0 : Number(orderingProduct.price)) + Number(deliveryInfo.deliveryCharge)).toLocaleString()}`}
                   </button>
                   <button type="button" onClick={() => setOrderingProduct(null)} style={{ padding: '12px 20px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
                     Cancel

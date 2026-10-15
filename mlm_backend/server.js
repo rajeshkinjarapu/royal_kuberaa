@@ -1034,19 +1034,39 @@ app.post('/api/orders/create', authMiddleware, async (req, res) => {
         // Calculate delivery charge dynamically based on destination distance/pincode
         const deliveryCalc = calculateDeliveryCharge(shippingAddress.pincode, shippingAddress.state);
         const deliveryCharge = Number(deliveryCalc.deliveryCharge) || 50;
-        const productPrice = Number(product.price) || 0;
+
+        // Check if member ID is already activated
+        const isAlreadyActive = Boolean(user.isActive);
+        // Active members get product for FREE (₹0), paying only delivery charge.
+        // Inactive members pay product price (₹1500) + delivery charge, which also activates their ID.
+        const productPrice = isAlreadyActive ? 0 : (Number(product.price) || 1500);
         const totalAmount = cleanFigure(productPrice + deliveryCharge);
 
         // Check wallet balance
         if (user.mainWallet < totalAmount) {
             return res.status(400).json({
                 success: false,
-                message: `Insufficient Main Wallet balance! Required: ₹${totalAmount} (Product: ₹${productPrice} + Delivery: ₹${deliveryCharge}). Available: ₹${cleanFigure(user.mainWallet)}. Please deposit funds to proceed.`
+                message: `Insufficient Main Wallet balance! Required: ₹${totalAmount} (${isAlreadyActive ? 'Delivery: ₹' + deliveryCharge + ' (Product Free for Activated ID)' : 'Product: ₹' + productPrice + ' + Delivery: ₹' + deliveryCharge}). Available: ₹${cleanFigure(user.mainWallet)}. Please deposit funds to proceed.`
             });
         }
 
         // Deduct from Main Wallet
         user.mainWallet = cleanFigure(user.mainWallet - totalAmount);
+
+        // If inactive member orders and pays the 1500 activation fee + delivery, activate the ID
+        if (!isAlreadyActive) {
+            user.isActive = true;
+            user.activatedAt = user.activatedAt || new Date();
+            let sponsor = null;
+            if (user.sponsorId) {
+                sponsor = await User.findOne({ memberId: user.sponsorId });
+            }
+            try {
+                await mlmLogic.activateUser(user, sponsor);
+            } catch (mlmErr) {
+                console.error('[Order Activation Error]:', mlmErr);
+            }
+        }
         await user.save();
 
         const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
@@ -1059,7 +1079,7 @@ app.post('/api/orders/create', authMiddleware, async (req, res) => {
             type: 'Debit',
             category: 'PRODUCT_ORDER',
             amount: totalAmount,
-            description: `Order #${orderId} - ${product.name} (Item: ₹${productPrice}, Delivery: ₹${deliveryCharge})`
+            description: `Order #${orderId} - ${product.name} (${isAlreadyActive ? 'Free Product for Activated ID, Delivery: ₹' + deliveryCharge : 'Product: ₹' + productPrice + ', Delivery: ₹' + deliveryCharge})`
         });
 
         // Create Order Record
@@ -1093,9 +1113,10 @@ app.post('/api/orders/create', authMiddleware, async (req, res) => {
 
         res.json({
             success: true,
-            message: `Order #${orderId} placed successfully! ₹${totalAmount} has been deducted from your Main Wallet.`,
+            message: `Order #${orderId} placed successfully! ₹${totalAmount} (${isAlreadyActive ? 'Delivery: ₹' + deliveryCharge + ' (Product Free)' : 'Product: ₹' + productPrice + ' + Delivery: ₹' + deliveryCharge}) has been deducted from your Main Wallet.`,
             order,
-            newWalletBalance: user.mainWallet
+            newWalletBalance: user.mainWallet,
+            isActive: user.isActive
         });
     } catch (error) {
         console.error('Order creation error:', error);

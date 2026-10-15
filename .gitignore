@@ -22,6 +22,7 @@ mlm_flutter_app/pubspec.lock
 # OS generated
 .DS_Store
 Thumbs.db
+update_app.ps1
 
 # Live Uploads & Downloadable Builds
 mlm_backend/uploads/

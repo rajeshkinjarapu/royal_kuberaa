@@ -22,6 +22,7 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
   double _userWalletBalance = 0.0;
   String _userName = '';
   String _userMobile = '';
+  bool _isUserActive = false;
 
   @override
   void initState() {
@@ -61,6 +62,7 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
               _userWalletBalance = ((u['mainWallet'] ?? 0) as num).toDouble();
               _userName = (u['name'] ?? '').toString();
               _userMobile = (u['mobile'] ?? '').toString();
+              _isUserActive = u['isActive'] == true;
             });
           }
         }
@@ -163,7 +165,7 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
 
   void _showOrderBottomSheet(dynamic product) {
     final name = product['name'] ?? 'Product Kit';
-    final double productPrice = ((product['price'] ?? 1500) as num).toDouble();
+    final double productPrice = _isUserActive ? 0.0 : ((product['price'] ?? 1500) as num).toDouble();
     final imageUrl = _formatImageUrl(product['image']?.toString());
 
     final nameController = TextEditingController(text: _userName);
@@ -282,7 +284,7 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Product Price:', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                                Text('₹${productPrice.toStringAsFixed(0)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text(_isUserActive ? '₹0 (Free - Active ID)' : '₹${productPrice.toStringAsFixed(0)}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: _isUserActive ? const Color(0xFF059669) : Colors.black)),
                               ],
                             ),
                             const SizedBox(height: 4),
@@ -470,7 +472,7 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
                                   children: [
                                     Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                     const SizedBox(height: 2),
-                                    Text('Kit Price: ₹${productPrice.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold, fontSize: 13)),
+                                    Text(_isUserActive ? 'Kit Price: FREE (Active ID)' : 'Kit Price: ₹${productPrice.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold, fontSize: 13)),
                                   ],
                                 ),
                               ),
@@ -644,7 +646,7 @@ class _ProductsScreenState extends State<ProductsScreen> with SingleTickerProvid
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text('Product Kit Price:', style: TextStyle(fontSize: 13, color: Color(0xFF475569))),
-                                  Text('₹${productPrice.toStringAsFixed(0)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                                  Text(_isUserActive ? '₹0 (Active ID Free)' : '₹${productPrice.toStringAsFixed(0)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isUserActive ? const Color(0xFF059669) : const Color(0xFF0F172A))),
                                 ],
                               ),
                               const SizedBox(height: 6),
