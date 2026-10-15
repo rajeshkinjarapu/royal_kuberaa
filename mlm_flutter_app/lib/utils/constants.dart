@@ -12,6 +12,7 @@ class AppColors {
   static const Color error = Color(0xFFEF4444);
   static const Color darkNavy = Color(0xFF0A192F); // Royal Dark Blue
   static const Color headerNavy = Color(0xFF0F172A); // Deep Slate Dark Blue
+  static const Color accent = Color(0xFFF59E0B); // Amber / Gold Accent
 }
 
 class AppConstants {

@@ -67,7 +67,7 @@ jobs:
       - name: Build Base Flutter APK
         if: ${{ github.event.inputs.action_type == 'release' }}
         working-directory: ./mlm_flutter_app
-        run: flutter build apk --release
+        run: flutter build apk --release -v
 
       - name: Run Shorebird Release (APK)
         if: ${{ github.event.inputs.action_type == 'release' }}

@@ -661,7 +661,7 @@ class _CashbackScreenState extends State<CashbackScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: top10List.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final member = top10List[index] as Map<String, dynamic>;
                 final int rank = (member['rank'] as num?)?.toInt() ?? (index + 1);
