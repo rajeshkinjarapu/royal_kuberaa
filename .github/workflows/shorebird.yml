@@ -10,13 +10,13 @@ on:
   workflow_dispatch:
     inputs:
       action_type:
-        description: 'Choose Shorebird action'
+        description: 'Action (release = Build Base APK with OTA support, patch = Send OTA Patch)'
         required: true
-        default: 'patch'
+        default: 'release'
         type: choice
         options:
-          - patch
           - release
+          - patch
 
 jobs:
   shorebird:
@@ -70,8 +70,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RoyalKuberaa-Shorebird-Release-APK
-          path: mlm_flutter_app/build/app/outputs/flutter-apk/*.apk
-          if-no-files-found: error
+          path: |
+            mlm_flutter_app/build/app/outputs/flutter-apk/*.apk
+            mlm_flutter_app/build/app/outputs/apk/release/*.apk
+          if-no-files-found: warn
 
       - name: Run Shorebird Patch (OTA)
         if: ${{ github.event_name == 'push' || github.event.inputs.action_type == 'patch' }}
