@@ -17,6 +17,7 @@ mlm_flutter_app/.dart_tool/
 mlm_flutter_app/build/
 mlm_flutter_app/.flutter-plugins
 mlm_flutter_app/.flutter-plugins-dependencies
+mlm_flutter_app/pubspec.lock
 
 # OS generated
 .DS_Store
