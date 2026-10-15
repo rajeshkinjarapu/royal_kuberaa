@@ -211,9 +211,9 @@ function App() {
 
 
 
-    { name: 'Privacy Policy', icon: '🛡️' },
-    { name: 'Return & Refund', icon: '↩️' },
-    { name: 'Disclaimer', icon: '⚠️' },
+
+
+
   ];
 
   const adminMenu = [

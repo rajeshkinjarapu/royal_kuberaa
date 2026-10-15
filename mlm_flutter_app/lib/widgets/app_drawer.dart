@@ -123,13 +123,13 @@ class AppDrawer extends StatelessWidget {
 
                     const SizedBox(height: 8),
 
-                    // ===== INFORMATION =====
-                    _buildSectionHeader('INFORMATION'),
-                    _buildMenuItem(context, 'ℹ️', 'About Us', '/legal'),
-                    _buildMenuItem(context, '📄', 'Terms & Conditions', '/terms'),
-                    _buildMenuItem(context, '🛡️', 'Privacy Policy', '/privacy'),
-                    _buildMenuItem(context, '↩️', 'Return & Refund', '/refund'),
-                    _buildMenuItem(context, '⚠️', 'Disclaimer', '/disclaimer'),
+
+
+
+
+
+
+
                   ],
 
                   const SizedBox(height: 16),
