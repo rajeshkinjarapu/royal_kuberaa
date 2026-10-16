@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -193,11 +193,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     final dashData = context.watch<DashboardProvider>().dashboardData;
     final mainWallet = dashData?['mainWallet'] ?? 0.0;
 
-    // Check QR code from local state or fallback to profile provider data
-    final profileData = context.watch<ProfileProvider>().profileData;
-    final paymentQr = ((_bankDetails?['paymentQrCode'] ?? profileData?['paymentQrCode']) ?? '').toString().trim();
-    final upiId = ((_bankDetails?['upiId'] ?? profileData?['upiId']) ?? '').toString().trim();
-    final bool hasQrOrUpi = paymentQr.isNotEmpty || upiId.isNotEmpty;
+
 
     final tds = _enteredAmount >= 500 ? _enteredAmount * 0.05 : 0.0;
     final adminFee = _enteredAmount >= 500 ? _enteredAmount * 0.05 : 0.0;
@@ -395,139 +391,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Receiving Payment QR / UPI Destination Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: hasQrOrUpi ? const Color(0xFFF0FDF4) : const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: hasQrOrUpi ? const Color(0xFF86EFAC) : const Color(0xFFFDE68A),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: (hasQrOrUpi ? Colors.green : Colors.amber).withOpacity(0.06),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: _isFetchingBank
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  : hasQrOrUpi
-                      ? Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade100,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.verified_rounded, color: Colors.green.shade700, size: 26),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Payment Destination Ready',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                          color: Colors.green.shade800,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    upiId.isNotEmpty
-                                        ? 'UPI ID: $upiId'
-                                        : 'QR Code attached & verified for payout',
-                                    style: TextStyle(fontSize: 12, color: Colors.green.shade700),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            OutlinedButton(
-                              onPressed: () async {
-                                await context.push('/payment-settings');
-                                _fetchBankDetails();
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.green.shade800,
-                                side: BorderSide(color: Colors.green.shade400),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                minimumSize: const Size(0, 32),
-                              ),
-                              child: const Text('Change', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.shade100,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.qr_code_scanner, color: Colors.amber.shade800, size: 26),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Payment QR Not Uploaded',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: Colors.amber.shade900,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Upload PhonePe / GPay QR or UPI for payout.',
-                                    style: TextStyle(fontSize: 11, color: Colors.amber.shade800),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                await context.push('/payment-settings');
-                                _fetchBankDetails();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                minimumSize: const Size(0, 32),
-                              ),
-                              child: const Text('Add QR', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-            ),
-            const SizedBox(height: 20),
 
             // Beautiful Withdrawal Policy & Deductions Breakdown Card
             Container(
