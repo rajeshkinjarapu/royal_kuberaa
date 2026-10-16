@@ -74,7 +74,7 @@ jobs:
         working-directory: ./mlm_flutter_app
         run: |
           echo "Starting Shorebird Release..."
-          shorebird release android --artifact=apk --no-confirm --flutter-version=3.29.0 --verbose || {
+          shorebird release android --artifact=apk --no-confirm --verbose || {
             echo "⚠️ Shorebird release encountered a notice; proceeding with built APK."
           }
 
@@ -93,5 +93,5 @@ jobs:
         working-directory: ./mlm_flutter_app
         run: |
           echo "Starting Shorebird OTA Patch..."
-          shorebird patch android --no-confirm --allow-asset-diffs --allow-native-diffs --flutter-version=3.29.0 --verbose
+          shorebird patch android --release-version=latest --no-confirm --allow-asset-diffs --allow-native-diffs --verbose
 
