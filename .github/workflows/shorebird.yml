@@ -92,10 +92,6 @@ jobs:
         if: ${{ github.event_name == 'push' || github.event.inputs.action_type == 'patch' }}
         working-directory: ./mlm_flutter_app
         run: |
-          echo "Attempting Shorebird OTA Patch..."
-          shorebird patch android --release-version=latest --no-confirm --allow-asset-diffs --allow-native-diffs --flutter-version=3.29.0 --verbose || {
-            echo "⚠️ Shorebird patch could not be applied automatically."
-            echo "ℹ️ Note: If you bumped version or added native plugins (like share_plus/image_picker), please create a new base release first via 'workflow_dispatch -> release' or install the fresh APK from the 'Build & Release APK' workflow."
-            exit 0
-          }
+          echo "Starting Shorebird OTA Patch..."
+          shorebird patch android --no-confirm --allow-asset-diffs --allow-native-diffs --flutter-version=3.29.0 --verbose
 
