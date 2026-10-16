@@ -1,0 +1,1998 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="theme-color" content="#1a0b2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Royal Kuberaa – Official Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d0618;
+      color: #f0e9ff;
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overscroll-behavior-y: none;
+    }
+
+    :root {
+      --royal: #2d1b4e;
+      --royal-dark: #1a0b2e;
+      --royal-deep: #130823;
+      --gold: #d4af37;
+      --gold-light: #f0d878;
+      --gold-glow: rgba(212, 175, 55, 0.3);
+      --purple-glow: rgba(138, 79, 255, 0.15);
+      --text-light: #d8cee8;
+      --text-muted: #9b8dae;
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --sidebar-width: 280px;
+    }
+
+    /* ========== SIDEBAR (LEFT) ========== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(180deg, #1a0b2e 0%, #0d0618 100%);
+      border-right: 1px solid rgba(212, 175, 55, 0.15);
+      padding: 1.8rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      padding-top: calc(1.8rem + var(--safe-top));
+      padding-bottom: calc(1.5rem + var(--safe-bottom));
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 4px;
+    }
+
+    .sidebar-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .sidebar-logo i {
+      color: var(--gold);
+      font-size: 1.8rem;
+      filter: drop-shadow(0 0 12px var(--gold-glow));
+    }
+
+    .sidebar-logo span {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-tagline {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      padding-left: 0.6rem;
+      border-left: 2px solid var(--gold);
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      flex: 1;
+    }
+
+    .sidebar-nav-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 1rem 0.8rem 0.4rem;
+      font-weight: 600;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.75rem 1rem;
+      border-radius: 14px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .sidebar-link i {
+      width: 22px;
+      text-align: center;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+      background: rgba(212, 175, 55, 0.1);
+      color: #fff;
+    }
+
+    .sidebar-link:hover i,
+    .sidebar-link.active i {
+      color: var(--gold);
+    }
+
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: var(--gold);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Sidebar App Download */
+    .sidebar-app-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #2d1b4e, #1a0b2e);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: var(--gold-light);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.85rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+      margin-top: 1.5rem;
+      transition: all 0.25s;
+    }
+
+    .sidebar-app-btn i {
+      font-size: 1.1rem;
+    }
+
+    .sidebar-app-btn:hover,
+    .sidebar-app-btn:active {
+      background: linear-gradient(135deg, #3a2463, #2d1b4e);
+      border-color: var(--gold);
+      box-shadow: 0 0 25px var(--gold-glow);
+    }
+
+    /* Sidebar Portal / Login Button */
+    .sidebar-portal-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      border: none;
+      color: #1a0b2e;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.85rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+      margin-top: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+      transition: all 0.25s;
+      width: 100%;
+    }
+
+    .sidebar-portal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.55);
+    }
+
+    /* Top Bar Login Button */
+    .top-bar-login {
+      background: linear-gradient(135deg, #f0d878, #d4af37);
+      color: #1a0b2e;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 0.42rem 0.9rem;
+      border-radius: 20px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 3px 12px rgba(212, 175, 55, 0.3);
+      transition: all 0.2s;
+    }
+
+    .top-bar-login:active {
+      transform: scale(0.95);
+    }
+
+    /* Hero Gold Portal Button */
+    .btn-gold-portal {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%) !important;
+      color: #1a0b2e !important;
+      font-weight: 800 !important;
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.45) !important;
+      border: none !important;
+      cursor: pointer;
+    }
+
+    .btn-gold-portal:hover {
+      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.65) !important;
+      transform: translateY(-2px);
+    }
+
+    /* ========== DESKTOP TOP BAR ========== */
+    .desktop-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2.5rem;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      background: rgba(13, 6, 24, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .desktop-topbar-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      display: inline-block;
+    }
+
+    .desktop-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .desktop-login-btn {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      color: #1a0b2e;
+      border: none;
+      font-weight: 800;
+      font-size: 0.92rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+      transition: all 0.25s;
+    }
+
+    .desktop-login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+    }
+
+    /* ========== AUTH MODAL STYLES ========== */
+    .auth-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 4, 18, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .auth-modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .auth-modal-card {
+      background: linear-gradient(165deg, #1f1138 0%, #110722 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 24px;
+      padding: 2.2rem 2rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(212, 175, 55, 0.25);
+      position: relative;
+      animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .auth-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #cbd5e1;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-modal-close:hover {
+      background: rgba(225, 29, 72, 0.25);
+      color: #f43f5e;
+    }
+
+    .auth-modal-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-modal-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(138, 79, 255, 0.15));
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.8rem;
+      font-size: 1.6rem;
+      color: var(--gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .auth-modal-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .auth-modal-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-modal-error {
+      background: rgba(225, 29, 72, 0.15);
+      border: 1px solid rgba(225, 29, 72, 0.4);
+      color: #f87171;
+      font-size: 0.85rem;
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .auth-modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .auth-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.4rem;
+    }
+
+    .auth-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-input-wrap i {
+      position: absolute;
+      left: 1rem;
+      color: var(--gold);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .auth-input-wrap input {
+      width: 100%;
+      background: rgba(13, 6, 24, 0.7);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 0.75rem 1rem 0.75rem 2.8rem;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .auth-input-wrap input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+      background: rgba(13, 6, 24, 0.95);
+    }
+
+    .auth-modal-submit {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      color: #1a0b2e;
+      border: none;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 0.85rem;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+      transition: all 0.2s;
+    }
+
+    .auth-modal-submit:hover {
+      box-shadow: 0 12px 28px rgba(212, 175, 55, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .auth-modal-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-modal-switch {
+      margin-top: 1.4rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-modal-switch button {
+      background: none;
+      border: none;
+      color: var(--gold-light);
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-left: 0.3rem;
+      font-size: 0.85rem;
+    }
+
+    /* Sidebar Overlay (mobile) */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ========== TOP BAR (mobile) ========== */
+    .top-bar {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(13, 6, 24, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.2rem;
+      z-index: 900;
+      padding-top: var(--safe-top);
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-size: 1.4rem;
+      cursor: pointer;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .menu-btn:active {
+      background: rgba(212, 175, 55, 0.15);
+    }
+
+    .top-bar-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .top-bar-logo i {
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+
+    .top-bar-logo span {
+      background: linear-gradient(135deg, #f0d878, #d4af37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .top-bar-action {
+      color: var(--gold);
+      font-size: 1.2rem;
+      text-decoration: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .top-bar-action:active {
+      background: rgba(212, 175, 55, 0.15);
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .content-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 3rem;
+    }
+
+    /* ========== HERO (simplified, no image) ========== */
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--gold-light);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      line-height: 1.15;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 .gold-text {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: var(--text-light);
+      max-width: 520px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      align-items: stretch;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #d4af37 0%, #b8942e 100%);
+      color: #1a0b2e;
+      border: none;
+      padding: 1.1rem 1.8rem;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      box-shadow: 0 15px 30px -8px rgba(212, 175, 55, 0.4);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary i {
+      font-size: 1.2rem;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid rgba(212, 175, 55, 0.35);
+      color: var(--gold-light);
+      padding: 1rem 1.8rem;
+      border-radius: 60px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: all 0.25s;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.97);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.08);
+    }
+
+    /* ========== STATS ROW ========== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-box {
+      background: linear-gradient(145deg, rgba(45, 27, 78, 0.6), rgba(26, 11, 46, 0.8));
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 22px;
+      padding: 1.2rem 0.8rem;
+      text-align: center;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-box::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.5;
+    }
+
+    .stat-box:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .stat-box .stat-icon {
+      font-size: 1.4rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-box h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .stat-box p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 0.2rem;
+    }
+
+    /* ========== SECTION COMMON ========== */
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ========== BUSINESS PLAN (SIMPLE) ========== */
+    .plan-join-box {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(138, 79, 255, 0.08));
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 24px;
+      padding: 1.8rem;
+      text-align: center;
+      margin-bottom: 1.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-join-box::after {
+      content: '♛';
+      position: absolute;
+      right: -10px;
+      bottom: -20px;
+      font-size: 7rem;
+      color: var(--gold);
+      opacity: 0.06;
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .plan-join-box .join-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .plan-join-box .join-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+
+    .plan-join-box .join-price .currency {
+      font-size: 1.6rem;
+      color: var(--gold);
+      vertical-align: super;
+    }
+
+    .plan-join-box .join-desc {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .plan-join-box .join-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #d4af37, #b8942e);
+      color: #1a0b2e;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.25s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .plan-join-box .join-btn:active {
+      transform: scale(0.96);
+    }
+
+    .plan-join-box .join-btn:hover {
+      box-shadow: 0 12px 28px -6px rgba(212, 175, 55, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* Income Cards */
+    .income-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .income-card {
+      background: linear-gradient(145deg, rgba(45, 27, 78, 0.5), rgba(26, 11, 46, 0.7));
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 22px;
+      padding: 1.4rem;
+      transition: all 0.25s;
+      position: relative;
+    }
+
+    .income-card:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+      transform: translateX(4px);
+    }
+
+    .income-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .income-icon {
+      width: 46px;
+      height: 46px;
+      min-width: 46px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(212, 175, 55, 0.15), rgba(138, 79, 255, 0.1));
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--gold);
+    }
+
+    .income-card-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: #fff;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .income-card-header .income-amount {
+      font-size: 0.75rem;
+      color: var(--gold-light);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 0.15rem;
+    }
+
+    .income-card > p {
+      color: var(--text-light);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin-bottom: 0.8rem;
+    }
+
+    .income-highlight {
+      background: rgba(212, 175, 55, 0.08);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 10px 10px 0;
+      padding: 0.7rem 1rem;
+      font-size: 0.82rem;
+      color: var(--gold-light);
+      line-height: 1.5;
+    }
+
+    .income-highlight i {
+      color: var(--gold);
+      margin-right: 0.3rem;
+    }
+
+    /* Level Table */
+    .level-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 0.8rem;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .level-table th {
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold-light);
+      font-weight: 600;
+      padding: 0.5rem 0.6rem;
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .level-table td {
+      padding: 0.45rem 0.6rem;
+      color: var(--text-light);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+    }
+
+    .level-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .level-table td:last-child {
+      color: var(--gold-light);
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Pool Tags */
+    .pool-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+
+    .pool-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .pool-tag.gold {
+      background: rgba(212, 175, 55, 0.12);
+      border-color: rgba(212, 175, 55, 0.4);
+      color: #f0d878;
+    }
+
+    .pool-tag.platinum {
+      background: rgba(200, 200, 210, 0.1);
+      border-color: rgba(200, 200, 210, 0.35);
+      color: #e0e0e8;
+    }
+
+    .pool-tag.ruby {
+      background: rgba(220, 50, 80, 0.12);
+      border-color: rgba(220, 50, 80, 0.4);
+      color: #f08090;
+    }
+
+    .pool-tag.diamond {
+      background: rgba(100, 200, 255, 0.1);
+      border-color: rgba(100, 200, 255, 0.35);
+      color: #90d8ff;
+    }
+
+    /* ========== DOWNLOAD BANNER ========== */
+    .download-banner {
+      background: linear-gradient(135deg, #2d1b4e 0%, #1a0b2e 50%, #0d0618 100%);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 32px;
+      padding: 2.2rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+    }
+
+    .download-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.12), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .download-banner::after {
+      content: '♛';
+      position: absolute;
+      right: 1rem;
+      bottom: -2rem;
+      font-size: 9rem;
+      color: var(--gold);
+      opacity: 0.06;
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .banner-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .banner-text h2 .gold-text {
+      background: linear-gradient(135deg, #f0d878, #d4af37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .banner-text p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .app-btn-large {
+      background: linear-gradient(135deg, #d4af37 0%, #b8942e 100%);
+      border: none;
+      padding: 1.1rem 2.2rem;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      color: #1a0b2e;
+      box-shadow: 0 15px 30px -8px rgba(212, 175, 55, 0.5);
+      transition: all 0.25s;
+      text-decoration: none;
+      width: 100%;
+      max-width: 320px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-btn-large i {
+      font-size: 1.3rem;
+    }
+
+    .app-btn-large:active {
+      transform: scale(0.97);
+    }
+
+    .app-btn-large:hover {
+      box-shadow: 0 20px 40px -8px rgba(212, 175, 55, 0.7);
+      transform: translateY(-2px);
+    }
+
+    /* ========== FOOTER ========== */
+    .footer {
+      border-top: 1px solid rgba(212, 175, 55, 0.15);
+      padding: 2rem 0 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .footer-logo i {
+      color: var(--gold);
+    }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .social-row {
+      display: flex;
+      gap: 1.2rem;
+    }
+
+    .social-row a {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .social-row a:active {
+      transform: scale(0.92);
+      background: rgba(212, 175, 55, 0.2);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1023px) {
+      .desktop-topbar {
+        display: none !important;
+      }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .top-bar {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding-top: 60px;
+      }
+
+      .content-inner {
+        padding: 2rem 1.3rem 2.5rem;
+      }
+    }
+
+    @media (min-width: 640px) {
+      .hero h1 {
+        font-size: 2.8rem;
+      }
+
+      .hero-cta {
+        flex-direction: row;
+        align-items: center;
+        max-width: none;
+        margin: 0 auto;
+        justify-content: center;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: auto;
+      }
+
+      .income-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .download-banner {
+        flex-direction: row;
+        text-align: left;
+        justify-content: space-between;
+        padding: 2.5rem 3rem;
+        border-radius: 40px;
+      }
+
+      .app-btn-large {
+        width: auto;
+        white-space: nowrap;
+      }
+
+      .footer {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .content-inner {
+        padding: 3rem 3rem 3.5rem;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+      }
+
+      .section-title {
+        font-size: 2.2rem;
+      }
+    }
+
+    /* Safe area */
+    @supports (padding: max(0px)) {
+      .content-inner {
+        padding-left: max(1.3rem, env(safe-area-inset-left));
+        padding-right: max(1.3rem, env(safe-area-inset-right));
+      }
+
+      .top-bar {
+        padding-left: max(1.2rem, env(safe-area-inset-left));
+        padding-right: max(1.2rem, env(safe-area-inset-right));
+      }
+    }
+
+    /* Touch optimizations */
+    button, a, .sidebar-link, .btn-primary, .btn-secondary {
+      touch-action: manipulation;
+    }
+
+    /* Scrollbar for main content */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0618;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 6px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== SIDEBAR (LEFT) ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="#" class="sidebar-logo">
+      <i class="fas fa-crown"></i>
+      <span>Royal Kuberaa</span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Main Menu</div>
+      <a href="#" class="sidebar-link active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="#business-plan" class="sidebar-link">
+        <i class="fas fa-briefcase"></i>
+        <span>Business Plan</span>
+      </a>
+      <a href="#login" class="sidebar-link login-nav-link" id="sidebarLoginNavLink" style="color: var(--gold-light); font-weight: 700;">
+        <i class="fas fa-sign-in-alt" style="color: var(--gold);"></i>
+        <span>Member Login</span>
+      </a>
+      <a href="#register" class="sidebar-link register-nav-link" id="sidebarRegisterNavLink">
+        <i class="fas fa-user-plus"></i>
+        <span>Register ID</span>
+      </a>
+      <a href="#business-plan" class="sidebar-link">
+        <i class="fas fa-trophy"></i>
+        <span>Rewards</span>
+      </a>
+    </nav>
+
+    <!-- Portal Login Button in Sidebar -->
+    <button class="sidebar-portal-btn" id="sidebarPortalBtn">
+      <i class="fas fa-sign-in-alt"></i> Member Login
+    </button>
+
+    <!-- App Download in Sidebar -->
+    <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="sidebar-app-btn" id="sidebarDownloadBtn">
+      <i class="fas fa-download"></i>
+      Download App
+    </a>
+  </aside>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ========== TOP BAR (mobile) ========== -->
+  <header class="top-bar">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="top-bar-logo">
+      <i class="fas fa-crown"></i>
+      <span>Royal Kuberaa</span>
+    </div>
+    <div class="top-bar-actions" style="display: flex; align-items: center; gap: 8px;">
+      <button class="top-bar-login" id="topLoginBtn" aria-label="Member Login">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+      <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="top-bar-action" id="topDownloadBtn" aria-label="Download App">
+        <i class="fas fa-download"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <!-- Desktop Topbar with Member Login -->
+    <header class="desktop-topbar">
+      <div class="desktop-topbar-status">
+        <span class="status-dot"></span>
+        <span>OFFICIAL ROYAL KUBERAA PLATFORM Â· LIVE</span>
+      </div>
+      <div class="desktop-topbar-actions">
+        <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="btn-secondary" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; border-radius: 30px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; color: var(--gold-light); border: 1px solid rgba(212, 175, 55, 0.3);">
+          <i class="fas fa-download"></i> Download App
+        </a>
+        <button class="desktop-login-btn" id="desktopTopLoginBtn">
+          <i class="fas fa-sign-in-alt"></i> Member Login
+        </button>
+      </div>
+    </header>
+    <div class="content-inner">
+
+      <!-- HERO (simplified, no image) -->
+      <section class="hero">
+        <div class="hero-badge">
+          <i class="fas fa-gem"></i> 100% TRANSPARENT NETWORK
+        </div>
+        <h1>
+          Build Your <span class="gold-text">Empire</span> With Royal Kuberaa
+        </h1>
+        <p>
+          Join the most transparent network marketing platform with 100% fund distribution,
+          daily royalty pools, and a revolutionary FIFO cashback system.
+        </p>
+        <div class="hero-cta">
+          <!-- LOGIN / PORTAL BUTTON -->
+          <button class="btn-primary btn-gold-portal" id="heroLoginBtn">
+            <i class="fas fa-sign-in-alt"></i> Member Login
+          </button>
+          <!-- APP DOWNLOAD BUTTON -->
+          <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="btn-secondary" id="heroDownloadBtn">
+            <i class="fas fa-download"></i> Download App
+          </a>
+          <a href="#business-plan" class="btn-secondary">
+            <i class="fas fa-briefcase"></i> View Business Plan
+          </a>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <h4>125K+</h4>
+          <p>Members</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon"><i class="fas fa-globe"></i></div>
+          <h4>22</h4>
+          <p>Countries</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+          <h4>$8.4M</h4>
+          <p>Rewards Paid</p>
+        </div>
+      </div>
+
+      <!-- BUSINESS PLAN SECTION (SIMPLE) -->
+      <section class="section" id="business-plan">
+        <div class="section-header">
+          <div class="section-label">Business Plan</div>
+          <h2 class="section-title">Simple & <span class="gold-text">Transparent</span></h2>
+          <p class="section-desc">
+            One joining package. Multiple income streams. 100% fund distribution.
+          </p>
+        </div>
+
+        <!-- Joining Package Box -->
+        <div class="plan-join-box">
+          <div class="join-label">Joining Package</div>
+          <div class="join-price">
+            <span class="currency">₹</span>1500
+          </div>
+          <div class="join-desc">
+            Includes Tangible Welcome Product Kit · 100% Fund Distribution
+          </div>
+          <a href="#" class="join-btn" id="joinNowBtn">
+            <i class="fas fa-crown"></i> Join Now
+          </a>
+        </div>
+
+        <!-- Income Streams -->
+        <div class="income-grid">
+
+          <!-- 1. Direct Referral -->
+          <div class="income-card">
+            <div class="income-card-header">
+              <div class="income-icon"><i class="fas fa-user-plus"></i></div>
+              <div>
+                <h3>Direct Referral Income</h3>
+                <div class="income-amount">₹400 per referral</div>
+              </div>
+            </div>
+            <p>Get ₹400 instantly for every direct referral. Unlimited direct referrals allowed.</p>
+            <div class="income-highlight">
+              <i class="fas fa-star"></i> Plus Level 1 income of ₹100 = <strong>₹500 total per direct!</strong>
+            </div>
+          </div>
+
+          <!-- 2. Team Level Income -->
+          <div class="income-card">
+            <div class="income-card-header">
+              <div class="income-icon"><i class="fas fa-layer-group"></i></div>
+              <div>
+                <h3>Team Level Income</h3>
+                <div class="income-amount">₹300 · 10 Levels Deep</div>
+              </div>
+            </div>
+            <p>Earn from your entire team up to 10 levels deep. No matching required!</p>
+            <table class="level-table">
+              <thead>
+                <tr><th>Level</th><th>Income</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Level 1</td><td>₹100</td></tr>
+                <tr><td>Level 2</td><td>₹50</td></tr>
+                <tr><td>Level 3</td><td>₹40</td></tr>
+                <tr><td>Level 4</td><td>₹30</td></tr>
+                <tr><td>Level 5</td><td>₹20</td></tr>
+                <tr><td>Level 6–10</td><td>₹15 / ₹10</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 3. Daily Royalty Pools -->
+          <div class="income-card">
+            <div class="income-card-header">
+              <div class="income-icon"><i class="fas fa-coins"></i></div>
+              <div>
+                <h3>Daily Royalty Pools</h3>
+                <div class="income-amount">₹400 Fund · 4 Pools</div>
+              </div>
+            </div>
+            <p>Daily profit sharing distributed equally among qualified members at midnight.</p>
+            <div class="pool-tags">
+              <span class="pool-tag gold"><i class="fas fa-medal"></i> Gold ₹120</span>
+              <span class="pool-tag platinum"><i class="fas fa-gem"></i> Platinum ₹60</span>
+              <span class="pool-tag ruby"><i class="fas fa-heart"></i> Ruby ₹70</span>
+              <span class="pool-tag diamond"><i class="fas fa-diamond"></i> Diamond ₹150</span>
+            </div>
+            <div class="income-highlight" style="margin-top: 0.8rem;">
+              <i class="fas fa-info-circle"></i> <strong>Gold:</strong> Refer 2 · <strong>Platinum:</strong> 2 Golds · <strong>Ruby:</strong> 5 Platinums · <strong>Diamond:</strong> 5 Rubies
+            </div>
+          </div>
+
+          <!-- 4. FIFO Autopool -->
+          <div class="income-card">
+            <div class="income-card-header">
+              <div class="income-icon"><i class="fas fa-clock"></i></div>
+              <div>
+                <h3>Global FIFO Autopool</h3>
+                <div class="income-amount">₹150 · 100% Cashback</div>
+              </div>
+            </div>
+            <p>Revolutionary non-working fund. ₹150 from every joining distributed equally among Top 10 active members.</p>
+            <div class="income-highlight">
+              <i class="fas fa-check-circle"></i> Each member receives ₹15 per joining until they reach <strong>₹1,500 cashback</strong>. Then the next in queue enters the Top 10.
+            </div>
+          </div>
+
+          <!-- 5. Rebirth System -->
+          <div class="income-card">
+            <div class="income-card-header">
+              <div class="income-icon"><i class="fas fa-sync-alt"></i></div>
+              <div>
+                <h3>Rebirth ID System</h3>
+                <div class="income-amount">90% / 10% Split</div>
+              </div>
+            </div>
+            <p>Every income splits 90% to Main Wallet (withdrawable) and 10% to Rebirth Wallet (locked).</p>
+            <div class="income-highlight">
+              <i class="fas fa-redo"></i> When Rebirth Wallet hits <strong>₹1,500</strong>, a new Rebirth ID generates automatically — ₹400 to sponsor + ₹1,100 into Royalty Pools.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Quick Rules -->
+        <div class="income-card" style="margin-top: 1rem;">
+          <div class="income-card-header">
+            <div class="income-icon"><i class="fas fa-file-contract"></i></div>
+            <div>
+              <h3>Quick Rules</h3>
+              <div class="income-amount">Withdrawal & Transfers</div>
+            </div>
+          </div>
+          <table class="level-table">
+            <tbody>
+              <tr><td>Minimum Withdrawal</td><td>₹500</td></tr>
+              <tr><td>Withdrawal Deduction</td><td>10% (5% TDS + 5% Admin)</td></tr>
+              <tr><td>P2P Transfer Charge</td><td>5%</td></tr>
+              <tr><td>Withdrawal Status</td><td>Auto-Approved</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- DOWNLOAD BANNER -->
+      <div class="download-banner">
+        <div class="banner-text">
+          <h2>Get The <span class="gold-text">Royal Kuberaa</span> App</h2>
+          <p>Manage your empire on the go. Available on Android.</p>
+        </div>
+        <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="app-btn-large" id="bannerDownloadBtn">
+          <i class="fas fa-download"></i> Download Now
+        </a>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="footer-logo">
+          <i class="fas fa-crown"></i> Royal Kuberaa
+        </div>
+        <div class="footer-copy">
+          © 2026 Royal Kuberaa. All rights reserved.
+        </div>
+        <div class="social-row">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      // ========== SIDEBAR TOGGLE ==========
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const menuBtn = document.getElementById('menuBtn');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (menuBtn) {
+        menuBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (sidebar.classList.contains('open')) {
+            closeSidebar();
+          } else {
+            openSidebar();
+          }
+        });
+      }
+
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+      }
+
+      // Close sidebar on link click (mobile)
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+          if (window.innerWidth < 1024) {
+            closeSidebar();
+          }
+        });
+      });
+
+      // Close sidebar on resize to desktop
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) {
+          closeSidebar();
+        }
+      });
+
+      // ========== AUTH MODAL & LOGIN/REGISTER HANDLERS ==========
+      const authOverlay = document.getElementById('authModalOverlay');
+      const authClose = document.getElementById('authModalClose');
+      const siteLoginForm = document.getElementById('siteLoginForm');
+      const siteRegisterForm = document.getElementById('siteRegisterForm');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalSubtitle = document.getElementById('modalSubtitle');
+      const switchPrompt = document.getElementById('switchPrompt');
+      const switchAuthBtn = document.getElementById('switchAuthBtn');
+      const modalError = document.getElementById('modalError');
+
+      function openAuthModal(view) {
+        // 1. Notify parent React webapp (if in iframe)
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: view === 'register' ? 'OPEN_REGISTER' : 'OPEN_LOGIN' }, '*');
+            return;
+          }
+        } catch (e) {}
+
+        // 2. Otherwise open in-page modal
+        if (!authOverlay) return;
+        modalError.style.display = 'none';
+        if (view === 'register') {
+          siteLoginForm.style.display = 'none';
+          siteRegisterForm.style.display = 'flex';
+          modalTitle.textContent = 'Create New Account';
+          modalSubtitle.textContent = 'Join Royal Kuberaa Community';
+          switchPrompt.textContent = 'Already have an ID?';
+          switchAuthBtn.textContent = 'Login to Account';
+        } else {
+          siteLoginForm.style.display = 'flex';
+          siteRegisterForm.style.display = 'none';
+          modalTitle.textContent = 'Member Login';
+          modalSubtitle.textContent = 'Access your Royal Kuberaa Dashboard';
+          switchPrompt.textContent = "Don't have an ID yet?";
+          switchAuthBtn.textContent = 'Register New ID';
+        }
+        authOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeAuthModal() {
+        if (authOverlay) {
+          authOverlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      if (authClose) authClose.addEventListener('click', closeAuthModal);
+      if (authOverlay) {
+        authOverlay.addEventListener('click', function(e) {
+          if (e.target === authOverlay) closeAuthModal();
+        });
+      }
+
+      if (switchAuthBtn) {
+        switchAuthBtn.addEventListener('click', function() {
+          const isCurrentlyLogin = siteLoginForm.style.display !== 'none';
+          openAuthModal(isCurrentlyLogin ? 'register' : 'login');
+        });
+      }
+
+      const allLoginButtons = [
+        'desktopTopLoginBtn',
+        'sidebarPortalBtn',
+        'topLoginBtn',
+        'heroLoginBtn',
+        'sidebarLoginNavLink'
+      ];
+      allLoginButtons.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAuthModal('login');
+          });
+        }
+      });
+
+      const allRegisterButtons = [
+        'joinNowBtn',
+        'sidebarRegisterNavLink'
+      ];
+      allRegisterButtons.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAuthModal('register');
+          });
+        }
+      });
+
+      // Standalone Login Form Submission
+      if (siteLoginForm) {
+        siteLoginForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const memberId = document.getElementById('loginMemberId').value.trim();
+          const password = document.getElementById('loginPassword').value.trim();
+          const submitBtn = document.getElementById('loginSubmitBtn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+          modalError.style.display = 'none';
+
+          try {
+            const apiBase = (typeof window !== 'undefined' && window.location.origin.startsWith('http') && !window.location.origin.includes('localhost'))
+              ? window.location.origin
+              : 'https://royalkuberaa.online';
+            const res = await fetch(apiBase + '/api/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ memberId, password })
+            });
+            const result = await res.json();
+            if (result.success) {
+              localStorage.setItem('token', result.token);
+              localStorage.setItem('userData', JSON.stringify(result.user));
+              localStorage.setItem('userRole', result.user.role || 'member');
+              localStorage.setItem('isLoggedIn', 'true');
+              localStorage.setItem('loginTime', Date.now().toString());
+
+              if (window.location.origin.includes('localhost')) {
+                window.location.href = '/?view=dashboard';
+              } else {
+                window.location.href = 'https://royalkuberaa.online';
+              }
+            } else {
+              modalError.textContent = result.message || 'Invalid Member ID or Password';
+              modalError.style.display = 'block';
+            }
+          } catch (err) {
+            modalError.innerHTML = 'Could not connect directly. <a href="https://royalkuberaa.online" target="_blank" style="color:#f0d878;text-decoration:underline;">Click here to open Royal Kuberaa Portal</a>';
+            modalError.style.display = 'block';
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Now';
+          }
+        });
+      }
+
+      // ========== DOWNLOAD BUTTONS ==========
+      const downloadButtons = [
+        'sidebarDownloadBtn',
+        'topDownloadBtn',
+        'heroDownloadBtn',
+        'bannerDownloadBtn'
+      ];
+
+      downloadButtons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.setAttribute('href', 'Royal Kubera.apk');
+          btn.setAttribute('download', 'Royal Kubera.apk');
+          btn.addEventListener('click', function(e) {
+            // Directly download the APK file
+            const link = document.createElement('a');
+            link.href = 'Royal Kubera.apk';
+            link.download = 'Royal Kubera.apk';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          });
+        }
+      });
+
+      // ========== JOIN NOW BUTTON ==========
+      const joinBtn = document.getElementById('joinNowBtn');
+      if (joinBtn) {
+        joinBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          alert('🎉 Joining Royal Kuberaa for ₹1,500! (Demo)');
+        });
+      }
+
+      // ========== SMOOTH SCROLL FOR BUSINESS PLAN ==========
+      document.querySelectorAll('a[href="#business-plan"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.getElementById('business-plan');
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      // ========== CAPACITOR BACK BUTTON ==========
+      document.addEventListener('backbutton', function(e) {
+        if (sidebar.classList.contains('open')) {
+          e.preventDefault();
+          closeSidebar();
+        }
+      }, false);
+    })();
+  </script>
+  <!-- ========== AUTH MODAL (STANDALONE & EMBEDDED) ========== -->
+  <div class="auth-modal-overlay" id="authModalOverlay">
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" id="authModalClose" aria-label="Close">&times;</button>
+      
+      <div class="auth-modal-header">
+        <div class="auth-modal-logo">
+          <i class="fas fa-crown"></i>
+        </div>
+        <h2 id="modalTitle">Member Login</h2>
+        <p id="modalSubtitle">Access your Royal Kuberaa Dashboard</p>
+      </div>
+
+      <div class="auth-modal-error" id="modalError" style="display: none;"></div>
+
+      <!-- Login Form -->
+      <form class="auth-modal-form" id="siteLoginForm">
+        <div class="auth-field">
+          <label>User ID / Mobile Number</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" id="loginMemberId" placeholder="e.g. RK100001 or Mobile" required autocomplete="username" />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Password (6 Digits)</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="Enter 6-digit password" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autocomplete="current-password" />
+          </div>
+        </div>
+
+        <button type="submit" class="auth-modal-submit" id="loginSubmitBtn">
+          <i class="fas fa-sign-in-alt"></i> Login Now
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form class="auth-modal-form" id="siteRegisterForm" style="display: none;">
+        <div class="auth-field">
+          <label>Full Name</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-id-card"></i>
+            <input type="text" id="regName" placeholder="Enter Full Name" style="text-transform: uppercase;" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Mobile Number</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="regMobile" placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Sponsor ID</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-users"></i>
+            <input type="text" id="regSponsorId" placeholder="e.g. RK100001" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Create 6-Digit Password</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-key"></i>
+            <input type="password" id="regPassword" placeholder="6-digit numeric PIN" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required />
+          </div>
+        </div>
+
+        <button type="submit" class="auth-modal-submit" id="regSubmitBtn">
+          <i class="fas fa-user-plus"></i> Complete Registration (â‚¹1,500)
+        </button>
+      </form>
+
+      <div class="auth-modal-switch">
+        <span id="switchPrompt">Don't have an ID yet?</span>
+        <button type="button" id="switchAuthBtn">Register New ID</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

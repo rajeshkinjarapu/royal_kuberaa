@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import * as htmlToImage from 'html-to-image';
 
@@ -128,7 +128,26 @@ function App() {
     }
     return false;
   });
-  const [authView, setAuthView] = useState('login'); 
+  const [authView, setAuthView] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('auth') === 'login' || params.get('view') === 'login') return 'login';
+      if (params.get('auth') === 'register' || params.get('view') === 'register') return 'register';
+    }
+    return 'website';
+  });
+
+  useEffect(() => {
+    const handleWebsiteMessage = (e) => {
+      if (e.data?.type === 'OPEN_LOGIN') {
+        setAuthView('login');
+      } else if (e.data?.type === 'OPEN_REGISTER') {
+        setAuthView('register');
+      }
+    };
+    window.addEventListener('message', handleWebsiteMessage);
+    return () => window.removeEventListener('message', handleWebsiteMessage);
+  }, []);
   const [userRole, setUserRole] = useState(() => {
     return localStorage.getItem('userRole') || 'member';
   });
@@ -399,6 +418,18 @@ function App() {
       );
     }
 
+    if (authView === 'website') {
+      return (
+        <div style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: '#0d0618' }}>
+          <iframe 
+            src="/website.html" 
+            title="Royal Kuberaa Official Website"
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="login-wrapper">
         <div className="login-container">
@@ -406,6 +437,28 @@ function App() {
             <img src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-83.jpg" alt="Welcome" />
           </div>
           <div className="login-content">
+            <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', marginBottom: '14px' }}>
+              <button 
+                type="button" 
+                onClick={() => setAuthView('website')}
+                style={{ 
+                  background: 'rgba(212, 175, 55, 0.12)', 
+                  color: '#b8942e', 
+                  border: '1px solid rgba(212, 175, 55, 0.35)', 
+                  borderRadius: '20px', 
+                  padding: '6px 14px', 
+                  fontSize: '12px', 
+                  fontWeight: '700', 
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                &larr; Back to Official Website
+              </button>
+            </div>
             <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', width: '100%', marginBottom: '24px' }}>
               <img src="/royal-kuberaa-logo.jpg" alt="Royal Kuberaa" className="login-logo" style={{ display: 'block', margin: '0 auto 12px auto' }} />
               {authView === 'login' && (
@@ -4551,7 +4604,7 @@ function App() {
         </div>
         <div style={{ padding: '20px', borderTop: '1px solid #f1f5f9', marginTop: 'auto' }}>
           <button 
-            onClick={() => { setIsLoggedIn(false); setAuthView('login'); setUserData(null); setRegisteredDetails(null); localStorage.clear(); }}
+            onClick={() => { setIsLoggedIn(false); setAuthView('website'); setUserData(null); setRegisteredDetails(null); localStorage.clear(); }}
             style={{ width: '100%', padding: '12px', background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48', border: '1px solid rgba(225, 29, 72, 0.2)', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
           >
             <span>🚪</span> Logout

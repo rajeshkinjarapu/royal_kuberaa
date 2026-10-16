@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -197,6 +197,327 @@
       background: linear-gradient(135deg, #3a2463, #2d1b4e);
       border-color: var(--gold);
       box-shadow: 0 0 25px var(--gold-glow);
+    }
+
+    /* Sidebar Portal / Login Button */
+    .sidebar-portal-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      border: none;
+      color: #1a0b2e;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.85rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+      margin-top: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+      transition: all 0.25s;
+      width: 100%;
+    }
+
+    .sidebar-portal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.55);
+    }
+
+    /* Top Bar Login Button */
+    .top-bar-login {
+      background: linear-gradient(135deg, #f0d878, #d4af37);
+      color: #1a0b2e;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 0.42rem 0.9rem;
+      border-radius: 20px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 3px 12px rgba(212, 175, 55, 0.3);
+      transition: all 0.2s;
+    }
+
+    .top-bar-login:active {
+      transform: scale(0.95);
+    }
+
+    /* Hero Gold Portal Button */
+    .btn-gold-portal {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%) !important;
+      color: #1a0b2e !important;
+      font-weight: 800 !important;
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.45) !important;
+      border: none !important;
+      cursor: pointer;
+    }
+
+    .btn-gold-portal:hover {
+      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.65) !important;
+      transform: translateY(-2px);
+    }
+
+    /* ========== DESKTOP TOP BAR ========== */
+    .desktop-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2.5rem;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      background: rgba(13, 6, 24, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .desktop-topbar-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      display: inline-block;
+    }
+
+    .desktop-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .desktop-login-btn {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      color: #1a0b2e;
+      border: none;
+      font-weight: 800;
+      font-size: 0.92rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 30px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+      transition: all 0.25s;
+    }
+
+    .desktop-login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+    }
+
+    /* ========== AUTH MODAL STYLES ========== */
+    .auth-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 4, 18, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .auth-modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .auth-modal-card {
+      background: linear-gradient(165deg, #1f1138 0%, #110722 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 24px;
+      padding: 2.2rem 2rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(212, 175, 55, 0.25);
+      position: relative;
+      animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px) scale(0.96); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .auth-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #cbd5e1;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-modal-close:hover {
+      background: rgba(225, 29, 72, 0.25);
+      color: #f43f5e;
+    }
+
+    .auth-modal-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-modal-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(138, 79, 255, 0.15));
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.8rem;
+      font-size: 1.6rem;
+      color: var(--gold);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .auth-modal-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .auth-modal-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-modal-error {
+      background: rgba(225, 29, 72, 0.15);
+      border: 1px solid rgba(225, 29, 72, 0.4);
+      color: #f87171;
+      font-size: 0.85rem;
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .auth-modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .auth-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.4rem;
+    }
+
+    .auth-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-input-wrap i {
+      position: absolute;
+      left: 1rem;
+      color: var(--gold);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .auth-input-wrap input {
+      width: 100%;
+      background: rgba(13, 6, 24, 0.7);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 0.75rem 1rem 0.75rem 2.8rem;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .auth-input-wrap input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+      background: rgba(13, 6, 24, 0.95);
+    }
+
+    .auth-modal-submit {
+      background: linear-gradient(135deg, #f0d878 0%, #d4af37 50%, #b8942e 100%);
+      color: #1a0b2e;
+      border: none;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 0.85rem;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+      box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+      transition: all 0.2s;
+    }
+
+    .auth-modal-submit:hover {
+      box-shadow: 0 12px 28px rgba(212, 175, 55, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .auth-modal-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-modal-switch {
+      margin-top: 1.4rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-modal-switch button {
+      background: none;
+      border: none;
+      color: var(--gold-light);
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-left: 0.3rem;
+      font-size: 0.85rem;
     }
 
     /* Sidebar Overlay (mobile) */
@@ -925,6 +1246,9 @@
 
     /* ========== RESPONSIVE ========== */
     @media (max-width: 1023px) {
+      .desktop-topbar {
+        display: none !important;
+      }
       .sidebar {
         transform: translateX(-100%);
       }
@@ -1057,15 +1381,24 @@
         <i class="fas fa-briefcase"></i>
         <span>Business Plan</span>
       </a>
-      <a href="#" class="sidebar-link">
-        <i class="fas fa-sitemap"></i>
-        <span>Network</span>
+      <a href="#login" class="sidebar-link login-nav-link" id="sidebarLoginNavLink" style="color: var(--gold-light); font-weight: 700;">
+        <i class="fas fa-sign-in-alt" style="color: var(--gold);"></i>
+        <span>Member Login</span>
       </a>
-      <a href="#" class="sidebar-link">
+      <a href="#register" class="sidebar-link register-nav-link" id="sidebarRegisterNavLink">
+        <i class="fas fa-user-plus"></i>
+        <span>Register ID</span>
+      </a>
+      <a href="#business-plan" class="sidebar-link">
         <i class="fas fa-trophy"></i>
         <span>Rewards</span>
       </a>
     </nav>
+
+    <!-- Portal Login Button in Sidebar -->
+    <button class="sidebar-portal-btn" id="sidebarPortalBtn">
+      <i class="fas fa-sign-in-alt"></i> Member Login
+    </button>
 
     <!-- App Download in Sidebar -->
     <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="sidebar-app-btn" id="sidebarDownloadBtn">
@@ -1086,13 +1419,34 @@
       <i class="fas fa-crown"></i>
       <span>Royal Kuberaa</span>
     </div>
-    <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="top-bar-action" id="topDownloadBtn" aria-label="Download App">
-      <i class="fas fa-download"></i>
-    </a>
+    <div class="top-bar-actions" style="display: flex; align-items: center; gap: 8px;">
+      <button class="top-bar-login" id="topLoginBtn" aria-label="Member Login">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+      <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="top-bar-action" id="topDownloadBtn" aria-label="Download App">
+        <i class="fas fa-download"></i>
+      </a>
+    </div>
   </header>
 
   <!-- ========== MAIN CONTENT ========== -->
   <main class="main-content">
+
+    <!-- Desktop Topbar with Member Login -->
+    <header class="desktop-topbar">
+      <div class="desktop-topbar-status">
+        <span class="status-dot"></span>
+        <span>OFFICIAL ROYAL KUBERAA PLATFORM Â· LIVE</span>
+      </div>
+      <div class="desktop-topbar-actions">
+        <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="btn-secondary" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; border-radius: 30px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; color: var(--gold-light); border: 1px solid rgba(212, 175, 55, 0.3);">
+          <i class="fas fa-download"></i> Download App
+        </a>
+        <button class="desktop-login-btn" id="desktopTopLoginBtn">
+          <i class="fas fa-sign-in-alt"></i> Member Login
+        </button>
+      </div>
+    </header>
     <div class="content-inner">
 
       <!-- HERO (simplified, no image) -->
@@ -1108,8 +1462,12 @@
           daily royalty pools, and a revolutionary FIFO cashback system.
         </p>
         <div class="hero-cta">
+          <!-- LOGIN / PORTAL BUTTON -->
+          <button class="btn-primary btn-gold-portal" id="heroLoginBtn">
+            <i class="fas fa-sign-in-alt"></i> Member Login
+          </button>
           <!-- APP DOWNLOAD BUTTON -->
-          <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="btn-primary" id="heroDownloadBtn">
+          <a href="Royal Kubera.apk" download="Royal Kubera.apk" class="btn-secondary" id="heroDownloadBtn">
             <i class="fas fa-download"></i> Download App
           </a>
           <a href="#business-plan" class="btn-secondary">
@@ -1357,6 +1715,147 @@
         }
       });
 
+      // ========== AUTH MODAL & LOGIN/REGISTER HANDLERS ==========
+      const authOverlay = document.getElementById('authModalOverlay');
+      const authClose = document.getElementById('authModalClose');
+      const siteLoginForm = document.getElementById('siteLoginForm');
+      const siteRegisterForm = document.getElementById('siteRegisterForm');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalSubtitle = document.getElementById('modalSubtitle');
+      const switchPrompt = document.getElementById('switchPrompt');
+      const switchAuthBtn = document.getElementById('switchAuthBtn');
+      const modalError = document.getElementById('modalError');
+
+      function openAuthModal(view) {
+        // 1. Notify parent React webapp (if in iframe)
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: view === 'register' ? 'OPEN_REGISTER' : 'OPEN_LOGIN' }, '*');
+            return;
+          }
+        } catch (e) {}
+
+        // 2. Otherwise open in-page modal
+        if (!authOverlay) return;
+        modalError.style.display = 'none';
+        if (view === 'register') {
+          siteLoginForm.style.display = 'none';
+          siteRegisterForm.style.display = 'flex';
+          modalTitle.textContent = 'Create New Account';
+          modalSubtitle.textContent = 'Join Royal Kuberaa Community';
+          switchPrompt.textContent = 'Already have an ID?';
+          switchAuthBtn.textContent = 'Login to Account';
+        } else {
+          siteLoginForm.style.display = 'flex';
+          siteRegisterForm.style.display = 'none';
+          modalTitle.textContent = 'Member Login';
+          modalSubtitle.textContent = 'Access your Royal Kuberaa Dashboard';
+          switchPrompt.textContent = "Don't have an ID yet?";
+          switchAuthBtn.textContent = 'Register New ID';
+        }
+        authOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeAuthModal() {
+        if (authOverlay) {
+          authOverlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      if (authClose) authClose.addEventListener('click', closeAuthModal);
+      if (authOverlay) {
+        authOverlay.addEventListener('click', function(e) {
+          if (e.target === authOverlay) closeAuthModal();
+        });
+      }
+
+      if (switchAuthBtn) {
+        switchAuthBtn.addEventListener('click', function() {
+          const isCurrentlyLogin = siteLoginForm.style.display !== 'none';
+          openAuthModal(isCurrentlyLogin ? 'register' : 'login');
+        });
+      }
+
+      const allLoginButtons = [
+        'desktopTopLoginBtn',
+        'sidebarPortalBtn',
+        'topLoginBtn',
+        'heroLoginBtn',
+        'sidebarLoginNavLink'
+      ];
+      allLoginButtons.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAuthModal('login');
+          });
+        }
+      });
+
+      const allRegisterButtons = [
+        'joinNowBtn',
+        'sidebarRegisterNavLink'
+      ];
+      allRegisterButtons.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAuthModal('register');
+          });
+        }
+      });
+
+      // Standalone Login Form Submission
+      if (siteLoginForm) {
+        siteLoginForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const memberId = document.getElementById('loginMemberId').value.trim();
+          const password = document.getElementById('loginPassword').value.trim();
+          const submitBtn = document.getElementById('loginSubmitBtn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+          modalError.style.display = 'none';
+
+          try {
+            const apiBase = (typeof window !== 'undefined' && window.location.origin.startsWith('http') && !window.location.origin.includes('localhost'))
+              ? window.location.origin
+              : 'https://royalkuberaa.online';
+            const res = await fetch(apiBase + '/api/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ memberId, password })
+            });
+            const result = await res.json();
+            if (result.success) {
+              localStorage.setItem('token', result.token);
+              localStorage.setItem('userData', JSON.stringify(result.user));
+              localStorage.setItem('userRole', result.user.role || 'member');
+              localStorage.setItem('isLoggedIn', 'true');
+              localStorage.setItem('loginTime', Date.now().toString());
+
+              if (window.location.origin.includes('localhost')) {
+                window.location.href = '/?view=dashboard';
+              } else {
+                window.location.href = 'https://royalkuberaa.online';
+              }
+            } else {
+              modalError.textContent = result.message || 'Invalid Member ID or Password';
+              modalError.style.display = 'block';
+            }
+          } catch (err) {
+            modalError.innerHTML = 'Could not connect directly. <a href="https://royalkuberaa.online" target="_blank" style="color:#f0d878;text-decoration:underline;">Click here to open Royal Kuberaa Portal</a>';
+            modalError.style.display = 'block';
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Now';
+          }
+        });
+      }
+
       // ========== DOWNLOAD BUTTONS ==========
       const downloadButtons = [
         'sidebarDownloadBtn',
@@ -1411,5 +1910,89 @@
       }, false);
     })();
   </script>
+  <!-- ========== AUTH MODAL (STANDALONE & EMBEDDED) ========== -->
+  <div class="auth-modal-overlay" id="authModalOverlay">
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" id="authModalClose" aria-label="Close">&times;</button>
+      
+      <div class="auth-modal-header">
+        <div class="auth-modal-logo">
+          <i class="fas fa-crown"></i>
+        </div>
+        <h2 id="modalTitle">Member Login</h2>
+        <p id="modalSubtitle">Access your Royal Kuberaa Dashboard</p>
+      </div>
+
+      <div class="auth-modal-error" id="modalError" style="display: none;"></div>
+
+      <!-- Login Form -->
+      <form class="auth-modal-form" id="siteLoginForm">
+        <div class="auth-field">
+          <label>User ID / Mobile Number</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-user"></i>
+            <input type="text" id="loginMemberId" placeholder="e.g. RK100001 or Mobile" required autocomplete="username" />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Password (6 Digits)</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="Enter 6-digit password" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autocomplete="current-password" />
+          </div>
+        </div>
+
+        <button type="submit" class="auth-modal-submit" id="loginSubmitBtn">
+          <i class="fas fa-sign-in-alt"></i> Login Now
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form class="auth-modal-form" id="siteRegisterForm" style="display: none;">
+        <div class="auth-field">
+          <label>Full Name</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-id-card"></i>
+            <input type="text" id="regName" placeholder="Enter Full Name" style="text-transform: uppercase;" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Mobile Number</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="regMobile" placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Sponsor ID</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-users"></i>
+            <input type="text" id="regSponsorId" placeholder="e.g. RK100001" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label>Create 6-Digit Password</label>
+          <div class="auth-input-wrap">
+            <i class="fas fa-key"></i>
+            <input type="password" id="regPassword" placeholder="6-digit numeric PIN" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required />
+          </div>
+        </div>
+
+        <button type="submit" class="auth-modal-submit" id="regSubmitBtn">
+          <i class="fas fa-user-plus"></i> Complete Registration (â‚¹1,500)
+        </button>
+      </form>
+
+      <div class="auth-modal-switch">
+        <span id="switchPrompt">Don't have an ID yet?</span>
+        <button type="button" id="switchAuthBtn">Register New ID</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
