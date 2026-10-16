@@ -92,6 +92,24 @@ jobs:
         if: ${{ github.event_name == 'push' || github.event.inputs.action_type == 'patch' }}
         working-directory: ./mlm_flutter_app
         run: |
-          echo "Starting Shorebird OTA Patch..."
-          shorebird patch android --release-version=latest --no-confirm --allow-asset-diffs --allow-native-diffs --verbose
+          echo "=== 1. Checking Shorebird Authentication & Existing Releases ==="
+          shorebird releases list android || true
+
+          echo "=== 2. Starting Shorebird OTA Patch ==="
+          shorebird patch android --no-confirm --allow-asset-diffs --allow-native-diffs --verbose || {
+            echo "❌ Shorebird patch failed (exit code 70)."
+            echo ""
+            echo "💡 WHY THIS HAPPENS:"
+            echo "1. No Base Release: If version 1.0.0+3 has never been created via 'shorebird release android', there is no base release on Shorebird servers to patch."
+            echo "2. Token or Permissions: If SHOREBIRD_TOKEN is expired or lacks permissions."
+            echo ""
+            echo "🚀 HOW TO FIX:"
+            echo "To create the initial base release for this version:"
+            echo "1. Go to GitHub -> Actions -> 'Shorebird Release & Patch'"
+            echo "2. Click 'Run workflow'"
+            echo "3. Choose 'release' as action_type and click 'Run workflow'"
+            echo "4. Download & install the newly built Release APK on your phone."
+            echo "Subsequent pushes will then patch cleanly via OTA!"
+            exit 70
+          }
 
