@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
 import '../providers/auth_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/constants.dart';
@@ -31,19 +30,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return n.round().toString();
     }
     return n.toStringAsFixed(2);
-  }
-
-  void _shareReferralLink(String memberId) {
-    final link = 'https://royalkuberaa.com/register?sponsorId=$memberId';
-    final text = '👑 *Join Royal Kuberaa - India\'s 100% Distribution Hybrid Plan!*\n\n'
-        '🎁 *Joining:* ₹1,500 with Tangible Welcome Product Kit!\n'
-        '💰 *Direct Bonus:* ₹400 per referral + ₹100 Level 1 = ₹500 Total!\n'
-        '👥 *Team Income:* 10 Levels deep (₹300 distributed)!\n'
-        '🌊 *100% Autopool Cashback:* Guaranteed ₹1,500 recovery!\n'
-        '👑 *Daily Royalty Pools:* Gold, Platinum, Ruby, Diamond!\n\n'
-        '👉 *Register Now:* $link\n'
-        '🔑 *Sponsor ID:* $memberId';
-    Share.share(text, subject: 'Join Royal Kuberaa');
   }
 
   void _copyToClipboard(String text, String label) {
@@ -104,9 +90,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          'Member ID: $memberId',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
+                        InkWell(
+                          onTap: () => _copyToClipboard(memberId, 'Member ID'),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Member ID: $memberId',
+                                style: const TextStyle(fontSize: 12, color: Color(0xFFD4AF37), fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 5),
+                              const Icon(Icons.copy, size: 12, color: Color(0xFFD4AF37)),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -185,26 +181,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-              )
-            else
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.verified, color: Color(0xFF059669), size: 16),
-                    SizedBox(width: 8),
-                    Text(
-                      'Verified Active ID • Welcome Product Kit Active',
-                      style: TextStyle(color: Color(0xFF065F46), fontSize: 11.5, fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                ),
               ),
             
             if (dashProvider.isLoading && dashData == null)
@@ -266,106 +242,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Row(
                       children: [
                         _buildWalletAction(Icons.add_circle_outline, 'Deposit', () => context.push('/deposit')),
-                        const SizedBox(width: 6),
-                        _buildWalletAction(Icons.flash_on, 'Activate', () => context.push('/activate')),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         _buildWalletAction(Icons.arrow_upward, 'Withdraw', () => context.push('/withdraw')),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         _buildWalletAction(Icons.swap_horiz, 'Transfer', () => context.push('/transfer')),
                       ],
                     )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // ── INVITE & EARN ₹400 REFERRAL CARD ──
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD97706).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.card_giftcard, color: Color(0xFFB45309), size: 18),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Invite & Earn ₹400 Direct',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E)),
-                            ),
-                          ],
-                        ),
-                        InkWell(
-                          onTap: () => _copyToClipboard(memberId, 'Sponsor ID'),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFF59E0B)),
-                            ),
-                            child: Row(
-                              children: [
-                                Text('ID: $memberId', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB45309))),
-                                const SizedBox(width: 4),
-                                const Icon(Icons.copy, size: 12, color: Color(0xFFB45309)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () => _copyToClipboard('https://royalkuberaa.com/register?sponsorId=$memberId', 'Referral Link'),
-                            icon: const Icon(Icons.link, size: 15),
-                            label: const Text('Copy Link', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF92400E),
-                              side: const BorderSide(color: Color(0xFFF59E0B)),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () => _shareReferralLink(memberId),
-                            icon: const Icon(Icons.share, size: 15, color: Colors.white),
-                            label: const Text('Share WhatsApp', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF059669),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
