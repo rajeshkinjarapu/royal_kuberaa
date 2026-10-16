@@ -17,5 +17,6 @@ class AppColors {
 
 class AppConstants {
   static const String appName = 'Royal Kuberaa';
+  static const String websiteUrl = 'https://royalkuberaa.online';
   static const String apiBaseUrl = 'http://66.116.252.191:5555/api'; // VPS Backend
 }

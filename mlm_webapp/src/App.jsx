@@ -6,7 +6,9 @@ import * as htmlToImage from 'html-to-image';
 const originalFetch = window.fetch;
 window.fetch = async function() {
   let [resource, config] = arguments;
-  const baseURL = 'https://royal-kuberaa.vercel.app';
+  const baseURL = (typeof window !== 'undefined' && window.location.origin.startsWith('http') && !window.location.origin.includes('localhost'))
+    ? window.location.origin
+    : 'https://royalkuberaa.online';
   if (typeof resource === 'string' && resource.startsWith('/api')) {
     resource = baseURL + resource;
   }
@@ -3313,7 +3315,7 @@ function App() {
 
         <h3 style={{ color: '#0F172A', fontWeight: '800', marginBottom: '12px' }}>📞 Official Support & Office</h3>
         <p style={{ margin: 0, fontSize: '14px', color: '#64748B' }}>
-          <strong>Corporate Email:</strong> support@royalkuberaa.com<br />
+          <strong>Corporate Email:</strong> support@royalkuberaa.online<br />
           <strong>Working Hours:</strong> Monday – Saturday, 10:00 AM – 6:00 PM IST<br />
           <strong>Headquarters:</strong> Andhra Pradesh & Telangana, India
         </p>
@@ -4534,7 +4536,7 @@ function App() {
                 className={`menu-item ${activeMenu === item.name ? 'active' : ''}`}
                 onClick={() => { 
                   if (item.name === 'Download App') {
-                    window.location.href = 'https://royal-kuberaa.vercel.app/api/app/download';
+                    window.location.href = '/api/app/download';
                     return;
                   }
                   setActiveMenu(item.name); 

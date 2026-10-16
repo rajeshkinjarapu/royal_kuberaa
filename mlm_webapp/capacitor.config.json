@@ -3,7 +3,7 @@
   "appName": "Royal Kuberaa",
   "webDir": "dist",
   "server": {
-    "url": "https://royal-kuberaa.vercel.app",
+    "url": "https://royalkuberaa.online",
     "cleartext": true
   }
 }
