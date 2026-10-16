@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import '../providers/auth_provider.dart';
@@ -19,7 +19,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   final _nameController = TextEditingController();
   final _mobileController = TextEditingController();
   final _sponsorController = TextEditingController();
-  final _passwordController = TextEditingController();
 
   bool _isLoading = false;
   String _sponsorName = '';
@@ -43,7 +42,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     _nameController.dispose();
     _mobileController.dispose();
     _sponsorController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -78,6 +76,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       return;
     }
 
+    // Automatically generate 6-digit numeric password
+    final autoPassword = (100000 + Random().nextInt(900000)).toString();
+
     setState(() => _isLoading = true);
 
     try {
@@ -88,18 +89,19 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           'name': _nameController.text.trim().toUpperCase(),
           'mobile': _mobileController.text.trim(),
           'sponsorId': _sponsorController.text.trim().toUpperCase(),
-          'password': _passwordController.text.trim(),
+          'password': autoPassword,
         }),
       );
 
       final data = jsonDecode(res.body);
 
       if ((res.statusCode == 200 || res.statusCode == 201) && data['success'] == true) {
-        final registeredUser = data['user'] ?? data['data'];
+        final registeredUser = data['user'] ?? data['data'] ?? {};
+        final finalPassword = data['plainPassword'] ?? registeredUser['plainPassword'] ?? autoPassword;
         if (mounted) {
           context.pushReplacement('/register_success', extra: {
-            'memberId': registeredUser['memberId'],
-            'password': _passwordController.text.trim(),
+            'memberId': registeredUser['memberId'] ?? '',
+            'password': finalPassword,
             'fullName': _nameController.text.trim().toUpperCase(),
             'mobile': _mobileController.text.trim(),
           });
@@ -252,29 +254,54 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                 ),
               ],
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
 
-              // Password (6 digits)
-              const Text('Password (6 Digits)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _passwordController,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                obscureText: true,
-                decoration: InputDecoration(
-                  counterText: '',
-                  hintText: 'Set 6-digit numeric password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+              // Automatic Password Notice Card (Password is auto-generated and shown on image)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
                 ),
-                validator: (val) {
-                  if (val == null || val.trim().length != 6) return 'Password must be exactly 6 digits';
-                  return null;
-                },
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.lock_reset_rounded, color: Color(0xFF059669), size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Auto-Generated Secure Password',
+                            style: TextStyle(
+                              color: Color(0xFF065F46),
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 3),
+                          Text(
+                            'A 6-digit password will be generated automatically and displayed on your Welcome Card to save as an image.',
+                            style: TextStyle(
+                              color: Color(0xFF047857),
+                              fontSize: 11,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 32),

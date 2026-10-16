@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import '../utils/constants.dart';
-import '../widgets/app_logo.dart';
-import '../widgets/pin_input_boxes.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,20 +18,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _mobileController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   
   bool _isLoading = false;
   bool _isSponsorValidating = false;
-  bool _obscurePassword = false;
   String _sponsorName = '';
   String _sponsorError = '';
-
-  @override
-  void initState() {
-    super.initState();
-    // Default 6-digit initial PIN for convenience
-    _passwordController.text = (100000 + Random().nextInt(900000)).toString();
-  }
 
   @override
   void dispose() {
@@ -41,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nameController.dispose();
     _mobileController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -60,13 +48,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.apiBaseUrl}/sponsor/$sponsorId'),
-      );
+      final response = await http.get(Uri.parse('${AppConstants.apiBaseUrl}/sponsor/$sponsorId'));
       final data = jsonDecode(response.body);
 
       setState(() {
-        if (data['success']) {
+        if (data['success'] == true) {
           _sponsorName = data['name'] ?? data['sponsorName'] ?? '';
           _sponsorError = '';
         } else {
@@ -86,16 +72,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid Sponsor ID')));
       return;
     }
-    if (_nameController.text.isEmpty || _mobileController.text.isEmpty) {
+    if (_nameController.text.trim().isEmpty || _mobileController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields')));
       return;
     }
-
-    final chosenPassword = _passwordController.text.trim();
-    if (chosenPassword.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password must be exactly 6 digits'), backgroundColor: AppColors.error));
+    if (_mobileController.text.trim().length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid 10-digit mobile number')));
       return;
     }
+
+    // Automatically generate 6-digit numeric password
+    final autoPassword = (100000 + Random().nextInt(900000)).toString();
 
     setState(() => _isLoading = true);
 
@@ -104,9 +91,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Uri.parse('${AppConstants.apiBaseUrl}/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': _nameController.text.toUpperCase(),
-          'mobile': _mobileController.text,
-          'password': chosenPassword,
+          'name': _nameController.text.trim().toUpperCase(),
+          'mobile': _mobileController.text.trim(),
+          'password': autoPassword,
           'sponsorId': _sponsorController.text.trim().toUpperCase(),
         }),
       );
@@ -116,12 +103,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if ((response.statusCode == 200 || response.statusCode == 201) && data['success'] == true) {
         if (mounted) {
           final registeredUser = data['user'] ?? data['data'] ?? {};
+          final finalPassword = data['plainPassword'] ?? registeredUser['plainPassword'] ?? autoPassword;
           // Go to success screen, passing credentials
           context.go('/register_success', extra: {
             'memberId': registeredUser['memberId'] ?? '',
-            'password': chosenPassword,
-            'fullName': _nameController.text.toUpperCase(),
-            'mobile': _mobileController.text,
+            'password': finalPassword,
+            'fullName': _nameController.text.trim().toUpperCase(),
+            'mobile': _mobileController.text.trim(),
           });
         }
       } else {
@@ -194,6 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               hint: 'Mobile Number',
               icon: Icons.phone_android,
               keyboardType: TextInputType.phone,
+              maxLength: 10,
             ),
             const SizedBox(height: 16),
             
@@ -203,29 +192,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Password (6 Digits)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF64748B))),
-                GestureDetector(
-                  onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                  child: Row(
-                    children: [
-                      Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 15, color: const Color(0xFF64748B)),
-                      const SizedBox(width: 4),
-                      Text(_obscurePassword ? 'Show' : 'Hide', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
-                    ],
+            // Automatic Password Notice Card (Password is auto-generated and shown on image)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.lock_reset_rounded, color: Color(0xFF059669), size: 22),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            PinInputBoxes(
-              length: 6,
-              controller: _passwordController,
-              obscureText: _obscurePassword,
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Auto-Generated Secure Password',
+                          style: TextStyle(
+                            color: Color(0xFF065F46),
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          'A 6-digit password will be generated automatically and displayed on your Welcome Card to save as an image.',
+                          style: TextStyle(
+                            color: Color(0xFF047857),
+                            fontSize: 11,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 32),
             

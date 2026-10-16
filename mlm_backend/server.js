@@ -353,8 +353,14 @@ app.post('/api/register', async (req, res) => {
         const { name, mobile, password, sponsorId } = req.body;
         
         // Validation
-        if (!name || !mobile || !password) {
-            return res.status(400).json({ success: false, message: 'Name, Mobile, and Password are required.' });
+        if (!name || !mobile) {
+            return res.status(400).json({ success: false, message: 'Name and Mobile are required.' });
+        }
+
+        // Auto-generate 6-digit numeric password if not provided
+        let plainPassword = (password || '').toString().trim();
+        if (!plainPassword || plainPassword.length < 6) {
+            plainPassword = Math.floor(100000 + Math.random() * 900000).toString();
         }
 
         const cleanMobile = mobile.toString().trim();
@@ -367,7 +373,7 @@ app.post('/api/register', async (req, res) => {
             }
         }
 
-        const hashedPassword = await bcrypt.hash(password.toString().trim(), 10);
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
         
         // Generate Unique Member ID
         let newMemberId;
@@ -397,7 +403,11 @@ app.post('/api/register', async (req, res) => {
         res.status(201).json({ 
             success: true, 
             message: `Registration successful! Your Member ID is ${newMemberId}. Please login and activate.`, 
-            user: newUser 
+            user: {
+                ...newUser._doc,
+                plainPassword: plainPassword
+            },
+            plainPassword: plainPassword
         });
     } catch (error) {
         console.error("Register Error:", error);
@@ -443,11 +453,19 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         // Actually, we can just look up all transactions for the member.
         const txs = await Transaction.find({ memberId: user.memberId });
         let direct = 0, level = 0, royalty = 0, cashback = 0, withdraw = 0;
+        let goldRoyalty = 0, platinumRoyalty = 0, rubyRoyalty = 0, diamondRoyalty = 0;
         
         txs.forEach(tx => {
             if (tx.category === 'DIRECT') direct += tx.amount;
             if (tx.category === 'LEVEL') level += tx.amount;
-            if (tx.category === 'ROYALTY') royalty += tx.amount;
+            if (tx.category === 'ROYALTY') {
+                royalty += tx.amount;
+                const rem = ((tx.remark || '') + ' ' + (tx.description || '')).toUpperCase();
+                if (rem.includes('PLATINUM')) platinumRoyalty += tx.amount;
+                else if (rem.includes('RUBY')) rubyRoyalty += tx.amount;
+                else if (rem.includes('DIAMOND')) diamondRoyalty += tx.amount;
+                else goldRoyalty += tx.amount;
+            }
             if (tx.category === 'CASHBACK' || tx.category === 'AUTOPOOL') cashback += tx.amount;
             if (tx.category === 'Withdrawal') withdraw += tx.amount;
         });
@@ -471,6 +489,11 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
             adminStats.todayJoinings = await User.countDocuments({ role: 'member', createdAt: { $gte: startOfDay } });
         }
 
+        const calculatedGold = cleanFigure(Math.max(user.goldEarnings || 0, goldRoyalty));
+        const calculatedPlatinum = cleanFigure(Math.max(user.platinumEarnings || 0, platinumRoyalty));
+        const calculatedRuby = cleanFigure(Math.max(user.rubyEarnings || 0, rubyRoyalty));
+        const calculatedDiamond = cleanFigure(Math.max(user.diamondEarnings || 0, diamondRoyalty));
+
         res.json({
             success: true,
             data: {
@@ -485,13 +508,13 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
                 autopoolEarnings: cleanFigure(user.autopoolEarnings || 0),
                 isAutopoolCompleted: user.isAutopoolCompleted || false,
                 withdrawFund: cleanFigure(withdraw), 
-                allRanks: cleanFigure((user.goldEarnings || 0) + (user.platinumEarnings || 0) + (user.rubyEarnings || 0) + (user.diamondEarnings || 0)),
+                allRanks: cleanFigure(calculatedGold + calculatedPlatinum + calculatedRuby + calculatedDiamond),
                 royaltyStats: {
                     rank: user.rank || (user.isDiamond ? 'DIAMOND' : user.isRuby ? 'RUBY' : user.isPlatinum ? 'PLATINUM' : user.isGold ? 'GOLD' : 'STARTER'),
-                    goldEarnings: cleanFigure(user.goldEarnings || 0),
-                    platinumEarnings: cleanFigure(user.platinumEarnings || 0),
-                    rubyEarnings: cleanFigure(user.rubyEarnings || 0),
-                    diamondEarnings: cleanFigure(user.diamondEarnings || 0),
+                    goldEarnings: calculatedGold,
+                    platinumEarnings: calculatedPlatinum,
+                    rubyEarnings: calculatedRuby,
+                    diamondEarnings: calculatedDiamond,
                     cashbackEarnings: cleanFigure(user.cashbackEarnings || 0),
                     caps: { GOLD: 20000, PLATINUM: 100000, RUBY: 500000, DIAMOND: 2500000, CASHBACK: 1500 }
                 },
@@ -505,6 +528,125 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error fetching dashboard" });
+    }
+});
+
+// Member Royalty Breakdown & History Route
+app.get('/api/royalty/breakdown', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const Transaction = require('./models/Transaction');
+        const royaltyTxs = await Transaction.find({ 
+            memberId: user.memberId, 
+            category: 'ROYALTY' 
+        }).sort({ createdAt: -1, date: -1 });
+
+        let goldEarned = 0;
+        let platinumEarned = 0;
+        let rubyEarned = 0;
+        let diamondEarned = 0;
+        const goldHistory = [];
+        const platinumHistory = [];
+        const rubyHistory = [];
+        const diamondHistory = [];
+
+        royaltyTxs.forEach(tx => {
+            const rem = ((tx.remark || '') + ' ' + (tx.description || '')).toUpperCase();
+            const txObj = {
+                _id: tx._id,
+                amount: cleanFigure(tx.amount),
+                type: tx.type,
+                category: tx.category,
+                remark: tx.remark || 'Royalty Share Credited',
+                date: tx.createdAt || tx.date
+            };
+            if (rem.includes('PLATINUM')) {
+                platinumEarned += tx.amount;
+                platinumHistory.push(txObj);
+            } else if (rem.includes('RUBY')) {
+                rubyEarned += tx.amount;
+                rubyHistory.push(txObj);
+            } else if (rem.includes('DIAMOND')) {
+                diamondEarned += tx.amount;
+                diamondHistory.push(txObj);
+            } else {
+                goldEarned += tx.amount;
+                goldHistory.push(txObj);
+            }
+        });
+
+        const finalGold = cleanFigure(Math.max(user.goldEarnings || 0, goldEarned));
+        const finalPlatinum = cleanFigure(Math.max(user.platinumEarnings || 0, platinumEarned));
+        const finalRuby = cleanFigure(Math.max(user.rubyEarnings || 0, rubyEarned));
+        const finalDiamond = cleanFigure(Math.max(user.diamondEarnings || 0, diamondEarned));
+        const totalRoyalty = cleanFigure(finalGold + finalPlatinum + finalRuby + finalDiamond);
+
+        const rank = user.rank || (user.isDiamond ? 'DIAMOND' : user.isRuby ? 'RUBY' : user.isPlatinum ? 'PLATINUM' : user.isGold ? 'GOLD' : 'STARTER');
+        const ranksOrder = ['STARTER', 'GOLD', 'PLATINUM', 'RUBY', 'DIAMOND', 'OWNER'];
+        const userRankIndex = ranksOrder.indexOf(rank.toUpperCase());
+
+        res.json({
+            success: true,
+            data: {
+                totalRoyalty,
+                rank,
+                pools: [
+                    {
+                        id: 'GOLD',
+                        name: 'Gold Pool',
+                        poolRate: '₹120 / joining',
+                        cap: 20000,
+                        earned: finalGold,
+                        requirement: 'Refer ANY 2 Directs',
+                        isQualified: user.isGold || userRankIndex >= 1,
+                        history: goldHistory
+                    },
+                    {
+                        id: 'PLATINUM',
+                        name: 'Platinum Pool',
+                        poolRate: '₹60 / joining',
+                        cap: 100000,
+                        earned: finalPlatinum,
+                        requirement: '2 of your Directs must become Gold',
+                        isQualified: user.isPlatinum || userRankIndex >= 2,
+                        history: platinumHistory
+                    },
+                    {
+                        id: 'RUBY',
+                        name: 'Ruby Pool',
+                        poolRate: '₹70 / joining',
+                        cap: 500000,
+                        earned: finalRuby,
+                        requirement: '5 of your Directs must become Platinum',
+                        isQualified: user.isRuby || userRankIndex >= 3,
+                        history: rubyHistory
+                    },
+                    {
+                        id: 'DIAMOND',
+                        name: 'Diamond Pool',
+                        poolRate: '₹150 / joining',
+                        cap: 2500000,
+                        earned: finalDiamond,
+                        requirement: '5 of your Directs must become Ruby',
+                        isQualified: user.isDiamond || userRankIndex >= 4,
+                        history: diamondHistory
+                    }
+                ],
+                allTransactions: royaltyTxs.map(tx => ({
+                    _id: tx._id,
+                    amount: cleanFigure(tx.amount),
+                    type: tx.type,
+                    category: tx.category,
+                    remark: tx.remark || 'Royalty Share Credited',
+                    date: tx.createdAt || tx.date
+                }))
+            }
+        });
+    } catch (error) {
+        console.error('Royalty breakdown error:', error);
+        res.status(500).json({ success: false, message: 'Server error fetching royalty breakdown' });
     }
 });
 
