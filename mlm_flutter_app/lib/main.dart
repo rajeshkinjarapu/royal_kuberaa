@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -43,6 +43,7 @@ import 'screens/admin_pools_screen.dart';
 import 'screens/admin_reports_screen.dart';
 import 'screens/admin_app_upload_screen.dart';
 import 'screens/legal_policy_screen.dart';
+import 'screens/personal_details_screen.dart';
 import 'utils/constants.dart';
 
 void main() {
@@ -227,6 +228,10 @@ class RoyalKuberaaApp extends StatelessWidget {
         GoRoute(
           path: '/team-network',
           builder: (context, state) => const TeamNetworkScreen(),
+        ),
+        GoRoute(
+          path: '/personal-details',
+          builder: (context, state) => const PersonalDetailsScreen(),
         ),
         GoRoute(
           path: '/payment-settings',
